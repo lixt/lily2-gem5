@@ -63,6 +63,7 @@ class FastCPU;
 class AtomicSimpleCPU;
 class TimingSimpleCPU;
 class InorderCPU;
+class HybridCPU;
 class SymbolTable;
 
 namespace Trace {

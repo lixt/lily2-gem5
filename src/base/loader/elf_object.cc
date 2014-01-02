@@ -115,7 +115,9 @@ ElfObject::tryFile(const string &fname, int fd, size_t len, uint8_t *data)
             fatal("The binary you're trying to load is compiled for 64-bit "
                   "Power. M5\n only supports 32-bit Power. Please "
                   "recompile your binary.\n");
-        } else {
+        } else if(ehdr.e_machine == EM_LILY2) {
+			arch = ObjectFile::Lily2;	
+		} else {
             warn("Unknown architecture: %d\n", ehdr.e_machine);
             arch = ObjectFile::UnknownArch;
         }

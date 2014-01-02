@@ -52,6 +52,7 @@ _cpu_aliases_all = [
     ("atomic", "AtomicSimpleCPU"),
     ("inorder", "InOrderCPU"),
     ("detailed", "DerivO3CPU"),
+    ("hybrid", "HybridCPU"),
     ]
 
 # Filtered list of aliases. Only aliases for existing CPUs exist in

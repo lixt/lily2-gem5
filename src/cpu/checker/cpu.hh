@@ -305,7 +305,7 @@ class CheckerCPU : public BaseCPU
         return thread->setMiscReg(reg_idx, val);
     }
 
-#if THE_ISA == MIPS_ISA
+#if THE_ISA == MIPS_ISA || THE_ISA == LILY2_ISA
     uint64_t readRegOtherThread(int misc_reg)
     {
         panic("MIPS MT not defined for CheckerCPU.\n");

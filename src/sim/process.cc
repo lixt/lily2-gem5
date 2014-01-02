@@ -79,6 +79,8 @@
 #include "arch/x86/linux/process.hh"
 #elif THE_ISA == POWER_ISA
 #include "arch/power/linux/process.hh"
+#elif THE_ISA == LILY2_ISA
+#include "arch/lily2/linux/process.hh"
 #else
 #error "THE_ISA not set"
 #endif
@@ -720,6 +722,20 @@ LiveProcess::create(LiveProcessParams * params)
         // fall through
       case ObjectFile::Linux:
         process = new PowerLinuxProcess(params, objFile);
+        break;
+
+      default:
+        fatal("Unknown/unsupported operating system.");
+    }
+#elif THE_ISA == LILY2_ISA
+    if (objFile->getArch() != ObjectFile::Lily2)
+        fatal("Object file architecture does not match compiled ISA (Lily2).");
+    switch (objFile->getOpSys()) {
+      case ObjectFile::UnknownOpSys:
+        warn("Unknown operating system; assuming Linux.");
+        // fall through
+      case ObjectFile::Linux:
+        process = new Lily2LinuxProcess(params, objFile);
         break;
 
       default:

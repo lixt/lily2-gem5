@@ -54,7 +54,8 @@ class ObjectFile
         I386,
         Arm,
         Thumb,
-        Power
+        Power,
+		Lily2
     };
 
     enum OpSys {

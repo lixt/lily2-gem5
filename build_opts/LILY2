@@ -1,0 +1,3 @@
+TARGET_ISA = 'lily2'
+CPU_MODELS = 'HybridCPU'
+PROTOCOL = 'MI_example'

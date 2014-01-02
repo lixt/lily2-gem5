@@ -51,7 +51,7 @@ from Bus import CoherentBus
 from InstTracer import InstTracer
 from ExeTracer import ExeTracer
 from MemObject import MemObject
-from BranchPredictor import BranchPredictor
+#from BranchPredictor import BranchPredictor
 from ClockDomain import *
 
 default_tracer = ExeTracer()
@@ -86,6 +86,11 @@ elif buildEnv['TARGET_ISA'] == 'power':
     from PowerInterrupts import PowerInterrupts
     from PowerISA import PowerISA
     isa_class = PowerISA
+elif buildEnv['TARGET_ISA'] == 'lily2':
+    from Lily2TLB import Lily2TLB
+    from Lily2Interrupts import Lily2Interrupts
+    from Lily2ISA import Lily2ISA
+    isa_class = Lily2ISA
 
 class BaseCPU(MemObject):
     type = 'BaseCPU'
@@ -182,6 +187,12 @@ class BaseCPU(MemObject):
         interrupts = Param.PowerInterrupts(
                 NULL, "Interrupt Controller")
         isa = VectorParam.PowerISA([ isa_class() ], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'lily2':
+        dtb = Param.Lily2TLB(Lily2TLB(), "Data TLB")
+        itb = Param.Lily2TLB(Lily2TLB(), "Instruction TLB")
+        interrupts = Param.Lily2Interrupts(
+                NULL, "Interrupt Controller")
+        isa = VectorParam.Lily2ISA([ isa_class() ], "ISA instance")
     else:
         print "Don't know what TLB to use for ISA %s" % \
             buildEnv['TARGET_ISA']
@@ -210,7 +221,7 @@ class BaseCPU(MemObject):
     dcache_port = MasterPort("Data Port")
     _cached_ports = ['icache_port', 'dcache_port']
 
-    branchPred = Param.BranchPredictor(NULL, "Branch Predictor")
+    #branchPred = Param.BranchPredictor(NULL, "Branch Predictor")
 
     if buildEnv['TARGET_ISA'] in ['x86', 'arm']:
         _cached_ports += ["itb.walker.port", "dtb.walker.port"]
@@ -239,6 +250,8 @@ class BaseCPU(MemObject):
             self.interrupts = ArmInterrupts()
         elif buildEnv['TARGET_ISA'] == 'power':
             self.interrupts = PowerInterrupts()
+        elif buildEnv['TARGET_ISA'] == 'lily2':
+            self.interrupts = Lily2Interrupts()
         else:
             print "Don't know what Interrupt Controller to use for ISA %s" % \
                 buildEnv['TARGET_ISA']
