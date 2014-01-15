@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2014 DSP Group, Institute of Microeletronics, Tsinghua University
+ * Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
  * All rights reserved.
- *  
+ *
  * Copyright (c) 2012-2013 ARM Limited
  * All rights reserved.
  *
@@ -40,7 +40,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Xiaotian Li
  */
 
 #ifndef __CPU_HYBRID_CPU_HH__
@@ -49,6 +48,7 @@
 #include "base/hashmap.hh"
 #include "cpu/hybrid/base.hh"
 #include "params/HybridCPU.hh"
+#include "arch/operands.hh"
 
 /**
  *  Start and end address of basic block for SimPoint profiling.

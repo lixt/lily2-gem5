@@ -40,6 +40,43 @@ class ThreadContext;
 
 namespace Lily2ISA
 {
+// Type for register counting.
+typedef int8_t RegCount_t;
+
+// Type for register index.
+typedef int16_t RegIndex_t;
+
+// Register number of three general register files.
+const RegIndex_t NumARegs = 24;
+const RegIndex_t NumBRegs = 24;
+const RegIndex_t NumCRegs = 8;
+
+// Type for register label.
+typedef enum RegFile_t
+{
+    REG_NIL,     // Illegal.
+
+    REG_A,       // Register file A.
+    REG_B,       // Register file B.
+    REG_C,       // Register file C.
+
+    NUM_REG_FILE // Number of register labels.
+} RegFile_t;
+
+/*
+static const char *RegFileStr[] =
+{
+    "Error RegFile",
+
+    "A",
+    "B",
+    "C",
+};*/
+
+// Types for three general register file.
+typedef uint32_t ARegValue_t;
+typedef uint32_t BRegValue_t;
+typedef uint32_t CRegValue_t;
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;
