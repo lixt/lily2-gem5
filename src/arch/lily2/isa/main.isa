@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 
-// Copyright (c) 2007 LILY2 Technologies, Inc.
+// Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ namespace Lily2ISA;
 ##include "operands.isa"
 
 //Include the base class for lily2 instructions, and some support code
-##include "base.isa"
+//##include "base.isa"
 
 //Include the definitions for the instruction formats
 ##include "formats/formats.isa"

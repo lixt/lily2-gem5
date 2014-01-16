@@ -1,0 +1,36 @@
+// -*- mode:c++ -*-
+//
+// Copyright (C) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
+// All rights reserved.
+
+// Outputs to decoder.hh
+output header {{
+#include <iostream>
+
+    // Base class for arithmetic instructions.
+    class ArithOp : public Lily2StaticInst
+    {
+      protected:
+        ArithOp (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
+            : Lily2StaticInst (mnemonic, extMachInst, opClass) {}
+
+        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
+    };
+}};
+
+// Outputs to decoder.cc
+output decoder {{
+    std::string ArithOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    {
+        std::stringstream ss;
+        return ss.str ();
+    }
+}};
+
+def format ArithOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'ArithOp', code, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = BasicExecute.subst(iop)
+}};

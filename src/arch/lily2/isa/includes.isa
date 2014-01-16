@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 
-// Copyright (c) 2007 LILY2 Technologies, Inc.
+// Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Authors: Korey Sewell
 
 ////////////////////////////////////////////////////////////////////
 //
@@ -41,7 +39,9 @@ output header {{
 #include "arch/lily2/isa_traits.hh"
 #include "arch/lily2/mt_constants.hh"
 #include "arch/lily2/pra_constants.hh"
-#include "cpu/static_inst.hh"
+#include "arch/lily2/registers.hh"
+#include "arch/lily2/operands.hh"
+#include "arch/lily2/static_inst.hh"
 #include "mem/packet.hh"
 }};
 
@@ -49,7 +49,7 @@ output decoder {{
 #include <cmath>
 
 #include "arch/lily2/decoder.hh"
-#include "arch/lily2/dsp.hh"
+//#include "arch/lily2/dsp.hh"
 #include "arch/lily2/dt_constants.hh"
 #include "arch/lily2/faults.hh"
 #include "arch/lily2/isa_traits.hh"
@@ -74,7 +74,7 @@ output exec {{
 #include <cmath>
 
 #include "arch/generic/memhelpers.hh"
-#include "arch/lily2/dsp.hh"
+//#include "arch/lily2/dsp.hh"
 #include "arch/lily2/dt_constants.hh"
 #include "arch/lily2/faults.hh"
 #include "arch/lily2/isa_traits.hh"
@@ -84,6 +84,8 @@ output exec {{
 #include "arch/lily2/pra_constants.hh"
 #include "arch/lily2/tlb.hh"
 #include "arch/lily2/utility.hh"
+#include "arch/lily2/operands.hh"
+#include "arch/lily2/isa_exec.hh"
 #if defined(linux)
 #include <fenv.h>
 #endif

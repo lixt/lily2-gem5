@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 
-// Copyright (c) 2007 LILY2 Technologies, Inc.
+// Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,133 +25,66 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Authors: Korey Sewell
-//          Jaidev Patwardhan
 
 def operand_types {{
-    'sb' : 'int8_t',
-    'ub' : 'uint8_t',
-    'sh' : 'int16_t',
-    'uh' : 'uint16_t',
-    'sw' : 'int32_t',
-    'uw' : 'uint32_t',
-    'sd' : 'int64_t',
-    'ud' : 'uint64_t',
-    'sf' : 'float',
-    'df' : 'double'
+    # Scalar Operands.
+    'sw'  : 'OpWord_t',
+    'uw'  : 'OpWord_t',
+#    'sf'  : 'OpSF_t',
+#    'df'  : 'OpDF_t',
+#
+#    # Vector Operands.
+#    'sb4' : 'OpB4_t',
+#    'ub4' : 'OpB4_t',
+#    'sh2' : 'OpH2_t',
+#    'uh2' : 'OpH2_t',
+#    'sh4' : 'OpH4_t',
+#    'uh4' : 'OpH4_t',
+#    'sw2' : 'OpW2_t',
+#    'uw2' : 'OpW2_t',
+#    'sf2' : 'OpSF2_t',
 }};
 
 def operands {{
-    #General Purpose Integer Reg Operands
-    'Rd': ('IntReg', 'uw', 'RD', 'IsInteger', 1),
-    'Rs': ('IntReg', 'uw', 'RS', 'IsInteger', 2),
-    'Rt': ('IntReg', 'uw', 'RT', 'IsInteger', 3),
 
-    #Immediate Value operand
-    'IntImm': ('IntReg', 'uw', 'INTIMM', 'IsInteger', 3),
+    # Word operands.
+    'Wd': ('OpWord', 'uw', 'RD', '', 1),
+    'Wa': ('OpWord', 'uw', 'RA', '', 2),
+    'Wb': ('OpWord', 'uw', 'RB', '', 3),
 
-    #Operands used for Link or Syscall Insts
-    'R31': ('IntReg', 'uw','31','IsInteger', 4),
-    'R2':  ('IntReg', 'uw','2', 'IsInteger', 5),
+#    # Single-Precision operands.
+#    'SFd': ('OpSF', 'sf', 'RD', '', 1),
+#    'SFa': ('OpSF', 'sf', 'RA', '', 2),
+#    'SFb': ('OpSF', 'sf', 'RB', '', 3),
+#
+#    # Double-Precision operands.
+#    'DFd': ('OpDF', 'df', 'DD', '', 1),
+#    'DFa': ('OpDF', 'df', 'DA', '', 2),
+#    'DFb': ('OpDF', 'df', 'DB', '', 3),
+#
+#    # 4-Way byte operands.
+#    'B4d': ('OpB4', 'ub4', 'RD', '', 1),
+#    'B4a': ('OpB4', 'ub4', 'RA', '', 2),
+#    'B4b': ('OpB4', 'ub4', 'RB', '', 3),
+#
+#    # 2-Way halfword operands.
+#    'H2d': ('OpH2', 'uh2', 'RD', '', 1),
+#    'H2a': ('OpH2', 'uh2', 'RA', '', 2),
+#    'H2b': ('OpH2', 'uh2', 'RB', '', 3),
+#
+#    # 4-Way halfword operands.
+#    'H4d': ('OpH4', 'uh4', 'DD', '', 1),
+#    'H4a': ('OpH4', 'uh4', 'DA', '', 2),
+#    'H4b': ('OpH4', 'uh4', 'DB', '', 3),
+#
+#    # 2-Way word operands.
+#    'W2d': ('OpW2', 'uw2', 'DD', '', 1),
+#    'W2a': ('OpW2', 'uw2', 'DA', '', 2),
+#    'W2b': ('OpW2', 'uw2', 'DB', '', 3),
+#
+#    # 2-Way Single-Precision operands.
+#    'SF2d': ('OpSF2', 'sf2', 'DD', '', 1),
+#    'SF2a': ('OpSF2', 'sf2', 'DA', '', 2),
+#    'SF2b': ('OpSF2', 'sf2', 'DB', '', 3),
 
-    #Special Integer Reg operands
-    'LO0':  ('IntReg', 'uw','INTREG_LO', 'IsInteger', 6),
-    'HI0':  ('IntReg', 'uw','INTREG_HI', 'IsInteger', 7),
-
-    #Bitfield-dependent HI/LO Register Access
-    'LO_RD_SEL': ('IntReg','uw','INTREG_DSP_LO0 + ACDST*3', None, 6),
-    'HI_RD_SEL': ('IntReg','uw','INTREG_DSP_HI0 + ACDST*3', None, 7),
-    'LO_RS_SEL': ('IntReg','uw','INTREG_DSP_LO0 + ACSRC*3', None, 6),
-    'HI_RS_SEL': ('IntReg','uw','INTREG_DSP_HI0 + ACSRC*3', None, 7),
-
-    #DSP Special Purpose Integer Operands
-    'DSPControl': ('IntReg', 'uw', 'INTREG_DSP_CONTROL', None, 8),
-    'DSPLo0': ('IntReg', 'uw', 'INTREG_LO', None, 1),
-    'DSPHi0': ('IntReg', 'uw', 'INTREG_HI', None, 1),
-    'DSPACX0': ('IntReg', 'uw', 'INTREG_DSP_ACX0', None, 1),
-    'DSPLo1': ('IntReg', 'uw', 'INTREG_DSP_LO1', None, 1),
-    'DSPHi1': ('IntReg', 'uw', 'INTREG_DSP_HI1', None, 1),
-    'DSPACX1': ('IntReg', 'uw', 'INTREG_DSP_ACX1', None, 1),
-    'DSPLo2': ('IntReg', 'uw', 'INTREG_DSP_LO2', None, 1),
-    'DSPHi2': ('IntReg', 'uw', 'INTREG_DSP_HI2', None, 1),
-    'DSPACX2': ('IntReg', 'uw', 'INTREG_DSP_ACX2', None, 1),
-    'DSPLo3': ('IntReg', 'uw', 'INTREG_DSP_LO3', None, 1),
-    'DSPHi3': ('IntReg', 'uw', 'INTREG_DSP_HI3', None, 1),
-    'DSPACX3': ('IntReg', 'uw', 'INTREG_DSP_ACX3', None, 1),
-
-    #Floating Point Reg Operands
-    'Fd': ('FloatReg', 'sf', 'FD', 'IsFloating', 1),
-    'Fs': ('FloatReg', 'sf', 'FS', 'IsFloating', 2),
-    'Ft': ('FloatReg', 'sf', 'FT', 'IsFloating', 3),
-    'Fr': ('FloatReg', 'sf', 'FR', 'IsFloating', 3),
-
-    #Special Purpose Floating Point Control Reg Operands
-    'FIR':  ('FloatReg', 'uw', 'FLOATREG_FIR', 'IsFloating', 1),
-    'FCCR': ('FloatReg', 'uw', 'FLOATREG_FCCR', 'IsFloating', 2),
-    'FEXR': ('FloatReg', 'uw', 'FLOATREG_FEXR', 'IsFloating', 3),
-    'FENR': ('FloatReg', 'uw', 'FLOATREG_FENR', 'IsFloating', 3),
-    'FCSR': ('FloatReg', 'uw', 'FLOATREG_FCSR', 'IsFloating', 3),
-
-    #Operands For Paired Singles FP Operations
-    'Fd1': ('FloatReg', 'sf', 'FD', 'IsFloating', 4),
-    'Fd2': ('FloatReg', 'sf', 'FD+1', 'IsFloating', 4),
-    'Fs1': ('FloatReg', 'sf', 'FS', 'IsFloating', 5),
-    'Fs2': ('FloatReg', 'sf', 'FS+1', 'IsFloating', 5),
-    'Ft1': ('FloatReg', 'sf', 'FT', 'IsFloating', 6),
-    'Ft2': ('FloatReg', 'sf', 'FT+1', 'IsFloating', 6),
-    'Fr1': ('FloatReg', 'sf', 'FR', 'IsFloating', 7),
-    'Fr2': ('FloatReg', 'sf', 'FR+1', 'IsFloating', 7),
-
-    #Status Control Reg
-    'Status': ('ControlReg', 'uw', 'MISCREG_STATUS', None, 1),
-
-    #LL Flag
-    'LLFlag': ('ControlReg', 'uw', 'MISCREG_LLFLAG', None, 1),
-
-    #Thread pointer value for SE mode
-    'TpValue': ('ControlReg', 'ud', 'MISCREG_TP_VALUE', None, 1),
-
-    # Index Register
-    'Index': ('ControlReg','uw','MISCREG_INDEX',None,1),
-
-
-    'CP0_RD_SEL': ('ControlReg', 'uw', '(RD << 3 | SEL)', None, 1),
-
-    #MT Control Regs
-    'MVPConf0': ('ControlReg', 'uw', 'MISCREG_MVP_CONF0', None, 1),
-    'MVPControl': ('ControlReg', 'uw', 'MISCREG_MVP_CONTROL', None, 1),
-    'TCBind': ('ControlReg', 'uw', 'MISCREG_TC_BIND', None, 1),
-    'TCStatus': ('ControlReg', 'uw', 'MISCREG_TC_STATUS', None, 1),
-    'TCRestart': ('ControlReg', 'uw', 'MISCREG_TC_RESTART', None, 1),
-    'VPEConf0': ('ControlReg', 'uw', 'MISCREG_VPE_CONF0', None, 1),
-    'VPEControl': ('ControlReg', 'uw', 'MISCREG_VPE_CONTROL', None, 1),
-    'YQMask': ('ControlReg', 'uw', 'MISCREG_YQMASK', None, 1),
-
-    #CP0 Control Regs
-    'EntryHi': ('ControlReg','uw', 'MISCREG_ENTRYHI',None,1),
-    'EntryLo0': ('ControlReg','uw', 'MISCREG_ENTRYLO0',None,1),
-    'EntryLo1': ('ControlReg','uw', 'MISCREG_ENTRYLO1',None,1),
-    'PageMask': ('ControlReg','uw', 'MISCREG_PAGEMASK',None,1),
-    'Random': ('ControlReg','uw', 'MISCREG_CP0_RANDOM',None,1),
-    'ErrorEPC': ('ControlReg','uw', 'MISCREG_ERROR_EPC',None,1),
-    'EPC': ('ControlReg','uw', 'MISCREG_EPC',None,1),
-    'DEPC': ('ControlReg','uw', 'MISCREG_DEPC',None,1),
-    'IntCtl': ('ControlReg','uw', 'MISCREG_INTCTL',None,1),
-    'SRSCtl': ('ControlReg','uw', 'MISCREG_SRSCTL',None,1),
-    'Config': ('ControlReg','uw', 'MISCREG_CONFIG',None,1),
-    'Config3': ('ControlReg','uw', 'MISCREG_CONFIG3',None,1),
-    'Config1': ('ControlReg','uw', 'MISCREG_CONFIG1',None,1),
-    'Config2': ('ControlReg','uw', 'MISCREG_CONFIG2',None,1),
-    'PageGrain': ('ControlReg','uw', 'MISCREG_PAGEGRAIN',None,1),
-    'Debug': ('ControlReg','uw', 'MISCREG_DEBUG',None,1),
-    'Cause': ('ControlReg','uw', 'MISCREG_CAUSE',None,1),
-
-    #Memory Operand
-    'Mem': ('Mem', 'uw', None, ('IsMemRef', 'IsLoad', 'IsStore'), 4),
-
-    #Program Counter Operands
-    'PC': ('PCState', 'uw', 'pc', (None, None, 'IsControl'), 4),
-    'NPC': ('PCState', 'uw', 'npc', (None, None, 'IsControl'), 4),
-    'NNPC': ('PCState', 'uw', 'nnpc', (None, None, 'IsControl'), 4)
 }};

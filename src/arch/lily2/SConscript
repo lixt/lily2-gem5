@@ -40,6 +40,8 @@ if env['TARGET_ISA'] == 'lily2':
     Source('idle_event.cc')
     Source('interrupts.cc')
     Source('isa.cc')
+    Source('isa_exec.cc')
+    Source('isa_util.cc')
     Source('linux/linux.cc')
     Source('linux/process.cc')
     Source('linux/system.cc')

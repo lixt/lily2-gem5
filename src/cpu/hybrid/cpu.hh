@@ -48,7 +48,8 @@
 #include "base/hashmap.hh"
 #include "cpu/hybrid/base.hh"
 #include "params/HybridCPU.hh"
-#include "arch/operands.hh"
+#include "arch/lily2/operands.hh"
+#include "arch/lily2/static_inst.hh"
 
 /**
  *  Start and end address of basic block for SimPoint profiling.
@@ -261,6 +262,20 @@ class HybridCPU : public BaseSimpleCPU
      * debugging).
      */
     void printAddr(Addr a);
+
+    typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
+    typedef TheISA::OpWord_t OpWord_t;
+
+    OpWord_t readWordOperand (const Lily2StaticInst *si, int idx)
+    {
+        return OpWord_t (0);
+    }
+
+    void setWordOperand (const Lily2StaticInst *si, int idx,
+                         OpWord_t &val, OpWord_t &mask)
+    {
+        ;
+    }
 };
 
 #endif // __CPU_HYBRID_CPU_HH__

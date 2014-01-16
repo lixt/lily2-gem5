@@ -53,7 +53,6 @@ isa_switch_hdrs = Split('''
         microcode_rom.hh
         mmapped_ipr.hh
         mt.hh
-        operands.hh
         process.hh
         registers.hh
         remote_gdb.hh

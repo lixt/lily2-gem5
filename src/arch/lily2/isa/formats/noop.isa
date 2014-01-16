@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 
-// Copyright (c) 2007 LILY2 Technologies, Inc.
+// Copyright (c) DSP Group, Institute of Microelectronics, Tsinghua University
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Authors: Korey Sewell
 
 ////////////////////////////////////////////////////////////////////
 //
@@ -34,18 +32,19 @@
 //
 
 output header {{
-    /**
+    /*
      * Static instruction class for no-ops.  This is a leaf class.
      */
     class Nop : public Lily2StaticInst
     {
-        /// Disassembly of original instruction.
+      private:
+        // Disassembly of original instruction.
         const std::string originalDisassembly;
 
       public:
-        /// Constructor
-        Nop(const std::string _originalDisassembly, MachInst _machInst)
-            : Lily2StaticInst("nop", _machInst, No_OpClass),
+        // Constructor
+        Nop(const std::string _originalDisassembly, ExtMachInst extMachInst)
+            : Lily2StaticInst("nop", extMachInst, No_OpClass),
               originalDisassembly(_originalDisassembly)
         {
             flags[IsNop] = true;
@@ -67,14 +66,14 @@ output decoder {{
         return csprintf("%-10s %s", "nop", originalDisassembly);
     }
 
-    /// Helper function for decoding nops.  Substitute Nop object
-    /// for original inst passed in as arg (and delete latter).
+    // When the execution condition is false, turn the instruction
+    // into a nop instruction.
     inline
     Lily2StaticInst *
     makeNop(Lily2StaticInst *inst)
     {
-        std::string nop_str = "(" + inst->disassemble(0) + ")";
-        Lily2StaticInst *nop = new Nop(nop_str, inst->machInst);
+        std::string originalDisassembly = "(" + inst->disassemble (0) + ")";
+        Lily2StaticInst *nop = new Nop(originalDisassembly, inst->extMachInst);
         delete inst;
         return nop;
     }
@@ -88,16 +87,14 @@ output exec {{
     }
 }};
 
-// Int & FP operate instructions use RD as dest, so check for
-// RD == 0 to detect nops
-def template RegNopCheckDecode {{
- {
-     Lily2StaticInst *i = new %(class_name)s(machInst);
-     //if (RD == 0) {
-         //i = makeNop(i);
-         //}
-     return i;
- }
+def template CondNopCheckDecode {{
+{
+    Lily2StaticInst *inst = new %(class_name)s(extMachInst);
+    if (!inst->cond(Z)) { /* Nop. */
+        inst = makeNop(inst);
+    }
+    return inst;
+}
 }};
 
 def template OperateNopCheckDecode {{
@@ -134,6 +131,6 @@ def format BasicOperateWithNopCheck(code, *opt_args) {{
 }};
 
 def format Nop() {{
-        decode_block = 'return new Nop(\"\",machInst);\n'
+        decode_block = 'return new Nop(\"\",extMachInst);\n'
 }};
 

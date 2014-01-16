@@ -442,7 +442,7 @@ class Operand(object):
         {
             %s final_val = %s;
             %s;
-            if (traceData) { traceData->setData(final_val); }
+            //if (traceData) { traceData->setData(final_val); }
         }''' % (self.dflt_ctype, self.base_name, code)
 
     def __init__(self, parser, full_name, ext, is_src, is_dest):
@@ -491,6 +491,9 @@ class Operand(object):
     def isReg(self):
         return 0
 
+    def isOp(self):
+        return 0
+
     def isFloatReg(self):
         return 0
 
@@ -525,7 +528,46 @@ class Operand(object):
     def makeDecl(self):
         # Note that initializations in the declarations are solely
         # to avoid 'uninitialized variable' errors from the compiler.
-        return self.ctype + ' ' + self.base_name + ' = 0;\n';
+        op_decl = self.ctype + ' ' + self.base_name + ';\n'
+        op_mask_decl = self.ctype + ' ' + self.base_name + '_Mask = '
+
+        if self.is_dest:
+            if (self.ctype == 'OpWord_t'):
+                return op_decl + op_mask_decl + 'genWordOperandMask (31, 0);\n'
+            else:
+                return op_decl
+        else:
+            return op_decl
+
+class OpWordOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_WORD, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_WORD, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readWordOperand (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setWordOperand(this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
 
 class IntRegOperand(Operand):
     def isReg(self):
@@ -816,6 +858,8 @@ class OperandList(object):
         self.numFPDestRegs = 0
         self.numIntDestRegs = 0
         self.numMiscDestRegs = 0
+        self.numSrcOps = 0;
+        self.numDestOps = 0;
         self.memOperand = None
 
         # Flags to keep track if one or more operands are to be read/written
@@ -841,6 +885,13 @@ class OperandList(object):
                 if self.memOperand:
                     error("Code block has more than one memory operand.")
                 self.memOperand = op_desc
+            elif op_desc.isOp():
+                if op_desc.is_src:
+                    op_desc.src_op_idx = self.numSrcOps
+                    self.numSrcOps += 1
+                if op_desc.is_dest:
+                    op_desc.dest_op_idx = self.numDestOps
+                    self.numDestOps += 1
 
             # Check if this operand has read/write predication. If true, then
             # the microop will dynamically index source/dest registers.
@@ -853,6 +904,11 @@ class OperandList(object):
             parser.maxInstDestRegs = self.numDestRegs
         if parser.maxMiscDestRegs < self.numMiscDestRegs:
             parser.maxMiscDestRegs = self.numMiscDestRegs
+
+        if parser.maxInstSrcOps < self.numSrcOps:
+            parser.maxInstSrcOps = self.numSrcOps
+        if parser.maxInstDestOps < self.numDestOps:
+            parser.maxInstDestOps = self.numDestOps
 
         # now make a final pass to finalize op_desc fields that may depend
         # on the register enumeration
@@ -1026,10 +1082,8 @@ class InstObjParams(object):
         # The header of the constructor declares the variables to be used
         # in the body of the constructor.
         header = ''
-        header += '\n\t_numSrcRegs = 0;'
-        header += '\n\t_numDestRegs = 0;'
-        header += '\n\t_numFPDestRegs = 0;'
-        header += '\n\t_numIntDestRegs = 0;'
+        header += '\n\t    _numSrcOps = 0;'
+        header += '\n\t    _numDestOps = 0;'
 
         self.constructor = header + \
                            self.operands.concatAttrStrings('constructor')
@@ -1161,6 +1215,9 @@ class ISAParser(Grammar):
         self.maxInstSrcRegs = 0
         self.maxInstDestRegs = 0
         self.maxMiscDestRegs = 0
+
+        self.maxInstSrcOps = 0
+        self.maxInstDestOps = 0
 
     #####################################################################
     #
@@ -1343,7 +1400,7 @@ class ISAParser(Grammar):
         # wrap the decode block as a function definition
         t[4].wrap_decode_block('''
 StaticInstPtr
-%(isa_name)s::Decoder::decodeInst(%(isa_name)s::ExtMachInst machInst)
+%(isa_name)s::Decoder::decodeInst(%(isa_name)s::ExtMachInst extMachInst)
 {
     using namespace %(namespace)s;
 ''' % vars(), '}')
@@ -1472,7 +1529,7 @@ StaticInstPtr
     # This generates a preprocessor macro in the output file.
     def p_def_bitfield_0(self, t):
         'def_bitfield : DEF opt_signed BITFIELD ID LESS INTLIT COLON INTLIT GREATER SEMI'
-        expr = 'bits(machInst, %2d, %2d)' % (t[6], t[8])
+        expr = 'bits(extMachInst, %2d, %2d)' % (t[6], t[8])
         if (t[2] == 'signed'):
             expr = 'sext<%d>(%s)' % (t[6] - t[8] + 1, expr)
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
@@ -1481,7 +1538,7 @@ StaticInstPtr
     # alternate form for single bit: 'def [signed] bitfield <ID> [<bit>]'
     def p_def_bitfield_1(self, t):
         'def_bitfield : DEF opt_signed BITFIELD ID LESS INTLIT GREATER SEMI'
-        expr = 'bits(machInst, %2d, %2d)' % (t[6], t[6])
+        expr = 'bits(extMachInst, %2d, %2d)' % (t[6], t[6])
         if (t[2] == 'signed'):
             expr = 'sext<%d>(%s)' % (1, expr)
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
@@ -1492,7 +1549,7 @@ StaticInstPtr
         'def_bitfield_struct : DEF opt_signed BITFIELD ID id_with_dot SEMI'
         if (t[2] != ''):
             error(t, 'error: structure bitfields are always unsigned.')
-        expr = 'machInst.%s' % t[5]
+        expr = 'extMachInst.%s' % t[5]
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
         t[0] = GenCode(self, header_output=hash_define)
 
@@ -2116,6 +2173,9 @@ StaticInstPtr
         MaxInstSrcRegs = self.maxInstSrcRegs
         MaxInstDestRegs = self.maxInstDestRegs
         MaxMiscDestRegs = self.maxMiscDestRegs
+
+        MaxInstSrcOps = self.maxInstSrcOps
+        MaxInstDestOps = self.maxInstDestOps
         # max_inst_regs.hh
         self.update_if_needed('max_inst_regs.hh',
                               max_inst_regs_template % vars())

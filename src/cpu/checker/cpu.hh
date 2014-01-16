@@ -57,6 +57,8 @@
 #include "debug/Checker.hh"
 #include "params/CheckerCPU.hh"
 #include "sim/eventq.hh"
+#include "arch/lily2/operands.hh"
+#include "arch/lily2/static_inst.hh"
 
 // forward declarations
 namespace TheISA
@@ -370,6 +372,20 @@ class CheckerCPU : public BaseCPU
 
     ThreadContext *tcBase() { return tc; }
     SimpleThread *threadBase() { return thread; }
+
+    typedef TheISA::OpWord_t OpWord_t;
+    typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
+
+    OpWord_t readWordOperand (const Lily2StaticInst *si, int idx)
+    {
+        return OpWord_t (0);
+    }
+
+    void setWordOperand (const Lily2StaticInst *si, int idx,
+                         OpWord_t& val, OpWord_t& mask)
+    {
+        ;
+    }
 
     Result unverifiedResult;
     Request *unverifiedReq;
