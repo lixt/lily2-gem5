@@ -373,16 +373,17 @@ class CheckerCPU : public BaseCPU
     ThreadContext *tcBase() { return tc; }
     SimpleThread *threadBase() { return thread; }
 
-    typedef TheISA::OpWord_t OpWord_t;
+    //
+    typedef TheISA::Op32i_t Op32i_t;
     typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
 
-    OpWord_t readWordOperand (const Lily2StaticInst *si, int idx)
+    Op32i_t readOp32i (const Lily2StaticInst *si, int idx)
     {
-        return OpWord_t (0);
+        return Op32i_t (0);
     }
 
-    void setWordOperand (const Lily2StaticInst *si, int idx,
-                         OpWord_t& val, OpWord_t& mask)
+    void setOp32i (const Lily2StaticInst *si, int idx,
+                         Op32i_t& val, Op32i_t& mask)
     {
         ;
     }

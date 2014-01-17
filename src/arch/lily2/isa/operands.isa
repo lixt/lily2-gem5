@@ -27,30 +27,31 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 def operand_types {{
+
     # Scalar Operands.
-    'sw'  : 'OpWord_t',
-    'uw'  : 'OpWord_t',
-#    'sf'  : 'OpSF_t',
-#    'df'  : 'OpDF_t',
-#
-#    # Vector Operands.
-#    'sb4' : 'OpB4_t',
-#    'ub4' : 'OpB4_t',
-#    'sh2' : 'OpH2_t',
-#    'uh2' : 'OpH2_t',
-#    'sh4' : 'OpH4_t',
-#    'uh4' : 'OpH4_t',
-#    'sw2' : 'OpW2_t',
-#    'uw2' : 'OpW2_t',
-#    'sf2' : 'OpSF2_t',
+    'ssw'  : 'Op32i_t', # Signed single word.
+    'usw'  : 'Op32i_t', # Unsigned single word.
+    'ssf'  : 'Op32f_t', # Single single-precision.
+    'sdf'  : 'Op64f_t', # Single double-precision.
+
+    # Vector Operands.
+    'sqb' : 'Opq8i_t',  # Signed quadruple byte.
+    'uqb' : 'Opq8i_t',  # Unsigned quadruple byte.
+    'sdh' : 'Opd16i_t', # Signed dual halfword.
+    'udh' : 'Opd16i_t', # Unsigned dual halfword.
+    'sqh' : 'Opq16i_t', # Signed quadruple halfword.
+    'uqh' : 'Opq16i_t', # Unsigned quadruple halfword.
+    'sdw' : 'Opd32i_t', # Signed dual word.
+    'udw' : 'Opd32i_t', # Unsigned dual word.
+    'dsf' : 'Opd32f_t', # Dual single-precision.
 }};
 
 def operands {{
 
-    # Word operands.
-    'Wd': ('OpWord', 'uw', 'RD', '', 1),
-    'Wa': ('OpWord', 'uw', 'RA', '', 2),
-    'Wb': ('OpWord', 'uw', 'RB', '', 3),
+    # 32-bit integer operands.
+    'Wd': ('Op32i', 'ssw', 'RD', '', 1),
+    'Wa': ('Op32i', 'ssw', 'RA', '', 2),
+    'Wb': ('Op32i', 'ssw', 'RB', '', 3),
 
 #    # Single-Precision operands.
 #    'SFd': ('OpSF', 'sf', 'RD', '', 1),

@@ -10,7 +10,7 @@
 
 namespace Lily2ISA
 {
-OpWord_t add (OpWord_t opa, OpWord_t opb);
+Op32i_t add (Op32i_t opa, Op32i_t opb);
 
 } // namespace Lily2ISA
 
