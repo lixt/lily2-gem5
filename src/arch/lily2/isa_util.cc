@@ -7,6 +7,4 @@
 
 namespace Lily2ISA
 {
-int32_t _add (int32_t a, int32_t b) { return (a + b); }
-
 } // namespace Lily2ISA

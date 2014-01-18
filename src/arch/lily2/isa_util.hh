@@ -10,7 +10,11 @@
 
 namespace Lily2ISA
 {
-int32_t _add (int32_t, int32_t);
+template <class T>
+T _add (T opa, T opb)
+{
+    return opa + opb;
+}
 
 } // namespace Lily2ISA
 

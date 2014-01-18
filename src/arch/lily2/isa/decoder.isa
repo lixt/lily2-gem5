@@ -38,9 +38,21 @@ decode FU default Unknown::unknown () {
 
             0x0: // FU(0x0) + HI(0x0).
                 decode OPCODE_ME default Unknown::unknown () {
+
                     0x0: // ADD-relative.
                         decode FLAG_IMM default Unknown::unknown () {
-                                0x0: ArithOp::add_a ({{ swd = add (swa, swb); }});
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ArithOp::add_a ({{ swd = add (swa, swb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithVecOp::add_b_4_a ({{ qbd = add_b_4 (qba, qbb); }});
+                                            0x1: ArithVecOp::add_h_2_a ({{ dhd = add_h_2 (dha, dhb); }});
+                                            0x2: ArithVecOp::add_h_4_a ({{ qhd = add_h_4 (qha, qhb); }});
+                                            0x3: ArithVecOp::add_w_2_a ({{ dwd = add_w_2 (dwa, dwb); }});
+                                        }
+                                }
+                            //0x1:
                         } // ADD-relative.
                 }
         } // FU = A(0x0).
