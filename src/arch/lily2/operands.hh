@@ -388,26 +388,44 @@ class Opq8i_t : public Op_t
         uint8_t uval;
     } vvh, vhi, vlo, vvl;
 };
-/*
+
 class Opd16i_t : public Op_t
 {
   public:
     // Constructors.
-    Opd16i_t (void)
-        : Op_t (), vhi.uval (0), vlo.uval (0) {}
-    explicit Opd16i_t (int16_t val)
-        : Op_t (), vhi.sval (val), vlo.sval (val) {}
-    explicit Opd16i_t (uint16_t val)
-        : Op_t (), vhi.uval (val), vlo.uval (val) {}
-    Opd16i_t (int16_t vhi, int16_t vlo)
-        : Op_t (), vhi.sval (vhi), vlo.sval (vlo) {}
-    Opd16i_t (uint16_t vhi, uint16_t vlo)
-        : Op_t (), vhi.uval (vhi), vlo.uval (vlo) {}
+    Opd16i_t (void) : Op_t ()
+    {
+        setUvhi (0);
+        setUvlo (0);
+    }
+    explicit Opd16i_t (int16_t val) : Op_t ()
+    {
+        setSvhi (val);
+        setSvlo (val);
+    }
+    explicit Opd16i_t (uint16_t val) : Op_t ()
+    {
+        setUvhi (val);
+        setUvlo (val);
+    }
+    Opd16i_t (int16_t vhi, int16_t vlo) : Op_t ()
+    {
+        setSvhi (vhi);
+        setSvlo (vlo);
+    }
+    Opd16i_t (uint16_t vhi, uint16_t vlo) : Op_t ()
+    {
+        setUvhi (vhi);
+        setUvlo (vlo);
+    }
 
     // Copy constructor.
     Opd16i_t (const Opd16i_t &op)
-        : Op_t (op._regFile, op._regIndex, op._immFlag),
-          vhi.uval (op.vhi.uval), vlo.uval (op.vlo.uval) {}
+        : Op_t (op._regFile, op._regIndex, op._immFlag)
+    {
+        setUvhi (op.vhi.uval);
+        setUvlo (op.vlo.uval);
+    }
 
   public:
     // Implements pure virtual function.
@@ -418,11 +436,15 @@ class Opd16i_t : public Op_t
     // Prints readable operand value.
     void print (std::ostream &os) const {}
 
-    // Accesses the value of operand.
+    // Accessors and mutators of operand value.
     int16_t  svhi (void) const { return vhi.sval; }
     int16_t  svlo (void) const { return vlo.sval; }
     uint16_t uvhi (void) const { return vhi.uval; }
     uint16_t uvlo (void) const { return vlo.uval; }
+    void setSvhi (int16_t vhi) { this->vhi.sval = vhi; }
+    void setSvlo (int16_t vlo) { this->vlo.sval = vlo; }
+    void setUvhi (uint16_t vhi) { this->vhi.uval = vhi; }
+    void setUvlo (uint16_t vlo) { this->vlo.uval = vlo; }
 
   private:
     // Number of registers a word contains.
@@ -439,22 +461,51 @@ class Opq16i_t : public Op_t
 {
   public:
     // Constructors.
-    Opq16i_t (void)
-        : Op_t (), vvh.uval (0), vhi.uval (0), vlo.uval (0), vvl.uval (0) {}
-    explicit Opq16i_t (int16_t val)
-        : Op_t (), vvh.sval (val), vhi.sval (val), vlo.sval (val), vvl.sval (val) {}
-    explicit Opq16i_t (uint16_t val)
-        : Op_t (), vvh.uval (val), vhi.uval (val), vlo.uval (val), vvl.uval (val) {}
-    Opq16i_t (int16_t vvh, int16_t vhi, int16_t vlo, int16_t vvl)
-        : Op_t (), vvh.sval (vvh), vhi.sval (vhi), vlo.sval (vlo), vvl.sval (vvl) {}
-    Opq16i_t (uint16_t vvh, uint16_t vhi, uint16_t vlo, uint16_t vvl)
-        : Op_t (), vvh.uval (vvh), vhi.uval (vhi), vlo.uval (vlo), vvl.uval (vvl) {}
+    Opq16i_t (void) : Op_t ()
+    {
+        setUvvh (0);
+        setUvhi (0);
+        setUvlo (0);
+        setUvvl (0);
+    }
+    explicit Opq16i_t (int16_t val) : Op_t ()
+    {
+        setSvvh (val);
+        setSvhi (val);
+        setSvlo (val);
+        setSvvl (val);
+    }
+    explicit Opq16i_t (uint16_t val) : Op_t ()
+    {
+        setUvvh (val);
+        setUvhi (val);
+        setUvlo (val);
+        setUvvl (val);
+    }
+    Opq16i_t (int16_t vvh, int16_t vhi, int16_t vlo, int16_t vvl) : Op_t ()
+    {
+        setSvvh (vvh);
+        setSvhi (vhi);
+        setSvlo (vlo);
+        setSvvl (vvl);
+    }
+    Opq16i_t (uint16_t vvh, uint16_t vhi, uint16_t vlo, uint16_t vvl) : Op_t ()
+    {
+        setUvvh (vvh);
+        setUvhi (vhi);
+        setUvlo (vlo);
+        setUvvl (vvl);
+    }
 
     // Copy constructor.
     Opq16i_t (const Opq16i_t &op)
-        : Op_t (op._regFile, op._regIndex, op._immFlag),
-          vvh.uval (op.vvh.uval), vhi.uval (op.vhi.uval),
-          vlo.uval (op.vlo.uval), vvl.uval (op.vvl.uval) {}
+        : Op_t (op._regFile, op._regIndex, op._immFlag)
+    {
+        setUvvh (op.vvh.uval);
+        setUvhi (op.vhi.uval);
+        setUvlo (op.vlo.uval);
+        setUvvl (op.vvl.uval);
+    }
 
   public:
     // Implements pure virtual function.
@@ -465,7 +516,7 @@ class Opq16i_t : public Op_t
     // Prints readable operand value.
     void print (std::ostream &os) const {}
 
-    // Accesses the value of operand.
+    // Accessors and mutators of operand value.
     int16_t  svvh (void) const { return vvh.sval; }
     int16_t  svhi (void) const { return vhi.sval; }
     int16_t  svlo (void) const { return vlo.sval; }
@@ -474,6 +525,14 @@ class Opq16i_t : public Op_t
     uint16_t uvhi (void) const { return vhi.uval; }
     uint16_t uvlo (void) const { return vlo.uval; }
     uint16_t uvvl (void) const { return vvl.uval; }
+    void setSvvh (int16_t  vvh) { this->vvh.sval = vvh; }
+    void setSvhi (int16_t  vhi) { this->vhi.sval = vhi; }
+    void setSvlo (int16_t  vlo) { this->vlo.sval = vlo; }
+    void setSvvl (int16_t  vvl) { this->vvl.sval = vvl; }
+    void setUvvh (uint16_t vvh) { this->vvh.uval = vvh; }
+    void setUvhi (uint16_t vhi) { this->vhi.uval = vhi; }
+    void setUvlo (uint16_t vlo) { this->vlo.uval = vlo; }
+    void setUvvl (uint16_t vvl) { this->vvl.uval = vvl; }
 
   private:
     // Number of registers a word contains.
@@ -490,17 +549,29 @@ class Opd32f_t : public Op_t
 {
   public:
     // Constructors.
-    Opd32f_t (void)
-        : Op_t (), vhi.fval (0.0), vlo.fval (0.0) {}
-    explicit Opd32f_t (float val)
-        : Op_t (), vhi.fval (val), vlo.fval (val) {}
-    explicit Opd32f_t (double val)
-        : Op_t (), vhi.fval (val), vlo.fval (val) {}
+    Opd32f_t (void) : Op_t ()
+    {
+        setFvhi (0.0);
+        setFvlo (0.0);
+    }
+    explicit Opd32f_t (float val) : Op_t ()
+    {
+        setFvhi (val);
+        setFvlo (val);
+    }
+    Opd32f_t (float vhi, float vlo) : Op_t ()
+    {
+        setFvhi (vhi);
+        setFvlo (vlo);
+    }
 
     // Copy constructor.
     Opd32f_t (const Opd32f_t &op)
-        : Op_t (op._regFile, op._regIndex, op._immFlag),
-          vhi.fval (op.vhi.fval), vlo.fval (op.vlo.fval) {}
+        : Op_t (op._regFile, op._regIndex, op._immFlag)
+    {
+        setFvhi (op.vhi.fval);
+        setFvlo (op.vlo.fval);
+    }
 
   public:
     // Implements pure virtual function.
@@ -511,9 +582,11 @@ class Opd32f_t : public Op_t
     // Prints readable operand value.
     void print (std::ostream &os) const {}
 
-    // Accesses the value of operand.
+    // Accessors and mutators of operand value.
     float fvhi (void) const { return vhi.fval; }
     float fvlo (void) const { return vlo.fval; }
+    void setFvhi (float vhi) { this->vhi.fval = vhi; }
+    void setFvlo (float vlo) { this->vlo.fval = vlo; }
 
   private:
     // Number of registers a word contains.
@@ -523,7 +596,7 @@ class Opd32f_t : public Op_t
     union {
         float fval;
     } vhi, vlo;
-};*/
+};
 
 inline
 Op32i_t maskGenOp32i (int first, int last)
