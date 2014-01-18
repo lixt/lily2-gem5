@@ -263,19 +263,91 @@ class HybridCPU : public BaseSimpleCPU
      */
     void printAddr(Addr a);
 
+#if THE_ISA == LILY2_ISA
+    // LILY2 interfaces.
     typedef TheISA::Op32i_t Op32i_t;
+    typedef TheISA::Op32f_t Op32f_t;
+    typedef TheISA::Op64f_t Op64f_t;
+    typedef TheISA::Opq8i_t Opq8i_t;
+    typedef TheISA::Opd16i_t Opd16i_t;
+    typedef TheISA::Opq16i_t Opq16i_t;
+    typedef TheISA::Opd32i_t Opd32i_t;
+    typedef TheISA::Opd32f_t Opd32f_t;
     typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
 
     Op32i_t readOp32i (const Lily2StaticInst *si, int idx)
     {
-        return Op32i_t (0);
+        return Op32i_t (static_cast<uint32_t> (0));
+    }
+
+    Op32f_t readOp32f (const Lily2StaticInst *si, int idx)
+    {
+        return Op32f_t (static_cast<float> (0.0));
+    }
+
+    Op64f_t readOp64f (const Lily2StaticInst *si, int idx)
+    {
+        return Op64f_t (static_cast<double> (0.0));
+    }
+
+    Opq8i_t readOpq8i (const Lily2StaticInst *si, int idx)
+    {
+        return Opq8i_t (static_cast<uint8_t> (0));
+    }
+
+    Opd16i_t readOpd16i (const Lily2StaticInst *si, int idx)
+    {
+        return Opd16i_t (static_cast<uint16_t> (0));
+    }
+
+    Opq16i_t readOpq16i (const Lily2StaticInst *si, int idx)
+    {
+        return Opq16i_t (static_cast<uint16_t> (0));
+    }
+
+    Opd32i_t readOpd32i (const Lily2StaticInst *si, int idx)
+    {
+        return Opd32i_t (static_cast<uint16_t> (0));
+    }
+
+    Opd32f_t readOpd32f (const Lily2StaticInst *si, int idx)
+    {
+        return Opd32f_t (static_cast<float> (0.0));
     }
 
     void setOp32i (const Lily2StaticInst *si, int idx,
-                         Op32i_t &val, Op32i_t &mask)
-    {
-        ;
-    }
+                   Op32i_t &val, Op32i_t &mask)
+    {}
+
+    void setOp32f (const Lily2StaticInst *si, int idx,
+                   Op32f_t &val, Op32f_t &mask)
+    {}
+
+    void setOp64f (const Lily2StaticInst *si, int idx,
+                   Op64f_t &val, Op64f_t &mask)
+    {}
+
+    void setOpq8i (const Lily2StaticInst *si, int idx,
+                   Opq8i_t &val, Opq8i_t &mask)
+    {}
+
+    void setOpd16i (const Lily2StaticInst *si, int idx,
+                    Opd16i_t &val, Opd16i_t &mask)
+    {}
+
+    void setOpq16i (const Lily2StaticInst *si, int idx,
+                    Opq16i_t &val, Opq16i_t &mask)
+    {}
+
+    void setOpd32i (const Lily2StaticInst *si, int idx,
+                    Opd32i_t &val, Opd32i_t &mask)
+    {}
+
+    void setOpd32f (const Lily2StaticInst *si, int idx,
+                    Opd32f_t &val, Opd32f_t &mask)
+    {}
+
+#endif // THE_ISA == LILY2_ISA
 };
 
 #endif // __CPU_HYBRID_CPU_HH__

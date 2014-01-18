@@ -40,7 +40,7 @@ decode FU default Unknown::unknown () {
                 decode OPCODE_ME default Unknown::unknown () {
                     0x0: // ADD-relative.
                         decode FLAG_IMM default Unknown::unknown () {
-                                0x0: ArithOp::add_a ({{ Wd = add (Wa, Wb); }});
+                                0x0: ArithOp::add_a ({{ swd = add (swa, swb); }});
                         } // ADD-relative.
                 }
         } // FU = A(0x0).

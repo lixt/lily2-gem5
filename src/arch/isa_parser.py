@@ -534,6 +534,20 @@ class Operand(object):
         if self.is_dest:
             if (self.ctype == 'Op32i_t'):
                 return op_decl + op_mask_decl + 'maskGenOp32i (31, 0);\n'
+            elif (self.ctype == 'Op32f_t'):
+                return op_decl + op_mask_decl + 'maskGenOp32f (31, 0);\n'
+            elif (self.ctype == 'Op64f_t'):
+                return op_decl + op_mask_decl + 'maskGenOp64f (64, 0);\n'
+            elif (self.ctype == 'Opq8i_t'):
+                return op_decl + op_mask_decl + 'maskGenOpq8i (8, 0);\n'
+            elif (self.ctype == 'Opd16i_t'):
+                return op_decl + op_mask_decl + 'maskGenOpd16i (16, 0);\n'
+            elif (self.ctype == 'Opq16i_t'):
+                return op_decl + op_mask_decl + 'maskGenOpq16i (16, 0);\n'
+            elif (self.ctype == 'Opd32i_t'):
+                return op_decl + op_mask_decl + 'maskGenOpd32i (32, 0);\n'
+            elif (self.ctype == 'Opd32f_t'):
+                return op_decl + op_mask_decl + 'maskGenOpd32f (32, 0);\n'
             else:
                 return op_decl
         else:
@@ -565,6 +579,216 @@ class Op32iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOp32i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Op32fOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_32F, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_32F, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32f (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOp32f (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Op64fOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_64F, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_64F, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp64F (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOp64F (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Opq8iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_Q8I, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_Q8I, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpq8i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOpq8i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Opd16iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_D16I, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_D16I, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpd16i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOpd16i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Opq16iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_Q16I, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_Q16I, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpq16i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOpq16i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Opd32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_D32I, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_D32I, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpd32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOpd32i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+
+        return wb
+
+class Opd32fOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcOp (OP_D32F, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestOp (OP_D32F, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpd32f (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOpd32f (this, %s, final_val, %s);\n
         }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
 
         return wb

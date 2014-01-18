@@ -601,7 +601,62 @@ class Opd32f_t : public Op_t
 inline
 Op32i_t maskGenOp32i (int first, int last)
 {
-    return Op32i_t (static_cast <uint32_t> (mask (first, last)));
+    return Op32i_t (static_cast<uint32_t> (mask (first, last)));
+}
+
+inline
+Op32f_t maskGenOp32f (int first, int last)
+{
+    uint32_t tval = static_cast<uint32_t> (mask (first, last));
+    return Op32f_t (*reinterpret_cast<float *> (&tval));
+}
+
+inline
+Op64f_t maskGenOp64f (int first, int last)
+{
+    uint64_t tval = static_cast<uint64_t> (mask (first, last));
+    return Op64f_t (*reinterpret_cast<double *> (&tval));
+}
+
+inline
+Opq8i_t maskGenOpq8i (int first, int last)
+{
+    return Opq8i_t (static_cast<uint8_t> (mask (first, last)),
+                    static_cast<uint8_t> (mask (first, last)),
+                    static_cast<uint8_t> (mask (first, last)),
+                    static_cast<uint8_t> (mask (first, last)));
+}
+
+inline
+Opd16i_t maskGenOpd16i (int first, int last)
+{
+    return Opd16i_t (static_cast<uint16_t> (mask (first, last)),
+                     static_cast<uint16_t> (mask (first, last)));
+}
+
+inline
+Opq16i_t maskGenOpq16i (int first, int last)
+{
+    return Opq16i_t (static_cast<uint16_t> (mask (first, last)),
+                     static_cast<uint16_t> (mask (first, last)),
+                     static_cast<uint16_t> (mask (first, last)),
+                     static_cast<uint16_t> (mask (first, last)));
+}
+
+inline
+Opd32i_t maskGenOpd32i (int first, int last)
+{
+    return Opd32i_t (static_cast<uint32_t> (mask (first, last)),
+                     static_cast<uint32_t> (mask (first, last)));
+}
+
+inline
+Opd32f_t maskGenOpd32f (int first, int last)
+{
+    uint32_t tvhi = static_cast<uint32_t> (mask (first, last));
+    uint32_t tvlo = static_cast<uint32_t> (mask (first, last));
+    return Opd32f_t (*reinterpret_cast<float *> (&tvhi),
+                     *reinterpret_cast<float *> (&tvlo));
 }
 
 } // namespace Lily2ISA

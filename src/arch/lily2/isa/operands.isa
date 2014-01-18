@@ -49,43 +49,43 @@ def operand_types {{
 def operands {{
 
     # 32-bit integer operands.
-    'Wd': ('Op32i', 'ssw', 'RD', '', 1),
-    'Wa': ('Op32i', 'ssw', 'RA', '', 2),
-    'Wb': ('Op32i', 'ssw', 'RB', '', 3),
+    'swd': ('Op32i', 'ssw', 'RD', '', 1),
+    'swa': ('Op32i', 'ssw', 'RA', '', 2),
+    'swb': ('Op32i', 'ssw', 'RB', '', 3),
 
-#    # Single-Precision operands.
-#    'SFd': ('OpSF', 'sf', 'RD', '', 1),
-#    'SFa': ('OpSF', 'sf', 'RA', '', 2),
-#    'SFb': ('OpSF', 'sf', 'RB', '', 3),
-#
-#    # Double-Precision operands.
-#    'DFd': ('OpDF', 'df', 'DD', '', 1),
-#    'DFa': ('OpDF', 'df', 'DA', '', 2),
-#    'DFb': ('OpDF', 'df', 'DB', '', 3),
-#
-#    # 4-Way byte operands.
-#    'B4d': ('OpB4', 'ub4', 'RD', '', 1),
-#    'B4a': ('OpB4', 'ub4', 'RA', '', 2),
-#    'B4b': ('OpB4', 'ub4', 'RB', '', 3),
-#
-#    # 2-Way halfword operands.
-#    'H2d': ('OpH2', 'uh2', 'RD', '', 1),
-#    'H2a': ('OpH2', 'uh2', 'RA', '', 2),
-#    'H2b': ('OpH2', 'uh2', 'RB', '', 3),
-#
-#    # 4-Way halfword operands.
-#    'H4d': ('OpH4', 'uh4', 'DD', '', 1),
-#    'H4a': ('OpH4', 'uh4', 'DA', '', 2),
-#    'H4b': ('OpH4', 'uh4', 'DB', '', 3),
-#
-#    # 2-Way word operands.
-#    'W2d': ('OpW2', 'uw2', 'DD', '', 1),
-#    'W2a': ('OpW2', 'uw2', 'DA', '', 2),
-#    'W2b': ('OpW2', 'uw2', 'DB', '', 3),
-#
-#    # 2-Way Single-Precision operands.
-#    'SF2d': ('OpSF2', 'sf2', 'DD', '', 1),
-#    'SF2a': ('OpSF2', 'sf2', 'DA', '', 2),
-#    'SF2b': ('OpSF2', 'sf2', 'DB', '', 3),
+    # Single-Precision operands.
+    'ssfd': ('Op32f', 'ssf', 'RD', '', 1),
+    'ssfa': ('Op32f', 'ssf', 'RA', '', 2),
+    'ssfb': ('Op32f', 'ssf', 'RB', '', 3),
+
+    # Double-Precision operands.
+    'sdfd': ('Op64f', 'sdf', 'DD', '', 1),
+    'sdfa': ('Op64f', 'sdf', 'DA', '', 2),
+    'sdfb': ('Op64f', 'sdf', 'DB', '', 3),
+
+    # 4-Way 8-bit integer operands.
+    'qbd': ('Opq8i', 'sqb', 'RD', '', 1),
+    'qba': ('Opq8i', 'sqb', 'RA', '', 2),
+    'qbb': ('Opq8i', 'sqb', 'RB', '', 3),
+
+    # 2-Way 16-bit integer operands.
+    'dhd': ('Opd16i', 'sdh', 'RD', '', 1),
+    'dha': ('Opd16i', 'sdh', 'RA', '', 2),
+    'dhb': ('Opd16i', 'sdh', 'RB', '', 3),
+
+    # 4-Way 16-bit integer operands.
+    'qhd': ('Opq16i', 'sqh', 'DD', '', 1),
+    'qha': ('Opq16i', 'sqh', 'DA', '', 2),
+    'qhb': ('Opq16i', 'sqh', 'DB', '', 3),
+
+    # 2-Way 32-bit integer operands.
+    'dwd': ('Opd32i', 'sdw', 'DD', '', 1),
+    'dwa': ('Opd32i', 'sdw', 'DA', '', 2),
+    'dwb': ('Opd32i', 'sdw', 'DB', '', 3),
+
+    # 2-Way 32-bit floating-point operands.
+    'dsfd': ('Opd32f', 'dsf', 'DD', '', 1),
+    'dsfa': ('Opd32f', 'dsf', 'DA', '', 2),
+    'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
 }};
