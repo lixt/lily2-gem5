@@ -35,6 +35,7 @@
 #include "arch/lily2/generated/max_inst_regs.hh"
 #include "base/misc.hh"
 #include "base/types.hh"
+#include "base/table.hh"
 
 class ThreadContext;
 
@@ -77,6 +78,8 @@ static const char *RegFileStr[] =
 typedef uint32_t ARegValue_t;
 typedef uint32_t BRegValue_t;
 typedef uint32_t CRegValue_t;
+
+typedef Table<NumARegs, 1, RegIndex_t, ARegValue_t> ARegFile;
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;
