@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014 DSP Group, Institute of Microeletronics, Tsinghua University
- * All rights reserved. 
- * 
+ * All rights reserved.
+ *
  * Copyright (c) 2012 ARM Limited
  * All rights reserved.
  *
@@ -525,7 +525,8 @@ HybridCPU::tick()
                         icache_latency = icachePort.sendAtomic(&ifetch_pkt);
 
                     assert(!ifetch_pkt.isError());
-
+                    printf ("insn = 0x%08x\n", inst);
+                    //return;
                     // ifetch_req is initialized to read the instruction directly
                     // into the CPU object's inst field.
                 //}
@@ -589,6 +590,17 @@ HybridCPU::tick()
     if (_status != Idle)
         schedule(tickEvent, curTick() + latency);
 }
+
+void
+HybridCPU::setupFetchRequest(Request *req)
+{
+    Addr instAddr = thread->instAddr();
+
+    Addr fetchPC = (instAddr & PCMask) + fetchOffset;
+    req->setVirt(0, fetchPC, sizeof(MachInst), Request::INST_FETCH, instMasterId(),
+            instAddr);
+}
+
 
 
 void

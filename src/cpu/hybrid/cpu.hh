@@ -263,8 +263,10 @@ class HybridCPU : public BaseSimpleCPU
      */
     void printAddr(Addr a);
 
-#if THE_ISA == LILY2_ISA
     // LILY2 interfaces.
+    void setupFetchRequest (Request *req);
+
+
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op32f_t Op32f_t;
     typedef TheISA::Op64f_t Op64f_t;
@@ -346,8 +348,6 @@ class HybridCPU : public BaseSimpleCPU
     void setOpd32f (const Lily2StaticInst *si, int idx,
                     Opd32f_t &val, Opd32f_t &mask)
     {}
-
-#endif // THE_ISA == LILY2_ISA
 };
 
 #endif // __CPU_HYBRID_CPU_HH__
