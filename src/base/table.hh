@@ -41,6 +41,9 @@ class Table
     typedef Key key_type;
     typedef T mapped_type;
     typedef std::pair<Key, T> value_type;
+    typedef Compare compare_type;
+    typedef Hash hash_type;
+    typedef Replace replace_type;
 
   public:
     // Class POSITION separates the outer interfaces and the bottom memory.
@@ -68,28 +71,31 @@ class Table
     // Returns a nil POSITION.
     Position nil (void) const
     {
-        Position nilPos;
-        nilPos.set = Set;
-        nilPos.way = Way;
-        return nilPos;
+        return Position (Set, Way);
     }
 
   public:
+    // Functions start with ``cb'' will call the callback functions in the
+    // Replace funtor and update the replace policy data.
+
     // Accesses the mapped value in POSITION.
     mapped_type access (const Position &position) const;
+    mapped_type cbAccess (const Position &position) const;
 
     // Searches the KEY in table. On success returns the position. On failure
     // returns a nil position.
     Position search (const key_type &key) const;
+    Position cbSearch (const key_type &key) const;
 
     // Inserts a pair of KEY and MAPPED into the table. If the table is full,
     // then the Replace functor will be called to get rid of an old one. After
     // the insertion, returns the position.
     Position insert (const key_type &key, const mapped_type &mapped);
+    Position cbInsert (const key_type &key, const mapped_type &mapped);
 
   protected:
     // Traverse the table. Call the F on every entry in the table.
-    //void traverse (void (*f) (const key_type &, const mapped_type &));
+    void traverse (void (*f) (const key_type &, const mapped_type &));
 
   protected:
     // Informs an invalid position fault and force quits the program.
@@ -320,6 +326,10 @@ class Table
     }
 
   private:
+    // Replace policy.
+    replace_type replace;
+
+  private:
     // Bottom memory model.
     entry_type table[Set][Way];
 };
@@ -350,6 +360,18 @@ TEMPLATE_TABLE::access (const Position &position) const
 }
 
 TEMPLATE_LIST
+typename TEMPLATE_TABLE::mapped_type
+TEMPLATE_TABLE::cbAccess (const Position &position) const
+{
+    if (!isPosValid (position)) {
+        invalidPosFault (position);
+    }
+
+    replace.accessCallback (position.set, position.way);
+    return access (position);
+}
+
+TEMPLATE_LIST
 typename TEMPLATE_TABLE::Position
 TEMPLATE_TABLE::search (const key_type &key) const
 {
@@ -376,18 +398,55 @@ TEMPLATE_TABLE::search (const key_type &key) const
 
 TEMPLATE_LIST
 typename TEMPLATE_TABLE::Position
+TEMPLATE_TABLE::cbSearch (const key_type &key) const
+{
+    Position searchPos = search (key);
+
+    if (searchPos != nil ()) {
+        replace.searchCallback (searchPos.set, searchPos.way);
+    }
+
+    return searchPos;
+}
+
+TEMPLATE_LIST
+typename TEMPLATE_TABLE::Position
 TEMPLATE_TABLE::insert (const key_type &key, const mapped_type &mapped)
 {
     size_t set = Hash (key) % Set;
 
     Position insertPos = findVacantPosInSet (set);
     if (insertPos == nil ()) {
-        // Table is full, calls the Replace functor.
         insertPos.set = set;
-        insertPos.way = Replace (set);
+        insertPos.way = replace (set);
     }
 
-    insert (insertPos, key, mapped);
+    return insert (insertPos, key, mapped);
+}
+
+TEMPLATE_LIST
+typename TEMPLATE_TABLE::Position
+TEMPLATE_TABLE::cbInsert (const key_type &key, const mapped_type &mapped)
+{
+    Position insertPos = insert (key, mapped);
+
+    if (insertPos != nil ()) {
+        replace.insertCallback (insertPos.set, insertPos.way);
+    }
+
+    return insertPos;
+}
+
+TEMPLATE_LIST
+void
+TEMPLATE_TABLE::traverse (void (*f) (const key_type &key, const mapped_type &mapped))
+{
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+            f (entryKey (curPos), entryMapped (curPos));
+        }
+    }
 }
 
 #endif // __BASE_TABLE_HH__
