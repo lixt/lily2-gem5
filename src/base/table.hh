@@ -341,7 +341,7 @@ class Table
                                class Compare, \
                                class Hash,    \
                                class Replace>
-#define TEMPLATE_TABLE Table<Set,     \
+#define TEMPLATE_CLASS Table<Set,     \
                              Way,     \
                              Key,     \
                              T,       \
@@ -349,8 +349,8 @@ class Table
                              Hash,    \
                              Replace>
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::mapped_type
-TEMPLATE_TABLE::access (const Position &position) const
+typename TEMPLATE_CLASS::mapped_type
+TEMPLATE_CLASS::access (const Position &position) const
 {
     if (!isPosValid (position)) {
         invalidPosFault (position);
@@ -360,8 +360,8 @@ TEMPLATE_TABLE::access (const Position &position) const
 }
 
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::mapped_type
-TEMPLATE_TABLE::cbAccess (const Position &position) const
+typename TEMPLATE_CLASS::mapped_type
+TEMPLATE_CLASS::cbAccess (const Position &position) const
 {
     if (!isPosValid (position)) {
         invalidPosFault (position);
@@ -372,8 +372,8 @@ TEMPLATE_TABLE::cbAccess (const Position &position) const
 }
 
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::Position
-TEMPLATE_TABLE::search (const key_type &key) const
+typename TEMPLATE_CLASS::Position
+TEMPLATE_CLASS::search (const key_type &key) const
 {
     size_t set = Hash (key) % Set;
 
@@ -397,8 +397,8 @@ TEMPLATE_TABLE::search (const key_type &key) const
 }
 
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::Position
-TEMPLATE_TABLE::cbSearch (const key_type &key) const
+typename TEMPLATE_CLASS::Position
+TEMPLATE_CLASS::cbSearch (const key_type &key) const
 {
     Position searchPos = search (key);
 
@@ -410,8 +410,8 @@ TEMPLATE_TABLE::cbSearch (const key_type &key) const
 }
 
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::Position
-TEMPLATE_TABLE::insert (const key_type &key, const mapped_type &mapped)
+typename TEMPLATE_CLASS::Position
+TEMPLATE_CLASS::insert (const key_type &key, const mapped_type &mapped)
 {
     size_t set = Hash (key) % Set;
 
@@ -425,8 +425,8 @@ TEMPLATE_TABLE::insert (const key_type &key, const mapped_type &mapped)
 }
 
 TEMPLATE_LIST
-typename TEMPLATE_TABLE::Position
-TEMPLATE_TABLE::cbInsert (const key_type &key, const mapped_type &mapped)
+typename TEMPLATE_CLASS::Position
+TEMPLATE_CLASS::cbInsert (const key_type &key, const mapped_type &mapped)
 {
     Position insertPos = insert (key, mapped);
 
@@ -439,7 +439,7 @@ TEMPLATE_TABLE::cbInsert (const key_type &key, const mapped_type &mapped)
 
 TEMPLATE_LIST
 void
-TEMPLATE_TABLE::traverse (void (*f) (const key_type &key, const mapped_type &mapped))
+TEMPLATE_CLASS::traverse (void (*f) (const key_type &key, const mapped_type &mapped))
 {
     for (int i = 0; i != Set; ++i) {
         for (int j = 0; j != Way; ++j) {
@@ -448,5 +448,8 @@ TEMPLATE_TABLE::traverse (void (*f) (const key_type &key, const mapped_type &map
         }
     }
 }
+
+#undef TEMPLATE_LIST
+#undef TEMPLATE_CLASS
 
 #endif // __BASE_TABLE_HH__
