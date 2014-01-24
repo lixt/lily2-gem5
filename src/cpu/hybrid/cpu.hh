@@ -46,6 +46,7 @@
 #define __CPU_HYBRID_CPU_HH__
 
 #include "base/hashmap.hh"
+#include "base/macho.hh"
 #include "cpu/hybrid/base.hh"
 #include "params/HybridCPU.hh"
 #include "arch/lily2/operands.hh"
@@ -266,6 +267,8 @@ class HybridCPU : public BaseSimpleCPU
     // LILY2 interfaces.
     void setupFetchRequest (Request *req);
 
+    // Test the MACHO.
+    Macho<int, int> pipelineState;
 
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op32f_t Op32f_t;

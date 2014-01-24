@@ -120,7 +120,8 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       intervalDrift(0),
       simpointStream(NULL),
       currentBBV(0, 0),
-      currentBBVInstCount(0)
+      currentBBVInstCount(0),
+      pipelineState (0)
 {
     _status = Idle;
 
