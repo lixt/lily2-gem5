@@ -62,15 +62,6 @@ typedef enum RegFile_t
     NUM_REG_FILE // Number of register labels.
 } RegFile_t;
 
-static const char *RegFileStr[] =
-{
-    "Error RegFile",
-
-    "A",
-    "B",
-    "C",
-};
-
 // Types for three general register file.
 typedef uint32_t ARegValue_t;
 typedef uint32_t BRegValue_t;
@@ -153,8 +144,8 @@ template <size_t RegNum, class RegValue_t>
 void
 RegFile<RegNum, RegValue_t>::printReg (std::ostream &os, const RegIndex_t &regIndex) const
 {
-    os << RegFileStr[fileName] << "[" << regIndex << "]"
-       << " = " << readReg (regIndex);
+    //os << RegFileStr[fileName] << "[" << regIndex << "]"
+       //<< " = " << readReg (regIndex);
 }
 
 template <size_t RegNum, class RegValue_t>

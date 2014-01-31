@@ -562,10 +562,10 @@ class Op32iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_32I, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_32I, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -592,10 +592,10 @@ class Op32fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_32F, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_32F, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -622,10 +622,10 @@ class Op64fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_64F, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_64F, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -652,10 +652,10 @@ class Opq8iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_Q8I, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_Q8I, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -682,10 +682,10 @@ class Opd16iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D16I, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D16I, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -712,10 +712,10 @@ class Opq16iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_Q16I, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_Q16I, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -742,10 +742,10 @@ class Opd32iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D32I, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D32I, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -772,10 +772,10 @@ class Opd32fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D32F, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D32F, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 

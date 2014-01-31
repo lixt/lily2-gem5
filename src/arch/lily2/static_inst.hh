@@ -16,6 +16,7 @@ namespace Lily2ISAInst
 class Lily2StaticInst : public StaticInst
 {
   public:
+    typedef TheISA::MachInst MachInst;
     typedef TheISA::RegCount_t RegCount_t;
     typedef TheISA::RegFile_t RegFile_t;
     typedef TheISA::RegIndex_t RegIndex_t;
@@ -75,13 +76,48 @@ class Lily2StaticInst : public StaticInst
         IsNop,
         NumFlags
     };
+    /*
+    // Decodes the functional unit from the given machine code.
+    void decodeFU (MachInst insnFU)
+    {
+        FU_t FU;
+        switch (insnFU) {
+            case 0 : // Fall through.
+            case 1 : FU = FU_XA; break;
+            case 2 : FU = FU_XM; break;
+            case 3 : FU = FU_XD; break;
+            case 4 : // Fall through.
+            case 5 : FU = FU_YA; break;
+            case 6 : FU = FU_YM; break;
+            case 7 : FU = FU_YD; break;
+            default: assert (0);
+        }
+        setStaticFU (FU);
+    }
 
-    void decodeSrcOp (OpLabel_t opLabel, ExtMachInst insnSrcReg)
+    // Decodes the condition from the given machine code.
+    void decodeCond (MachInst insnCond)
+    {
+        Cond_t cond;
+        switch (insnCond) {
+            case 0 : cond = COND_ALWAYS; break;
+            case 1 : cond = COND_CR0; break;
+            case 2 : cond = COND_NCR0; break;
+            case 3 : cond = COND_CR1; break;
+            case 4 : cond = COND_NCR1; break;
+            case 5 : cond = COND_CR2; break;
+            case 6 : cond = COND_NCR2; break;
+            default: assert (0);
+        }
+        setCond (cond);
+    }*/
+
+    void decodeSrcOp (OpLabel_t opLabel, MachInst insnSrcRegFile, MachInst insnSrcRegIndex)
     {
         ;
     }
 
-    void decodeDestOp (OpLabel_t opLabel, ExtMachInst insnDestReg)
+    void decodeDestOp (OpLabel_t opLabel, MachInst insnDestRegFile, MachInst insnDestRegIndex)
     {
         ;
     }
