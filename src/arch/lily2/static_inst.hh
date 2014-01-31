@@ -9,6 +9,7 @@
 #include "types.hh"
 #include "registers.hh"
 #include "operands.hh"
+#include "opcodes.hh"
 #include "cpu/static_inst.hh"
 
 namespace Lily2ISAInst
@@ -76,25 +77,13 @@ class Lily2StaticInst : public StaticInst
         IsNop,
         NumFlags
     };
-    /*
     // Decodes the functional unit from the given machine code.
     void decodeFU (MachInst insnFU)
     {
-        FU_t FU;
-        switch (insnFU) {
-            case 0 : // Fall through.
-            case 1 : FU = FU_XA; break;
-            case 2 : FU = FU_XM; break;
-            case 3 : FU = FU_XD; break;
-            case 4 : // Fall through.
-            case 5 : FU = FU_YA; break;
-            case 6 : FU = FU_YM; break;
-            case 7 : FU = FU_YD; break;
-            default: assert (0);
-        }
-        setStaticFU (FU);
+        MachInst key = Lily2ISA::genOpcFUKey (insnFU);
+        setStaticFU (Lily2ISA::findOpcFU (key));
     }
-
+    /*
     // Decodes the condition from the given machine code.
     void decodeCond (MachInst insnCond)
     {
