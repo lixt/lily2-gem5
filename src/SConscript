@@ -76,7 +76,7 @@ class SourceMeta(type):
     def __init__(cls, name, bases, dict):
         super(SourceMeta, cls).__init__(name, bases, dict)
         cls.all = []
-        
+
     def get(cls, **guards):
         '''Find all files that match the specified guards.  If a source
         file does not specify a flag, the default is False'''
@@ -148,10 +148,10 @@ class SourceFile(object):
     def __ge__(self, other): return self.filename >= other.filename
     def __eq__(self, other): return self.filename == other.filename
     def __ne__(self, other): return self.filename != other.filename
-        
+
 class Source(SourceFile):
     '''Add a c/c++ source file to the build'''
-    def __init__(self, source, Werror=True, swig=False, **guards):
+    def __init__(self, source, Werror=False, swig=False, **guards):
         '''specify the source file, and any guards'''
         super(Source, self).__init__(source, **guards)
 
@@ -164,7 +164,7 @@ class PySource(SourceFile):
     modules = {}
     tnodes = {}
     symnames = {}
-    
+
     def __init__(self, package, source, **guards):
         '''specify the python package, the source file, and any guards'''
         super(PySource, self).__init__(source, **guards)
@@ -352,9 +352,9 @@ def makeTheISA(source, target, env):
     target_isa = env['TARGET_ISA']
     def define(isa):
         return isa.upper() + '_ISA'
-    
+
     def namespace(isa):
-        return isa[0].upper() + isa[1:].lower() + 'ISA' 
+        return isa[0].upper() + isa[1:].lower() + 'ISA'
 
 
     code = code_formatter()
@@ -681,7 +681,7 @@ extern "C" {
 EmbeddedSwig embed_swig_${module}(init_${module});
 ''')
     code.write(str(target[0]))
-    
+
 # Build all swig modules
 for swig in SwigSource.all:
     env.Command([swig.cc_source.tnode, swig.py_source.tnode], swig.tnode,
@@ -845,7 +845,7 @@ const uint8_t data_${sym}[] = {
         x = array.array('B', data[i:i+step])
         code(''.join('%d,' % d for d in x))
     code.dedent()
-    
+
     code('''};
 
 EmbeddedPython embedded_${sym}(
@@ -861,7 +861,7 @@ EmbeddedPython embedded_${sym}(
     code.write(str(target[0]))
 
 for source in PySource.all:
-    env.Command(source.cpp, source.tnode, 
+    env.Command(source.cpp, source.tnode,
                 MakeAction(embedPyFile, Transform("EMBED PY")))
     Source(source.cpp)
 
@@ -955,7 +955,7 @@ def makeEnv(label, objsfx, strip = False, **kwargs):
 
     static_date = make_obj(date_source, static=True, extra_deps=static_objs)
     static_objs.append(static_date)
-    
+
     shared_date = make_obj(date_source, static=False, extra_deps=shared_objs)
     shared_objs.append(shared_date)
 

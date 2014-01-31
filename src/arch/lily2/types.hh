@@ -40,7 +40,7 @@ namespace Lily2ISA
 typedef uint32_t MachInst;
 typedef uint64_t ExtMachInst;
 
-// Type for functional units.
+// Types for functional units.
 enum FU_t {
     FU_NIL, // Illegal.
 
@@ -54,7 +54,22 @@ enum FU_t {
     NUM_FU  // Total number.
 };
 
-typedef GenericISA::DelaySlotPCState<MachInst> PCState;
+// Types for execution conditions.
+enum Cond_t {
+    COND_NIL,    // Illegal.
+
+    COND_ALWAYS, // Always.
+    COND_CR0,    // CR0.
+    COND_NCR0,   // !CR0.
+    COND_CR1,    // CR1.
+    COND_NCR1,   // !CR1.
+    COND_CR2,    // CR2.
+    COND_NCR2,   // !CR2.
+
+    NUM_COND     // Total number.
+};
+
+typedef GenericISA::HybridPCState<MachInst> PCState;
 
 typedef uint64_t LargestRead;
 

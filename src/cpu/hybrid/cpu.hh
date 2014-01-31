@@ -45,6 +45,8 @@
 #ifndef __CPU_HYBRID_CPU_HH__
 #define __CPU_HYBRID_CPU_HH__
 
+#include <iostream>
+#include <iomanip>
 #include "base/hashmap.hh"
 #include "base/macho.hh"
 #include "cpu/hybrid/base.hh"
@@ -265,7 +267,9 @@ class HybridCPU : public BaseSimpleCPU
     void printAddr(Addr a);
 
     // LILY2 interfaces.
+    Cycles fetch (void);
     void setupFetchRequest (Request *req);
+    StaticInstPtr decode (void);
 
     // Test the MACHO.
     Macho<int, int> pipelineState;

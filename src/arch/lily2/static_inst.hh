@@ -16,10 +16,14 @@ namespace Lily2ISAInst
 class Lily2StaticInst : public StaticInst
 {
   public:
+    typedef TheISA::RegCount_t RegCount_t;
+    typedef TheISA::RegFile_t RegFile_t;
+    typedef TheISA::RegIndex_t RegIndex_t;
     typedef TheISA::OpCount_t OpCount_t;
     typedef TheISA::OpLabel_t OpLabel_t;
     typedef TheISA::Op_t Op_t;
     typedef TheISA::FU_t FU_t;
+    typedef TheISA::Cond_t Cond_t;
 
     // Constructor.
     Lily2StaticInst (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
@@ -50,6 +54,10 @@ class Lily2StaticInst : public StaticInst
     FU_t dynFU (void) const { return _dynFU; }
     void setDynFU (FU_t _dynFU) { this->_dynFU = _dynFU; }
 
+    // Accessor and mutator of execution condition.
+    Cond_t cond (void) const { return _cond; };
+    void setCond (Cond_t _cond) { this->_cond = _cond; }
+
     // Accessor and mutator of an execution condition Z bit.
     bool condZ (void) const { return _condZ; }
     void setCondZ (bool _condZ) { this->_condZ = _condZ; }
@@ -78,6 +86,110 @@ class Lily2StaticInst : public StaticInst
         ;
     }
 
+    void printFU (std::stringstream &ss) const
+    {
+        switch (staticFU ()) {
+            case TheISA::FU_XA: ss << "[xa]"; break;
+            case TheISA::FU_XM: ss << "[xm]"; break;
+            case TheISA::FU_XD: ss << "[xd]"; break;
+            case TheISA::FU_YA: ss << "[ya]"; break;
+            case TheISA::FU_YM: ss << "[ym]"; break;
+            case TheISA::FU_YD: ss << "[yd]"; break;
+            default           : ss << "[??]"; break;
+        }
+    }
+
+    void printCond (std::stringstream &ss) const
+    {
+        switch (cond ()) {
+            case TheISA::COND_ALWAYS: ss << "      "; break;
+            case TheISA::COND_CR0   : ss << "{ cr0}"; break;
+            case TheISA::COND_NCR0  : ss << "{!cr0}"; break;
+            case TheISA::COND_CR1   : ss << "{ cr1}"; break;
+            case TheISA::COND_NCR1  : ss << "{!cr1}"; break;
+            case TheISA::COND_CR2   : ss << "{ cr2}"; break;
+            case TheISA::COND_NCR2  : ss << "{!cr2}"; break;
+            default                 : ss << "{????}"; break;
+        }
+    }
+
+    void printName (std::stringstream &ss) const
+    {
+        ss << mnemonic;
+    }
+
+    void printOp (std::stringstream &ss, const Op_t *op) const
+    {
+        RegFile_t regFile = op->regFile ();
+        RegIndex_t regIndex = op->regIndex ();
+
+        switch (op->numRegs ()) {
+            case 1 : printReg (ss, regFile, regIndex); break;
+            case 2 : printRegPair (ss, regFile, regIndex); break;
+            case 4 : printRegPairPair (ss, regFile, regIndex); break;
+            default: assert (0);
+        }
+    }
+
+    void printSrcOps (std::stringstream &ss) const
+    {
+        for (OpCount_t i = 0; i != numSrcOps (); ++i) {
+            printOp (ss, srcOp (i));
+        }
+    }
+
+    void printDestOps (std::stringstream &ss) const
+    {
+        for (OpCount_t i = 0; i != numDestOps (); ++i) {
+            printOp (ss, destOp (i));
+        }
+    }
+
+    void printReg (std::stringstream &ss,
+                   const RegFile_t &regFile,
+                   const RegIndex_t &regIndex) const
+    {
+        printRegFile (ss, regFile);
+        printRegIndex (ss, regIndex);
+    }
+
+    void printRegPair (std::stringstream &ss,
+                       const RegFile_t &regFile,
+                       const RegIndex_t &regIndex) const
+    {
+        printReg (ss, regFile, regIndex);
+        ss << ":";
+        printReg (ss, regFile, regIndex + 1);
+    }
+
+    void printRegPairPair (std::stringstream &ss,
+                           const RegFile_t &regFile,
+                           const RegIndex_t &regIndex) const
+    {
+        printReg (ss, regFile, regIndex);
+        ss << ":";
+        printReg (ss, regFile, regIndex + 1);
+        ss << ":";
+        printReg (ss, regFile, regIndex + 2);
+        ss << ":";
+        printReg (ss, regFile, regIndex + 3);
+    }
+
+    void printRegFile (std::stringstream &ss, const RegFile_t &regFile) const
+    {
+        switch (regFile) {
+            case TheISA::REG_X: ss << "x"; break;
+            case TheISA::REG_Y: ss << "y"; break;
+            case TheISA::REG_G: ss << "g"; break;
+            default           : ss << "?"; break;
+        }
+    }
+
+    void printRegIndex (std::stringstream &ss, const RegIndex_t &regIndex) const
+    {
+        ss << regIndex;
+    }
+
     // Number of source and destination operands.
     OpCount_t _numSrcOps;
     OpCount_t _numDestOps;
@@ -92,6 +204,7 @@ class Lily2StaticInst : public StaticInst
     FU_t _dynFU;
 
     // Execution condition of an instruction.
+    Cond_t _cond;
     bool _condZ;
     Op_t *_condOp;
 

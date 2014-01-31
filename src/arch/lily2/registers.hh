@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2006 The Regents of The University of Michigan
- * Copyright (c) 2007 MIPS Technologies, Inc.
+ * Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Authors: Korey Sewell
  */
 
 #ifndef __ARCH_LILY2_REGISTERS_HH__
@@ -52,19 +50,18 @@ const RegIndex_t NumARegs = 24;
 const RegIndex_t NumBRegs = 24;
 const RegIndex_t NumCRegs = 8;
 
-// Type for register label.
+// Type for register file.
 typedef enum RegFile_t
 {
     REG_NIL,     // Illegal.
 
-    REG_A,       // Register file A.
-    REG_B,       // Register file B.
-    REG_C,       // Register file C.
+    REG_X,       // Register file X.
+    REG_Y,       // Register file Y.
+    REG_G,       // Register file G.
 
     NUM_REG_FILE // Number of register labels.
 } RegFile_t;
 
-/*
 static const char *RegFileStr[] =
 {
     "Error RegFile",
@@ -72,12 +69,104 @@ static const char *RegFileStr[] =
     "A",
     "B",
     "C",
-};*/
+};
 
 // Types for three general register file.
 typedef uint32_t ARegValue_t;
 typedef uint32_t BRegValue_t;
 typedef uint32_t CRegValue_t;
+
+// Types for register files.
+template <size_t RegNum, class RegValue_t>
+class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
+{
+  public:
+    typedef Table<RegNum, 1, RegIndex_t, RegValue_t> Base;
+    typedef typename Base::Position Position;
+
+  public:
+    // Constructor.
+    // This constructor sets all the registers to zero.
+    explicit RegFile (RegFile_t fileName) : fileName (fileName)
+    {
+        clear ();
+    }
+
+  public:
+    // Reads the register according to the given REGINDEX.
+    RegValue_t readReg (const RegIndex_t &regIndex) const;
+
+    // Writes the new REGVALUE to register according to the give REGINDEX.
+    void setReg (const RegIndex_t &regIndex, const RegValue_t &regValue);
+
+    // Clears all the registers to zeros.
+    void clear (void);
+    static void traverseClear (RegIndex_t &, RegValue_t &);
+
+  public:
+    // Prints out the register according to the given REGINDEX.
+    void printReg (std::ostream &os, const RegIndex_t &regIndex) const;
+
+    // Prints out the whole register file.
+    void print (std::ostream &os) const;
+
+  private:
+    // Register file name.
+    RegFile_t fileName;
+};
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFile<RegNum, RegValue_t>::clear (void)
+{
+    traverse (traverseClear);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFile<RegNum, RegValue_t>::traverseClear (RegIndex_t &regIndex, RegValue_t &regValue)
+{
+    memset (&regValue, 0, sizeof (RegValue_t));
+}
+
+template <size_t RegNum, class RegValue_t>
+RegValue_t
+RegFile<RegNum, RegValue_t>::readReg (const RegIndex_t &regIndex) const
+{
+    // Position to read registers.
+    Position regPos (regIndex, 1);
+
+    return access (regPos);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFile<RegNum, RegValue_t>::setReg (const RegIndex_t &regIndex, const RegValue_t &regValue)
+{
+    // Position to set registers.
+    Position regPos (regIndex, 1);
+
+    return mutate (regPos, regValue);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFile<RegNum, RegValue_t>::printReg (std::ostream &os, const RegIndex_t &regIndex) const
+{
+    os << RegFileStr[fileName] << "[" << regIndex << "]"
+       << " = " << readReg (regIndex);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFile<RegNum, RegValue_t>::print (std::ostream &os) const
+{
+    for (RegIndex_t regIndex = 0; regIndex != RegNum; ++regIndex) {
+        printReg (os, regIndex);
+        os << std::endl;
+    }
+}
+
 
 typedef Table<NumARegs, 1, RegIndex_t, ARegValue_t> ARegFile;
 

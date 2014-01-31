@@ -451,6 +451,18 @@ operator<<(std::ostream & os, const DelaySlotUPCState<MachInst> &pc)
     return os;
 }
 
+template <class MachInst>
+class HybridPCState : public SimplePCState<MachInst>
+{
+  protected:
+    typedef SimplePCState<MachInst> Base;
+
+  public:
+    // Constructors.
+    HybridPCState (void) {}
+    HybridPCState (Addr val) { Base::set (val); }
+};
+
 }
 
 #endif

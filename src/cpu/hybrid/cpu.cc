@@ -62,6 +62,8 @@
 #include "sim/system.hh"
 #include "sim/full_system.hh"
 
+#define DEBUG 1
+
 using namespace std;
 using namespace TheISA;
 
@@ -474,6 +476,11 @@ HybridCPU::writeMem(uint8_t *data, unsigned size,
 void
 HybridCPU::tick()
 {
+#if DEBUG
+    std::cout << std::endl;
+    std::cout << "********************** NEW CYCLE **********************" << std::endl;
+#endif
+
     DPRINTF(HybridCPU, "Tick\n");
 
     Tick latency = 0;
@@ -495,13 +502,17 @@ HybridCPU::tick()
 
         TheISA::PCState pcState = thread->pcState();
 
+        fetch ();
+
+        curStaticInst = decode ();
+        /*
         bool needToFetch = !isRomMicroPC(pcState.microPC()) &&
                            !curMacroStaticInst;
         if (needToFetch) {
             setupFetchRequest(&ifetch_req);
             fault = thread->itb->translateAtomic(&ifetch_req, tc,
                                                  BaseTLB::Execute);
-        }
+         }
 
         if (fault == NoFault) {
             Tick icache_latency = 0;
@@ -526,7 +537,6 @@ HybridCPU::tick()
                         icache_latency = icachePort.sendAtomic(&ifetch_pkt);
 
                     assert(!ifetch_pkt.isError());
-                    printf ("insn = 0x%08x\n", inst);
                     //return;
                     // ifetch_req is initialized to read the instruction directly
                     // into the CPU object's inst field.
@@ -579,6 +589,9 @@ HybridCPU::tick()
         }
         if(fault != NoFault || !stayAtPC)
             advancePC(fault);
+        */
+        pcState.advance ();
+        thread->pcState (pcState);
     }
 
     if (tryCompleteDrain())
@@ -596,13 +609,66 @@ void
 HybridCPU::setupFetchRequest(Request *req)
 {
     Addr instAddr = thread->instAddr();
+    Addr PCMask = ~(sizeof (MachInst) - 1);
+    Addr fetchPC = instAddr & PCMask;
 
-    Addr fetchPC = (instAddr & PCMask) + fetchOffset;
-    req->setVirt(0, fetchPC, sizeof(MachInst), Request::INST_FETCH, instMasterId(),
-            instAddr);
+    req->setVirt
+        (0, fetchPC, sizeof(MachInst), Request::INST_FETCH, instMasterId(), instAddr);
+
+#if DEBUG
+    std::cout << "<----- fetch" << std::endl;
+    std::cout << "       fetchPC = 0x"
+              << std::hex << std::setfill ('0') << std::setw (8)
+              << instAddr << std::endl;
+    std::cout << "       aligned fetchPC = 0x"
+              << std::hex << std::setfill ('0') << std::setw (8)
+              << fetchPC << std::endl;
+#endif
 }
 
+Cycles
+HybridCPU::fetch (void)
+{
+    setupFetchRequest (&ifetch_req);
 
+    thread->itb->translateAtomic(&ifetch_req, tc, BaseTLB::Execute);
+
+    Packet ifetch_pkt = Packet(&ifetch_req, MemCmd::ReadReq);
+    ifetch_pkt.dataStatic(&inst);
+
+    /* Do the actual fetch here. */
+    icachePort.sendAtomic(&ifetch_pkt);
+    inst = gtobe (inst);
+
+#if DEBUG
+    std::cout << "       fetch instruction = 0x"
+              << std::hex << std::setfill ('0') << std::setw (8)
+              << inst << std::endl;
+    std::cout << "-----> fetch" << std::endl;
+    std::cout << std::endl;
+#endif
+
+    /* TODO */
+    return Cycles (0);
+}
+
+StaticInstPtr
+HybridCPU::decode (void)
+{
+    StaticInstPtr instPtr = NULL;
+    TheISA::Decoder *decoder = &(thread->decoder);
+
+    instPtr = decoder->decode(inst, thread->instAddr ());
+
+#if DEBUG
+    std::cout << "<----- decode" << std::endl;
+    std::cout << "       disassemble: "
+              << instPtr->disassemble (thread->instAddr ()) << std::endl;
+    std::cout << "-----> decode" << std::endl;
+#endif
+
+    return instPtr;
+}
 
 void
 HybridCPU::printAddr(Addr a)

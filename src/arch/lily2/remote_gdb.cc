@@ -270,6 +270,7 @@ RemoteGDB::clearSingleStep()
 void
 RemoteGDB::setSingleStep()
 {
+    /*
     PCState pc = context->pcState();
     PCState bpc;
     bool set_bt = false;
@@ -294,6 +295,6 @@ RemoteGDB::setSingleStep()
     if (set_bt) {
         takenBkpt = bpc.npc();
         setTempBreakpoint(takenBkpt);
-    }
+    }*/
 }
 
