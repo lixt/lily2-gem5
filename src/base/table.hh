@@ -78,7 +78,8 @@ class Table
     // Functions start with ``cb'' will call the callback functions in the
     // Replace funtor and update the replace policy data.
 
-    // Accesses the mapped value in POSITION.
+    // Accesses the mapped value according to the given POSITION.
+    // If the POSITION is invalid, the function will be aborted.
     mapped_type access (const Position &position) const;
     mapped_type cbAccess (const Position &position) const;
 
@@ -86,6 +87,11 @@ class Table
     // returns a nil position.
     Position search (const key_type &key) const;
     Position cbSearch (const key_type &key) const;
+
+    // Mutates a new MAPPED value according to the given POSITION.
+    // If the POSITION is invalid, the function will be aborted.
+    void mutate (const Position &position, const mapped_type &mapped);
+    void cbMutate (const Position &position, const mapped_type &mapped);
 
     // Inserts a pair of KEY and MAPPED into the table. If the table is full,
     // then the Replace functor will be called to get rid of an old one. After
@@ -95,7 +101,7 @@ class Table
 
   protected:
     // Traverse the table. Call the F on every entry in the table.
-    void traverse (void (*f) (const key_type &, const mapped_type &));
+    void traverse (void (*f) (key_type &, mapped_type &));
 
   protected:
     // Informs an invalid position fault and force quits the program.
@@ -410,6 +416,29 @@ TEMPLATE_CLASS::cbSearch (const key_type &key) const
 }
 
 TEMPLATE_LIST
+void
+TEMPLATE_CLASS::mutate (const Position &mutatePos, const mapped_type &mapped)
+{
+    if (!isPosValid (mutatePos)) {
+        invalidPosFault (mutatePos);
+    }
+
+    setEntryMapped (mutatePos, mapped);
+}
+
+TEMPLATE_LIST
+void
+TEMPLATE_CLASS::cbMutate (const Position &mutatePos, const mapped_type &mapped)
+{
+    if (!isPosValid (mutatePos)) {
+        invalidPosFault (mutatePos);
+    }
+
+    replace.mutateCallback (mutatePos.set, mutatePos.way);
+    setEntryMapped (mutatePos, mapped);
+}
+
+TEMPLATE_LIST
 typename TEMPLATE_CLASS::Position
 TEMPLATE_CLASS::insert (const key_type &key, const mapped_type &mapped)
 {
@@ -439,7 +468,7 @@ TEMPLATE_CLASS::cbInsert (const key_type &key, const mapped_type &mapped)
 
 TEMPLATE_LIST
 void
-TEMPLATE_CLASS::traverse (void (*f) (const key_type &key, const mapped_type &mapped))
+TEMPLATE_CLASS::traverse (void (*f) (key_type &key, mapped_type &mapped))
 {
     for (int i = 0; i != Set; ++i) {
         for (int j = 0; j != Way; ++j) {
