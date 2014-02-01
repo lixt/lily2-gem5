@@ -33,6 +33,11 @@ output decoder {{
     std::string ArithOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
+
+        printFU (ss);
+        printCond (ss);
+        printName (ss);
+
         return ss.str ();
     }
 

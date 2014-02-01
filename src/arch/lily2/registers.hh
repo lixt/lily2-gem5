@@ -46,9 +46,9 @@ typedef int8_t RegCount_t;
 typedef int16_t RegIndex_t;
 
 // Register number of three general register files.
-const RegIndex_t NumARegs = 24;
-const RegIndex_t NumBRegs = 24;
-const RegIndex_t NumCRegs = 8;
+const RegIndex_t NumXRegs = 24;
+const RegIndex_t NumYRegs = 24;
+const RegIndex_t NumGRegs = 8;
 
 // Type for register file.
 typedef enum RegFile_t
@@ -58,14 +58,15 @@ typedef enum RegFile_t
     REG_X,       // Register file X.
     REG_Y,       // Register file Y.
     REG_G,       // Register file G.
+    REG_M,       // Miscellaneous.
 
     NUM_REG_FILE // Number of register labels.
 } RegFile_t;
 
 // Types for three general register file.
-typedef uint32_t ARegValue_t;
-typedef uint32_t BRegValue_t;
-typedef uint32_t CRegValue_t;
+typedef uint32_t XRegValue_t;
+typedef uint32_t YRegValue_t;
+typedef uint32_t GRegValue_t;
 
 // Types for register files.
 template <size_t RegNum, class RegValue_t>
@@ -157,9 +158,6 @@ RegFile<RegNum, RegValue_t>::print (std::ostream &os) const
         os << std::endl;
     }
 }
-
-
-typedef Table<NumARegs, 1, RegIndex_t, ARegValue_t> ARegFile;
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;

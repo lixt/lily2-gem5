@@ -659,6 +659,23 @@ Opd32f_t maskGenOpd32f (int first, int last)
                      *reinterpret_cast<float *> (&tvlo));
 }
 
+inline
+Op_t *opFactory (OpLabel_t opLabel)
+{
+    Op_t *op;
+    switch (opLabel) {
+        case OP_32I : op = new Op32i_t  (); break;
+        case OP_32F : op = new Op32f_t  (); break;
+        case OP_64F : op = new Op64f_t  (); break;
+        case OP_Q8I : op = new Opq8i_t  (); break;
+        case OP_D16I: op = new Opd16i_t (); break;
+        case OP_Q16I: op = new Opq16i_t (); break;
+        case OP_D32I: op = new Opd32i_t (); break;
+        case OP_D32F: op = new Opd32f_t (); break;
+        default     : assert (0);
+    }
+    return op;
+}
 } // namespace Lily2ISA
 
 #endif // __ARCH_LILY2_OPERANDS_HH__

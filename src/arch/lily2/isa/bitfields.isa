@@ -33,6 +33,7 @@
 
 def bitfield REG_FILE   <31:31>;
 
+def bitfield CFU        <31:29>;
 def bitfield FU         <30:29>;
 
 def bitfield OPCODE_HI  <28:26>;
@@ -55,3 +56,4 @@ def bitfield QB         <17:13>;
 def bitfield QA         <12: 8>;
 def bitfield QD         < 7: 3>;
 
+def bitfield COND       < 2: 0>;

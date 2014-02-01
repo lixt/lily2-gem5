@@ -26,6 +26,10 @@ class Lily2StaticInst : public StaticInst
     typedef TheISA::Op_t Op_t;
     typedef TheISA::FU_t FU_t;
     typedef TheISA::Cond_t Cond_t;
+    // Typedef for opcode table.
+    typedef TheISA::OpcFU_t OpcFU_t;
+    typedef TheISA::OpcCond_t OpcCond_t;
+    typedef TheISA::OpcReg_t OpcReg_t;
 
     // Constructor.
     Lily2StaticInst (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
@@ -42,11 +46,13 @@ class Lily2StaticInst : public StaticInst
     OpCount_t numDestOps (void) const { return _numDestOps; }
     void setNumDestOps (OpCount_t _numDestOps) { this->_numDestOps = _numDestOps; }
 
-    // Gets the source operand pointers.
+    // Accessor and mutator of the source operand pointers.
     Op_t *srcOp (OpCount_t i) const { return _srcOp[i]; }
+    void setSrcOp (OpCount_t i, Op_t *_srcOp) { this->_srcOp[i] = _srcOp; }
 
-    // Gets the destination operand pointers.
+    // Accessor and mutator of the destination operand pointers.
     Op_t *destOp (OpCount_t i) const { return _destOp[i]; }
+    void setDestOp (OpCount_t i, Op_t *_destOp) { this->_destOp[i] = _destOp; }
 
     // Accessor and mutator of static functional unit.
     FU_t staticFU (void) const { return _staticFU; }
@@ -77,38 +83,53 @@ class Lily2StaticInst : public StaticInst
         IsNop,
         NumFlags
     };
+
     // Decodes the functional unit from the given machine code.
     void decodeFU (MachInst insnFU)
     {
-        MachInst key = Lily2ISA::genOpcFUKey (insnFU);
-        setStaticFU (Lily2ISA::findOpcFU (key));
+        OpcFU_t opcFU = Lily2ISA::getOpcFU (insnFU);
+        setStaticFU (opcFU.FU);
     }
-    /*
+
     // Decodes the condition from the given machine code.
     void decodeCond (MachInst insnCond)
     {
-        Cond_t cond;
-        switch (insnCond) {
-            case 0 : cond = COND_ALWAYS; break;
-            case 1 : cond = COND_CR0; break;
-            case 2 : cond = COND_NCR0; break;
-            case 3 : cond = COND_CR1; break;
-            case 4 : cond = COND_NCR1; break;
-            case 5 : cond = COND_CR2; break;
-            case 6 : cond = COND_NCR2; break;
-            default: assert (0);
-        }
-        setCond (cond);
-    }*/
-
-    void decodeSrcOp (OpLabel_t opLabel, MachInst insnSrcRegFile, MachInst insnSrcRegIndex)
-    {
-        ;
+        OpcCond_t opcCond = Lily2ISA::getOpcCond (insnCond);
+        setCond (opcCond.cond);
     }
 
-    void decodeDestOp (OpLabel_t opLabel, MachInst insnDestRegFile, MachInst insnDestRegIndex)
+    // Decodes the source operand from the given machine code.
+    // OPTION = 0: Inner-Cluster.
+    // OPTION = 1: Cross-Cluster.
+    // OPTION = 2: Miscellaneous.
+    void decodeSrcOp (OpLabel_t opLabel, MachInst insnSrcRegFile,
+                      MachInst insnSrcRegIndex, int option = 0)
     {
-        ;
+        OpcReg_t opcReg = Lily2ISA::getOpcReg (insnSrcRegFile, insnSrcRegIndex, option);
+
+        Op_t *op = opFactory (opLabel);
+        op->setRegFile (opcReg.regFile);
+        op->setRegIndex (opcReg.regIndex);
+
+        // Increments the number of source operands.
+        OpCount_t i = numSrcOps ();
+        setSrcOp (i++, op);
+        setNumSrcOps (i);
+    }
+
+    void decodeDestOp (OpLabel_t opLabel, MachInst insnDestRegFile,
+                       MachInst insnDestRegIndex, int option = 0)
+    {
+        OpcReg_t opcReg = Lily2ISA::getOpcReg (insnDestRegFile, insnDestRegIndex, option);
+
+        Op_t *op = opFactory (opLabel);
+        op->setRegFile (opcReg.regFile);
+        op->setRegIndex (opcReg.regIndex);
+
+        // Increments the number of destination operands.
+        OpCount_t i = numDestOps ();
+        setDestOp (i++, op);
+        setNumDestOps (i);
     }
 
     void printFU (std::stringstream &ss) const
@@ -220,8 +241,8 @@ class Lily2StaticInst : public StaticInst
     OpCount_t _numDestOps;
 
     // Pointers of source and destination operands.
-    Op_t *_srcOp[1/*TheISA::MAX_INST_SRC_OPS*/];
-    Op_t *_destOp[1/*TheISA::MAX_INST_DEST_OPS*/];
+    Op_t *_srcOp[MaxInstSrcOps];
+    Op_t *_destOp[MaxInstDestOps];
 
     // Functional unit of an instruction.
     // Static FU is for VLIW and dynamic FU is for Superscalar.

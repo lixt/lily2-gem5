@@ -1306,8 +1306,10 @@ class InstObjParams(object):
         # The header of the constructor declares the variables to be used
         # in the body of the constructor.
         header = ''
-        header += '\n\t    _numSrcOps = 0;'
-        header += '\n\t    _numDestOps = 0;'
+        header += '\n\t    setNumSrcOps (0);'
+        header += '\n\t    setNumDestOps (0);'
+        header += '\n\t    decodeFU (CFU);'
+        header += '\n\t    decodeCond (COND);'
 
         self.constructor = header + \
                            self.operands.concatAttrStrings('constructor')
@@ -1403,6 +1405,9 @@ namespace %(namespace)s {
     const int MaxInstSrcRegs = %(MaxInstSrcRegs)d;
     const int MaxInstDestRegs = %(MaxInstDestRegs)d;
     const int MaxMiscDestRegs = %(MaxMiscDestRegs)d;
+
+    const int MaxInstSrcOps = %(MaxInstSrcOps)d;
+    const int MaxInstDestOps = %(MaxInstDestOps)d;
 
 } // namespace %(namespace)s
 
