@@ -39,39 +39,134 @@ class Lily2StaticInst : public StaticInst
     bool isNop (void) const { return flags[IsNop]; }
 
     // Accessor and mutator of number of source operands.
-    OpCount_t numSrcOps (void) const { return _numSrcOps; }
-    void setNumSrcOps (OpCount_t _numSrcOps) { this->_numSrcOps = _numSrcOps; }
+    OpCount_t getNumSrcOps (void) const
+    {
+        return numSrcOps;
+    }
+    void setNumSrcOps (OpCount_t numSrcOps)
+    {
+        this->numSrcOps = numSrcOps;
+    }
 
     // Accessor and mutator of number of destination operands.
-    OpCount_t numDestOps (void) const { return _numDestOps; }
-    void setNumDestOps (OpCount_t _numDestOps) { this->_numDestOps = _numDestOps; }
+    OpCount_t getNumDestOps (void) const
+    {
+        return numDestOps;
+    }
+    void setNumDestOps (OpCount_t _numDestOps)
+    {
+        this->numDestOps = numDestOps;
+    }
 
     // Accessor and mutator of the source operand pointers.
-    Op_t *srcOp (OpCount_t i) const { return _srcOp[i]; }
-    void setSrcOp (OpCount_t i, Op_t *_srcOp) { this->_srcOp[i] = _srcOp; }
+    Op_t *getSrcOp (OpCount_t i) const
+    {
+        return srcOp[i];
+    }
+    void setSrcOp (OpCount_t i, Op_t *srcOp)
+    {
+        this->srcOp[i] = srcOp;
+    }
 
     // Accessor and mutator of the destination operand pointers.
-    Op_t *destOp (OpCount_t i) const { return _destOp[i]; }
-    void setDestOp (OpCount_t i, Op_t *_destOp) { this->_destOp[i] = _destOp; }
+    Op_t *getDestOp (OpCount_t i) const
+    {
+        return destOp[i];
+    }
+    void setDestOp (OpCount_t i, Op_t *destOp)
+    {
+        this->destOp[i] = destOp;
+    }
 
     // Accessor and mutator of static functional unit.
-    FU_t staticFU (void) const { return _staticFU; }
-    void setStaticFU (FU_t _staticFU) { this->_staticFU = _staticFU; }
+    FU_t getStaticFU (void) const
+    {
+        return staticFU;
+    }
+    void setStaticFU (FU_t staticFU)
+    {
+        this->staticFU = staticFU;
+    }
 
     // Accessor and mutator of dynamic functional unit.
-    FU_t dynFU (void) const { return _dynFU; }
-    void setDynFU (FU_t _dynFU) { this->_dynFU = _dynFU; }
+    FU_t getDynFU (void) const
+    {
+        return dynFU;
+    }
+    void setDynFU (FU_t dynFU)
+    {
+        this->dynFU = dynFU;
+    }
 
     // Accessor and mutator of execution condition.
-    Cond_t cond (void) const { return _cond; };
-    void setCond (Cond_t _cond) { this->_cond = _cond; }
+    Cond_t getCond (void) const
+    {
+        return cond;
+    }
+    void setCond (Cond_t cond)
+    {
+        this->cond = cond;
+    }
 
-    // Accessor and mutator of an execution condition Z bit.
-    bool condZ (void) const { return _condZ; }
-    void setCondZ (bool _condZ) { this->_condZ = _condZ; }
+    // Accessor and mutator of the execution condition pointer.
+    Op_t *getCondOp (void) const
+    {
+        return condOp;
+    }
+    void setCondOp (Op_t *condOp)
+    {
+        this->condOp = condOp;
+    }
 
-    // Gets the execution condition pointer.
-    Op_t *condOp (void) const { return _condOp; }
+    // Accessor and mutator of the string of static functional unit.
+    std::string getStaticFUStr (void) const
+    {
+        return staticFUStr;
+    }
+    void setStaticFUStr (const char *staticFUStr)
+    {
+        (this->staticFUStr).assign (staticFUStr);
+    }
+
+    // Accessor and mutator of the string of dynamic functional unit.
+    std::string getDynFUStr (void) const
+    {
+        return dynFUStr;
+    }
+    void setDynFUStr (const char *dynFUStr)
+    {
+        (this->dynFUStr).assign (dynFUStr);
+    }
+
+    // Accessor and mutator of the string of condition.
+    std::string getCondStr (void) const
+    {
+        return condStr;
+    }
+    void setCondStr (const char *condStr)
+    {
+        (this->condStr).assign (condStr);
+    }
+
+    // Accessor and mutator of the string of source operand.
+    std::string getSrcOpStr (OpCount_t i) const
+    {
+        return srcOpStr[i];
+    }
+    void setSrcOpStr (OpCount_t i, const char *srcOpStr)
+    {
+        (this->srcOpStr[i]).assign (srcOpStr);
+    }
+
+    // Accessor and mutator of the string of destination operand.
+    std::string getDestOpStr (OpCount_t i) const
+    {
+        return destOpStr[i];
+    }
+    void setDestOpStr (OpCount_t i, const char *destOpStr)
+    {
+        (this->destOpStr[i]).assign (destOpStr);
+    }
 
     void advancePC (TheISA::PCState &pcState) const {}
 
@@ -112,7 +207,7 @@ class Lily2StaticInst : public StaticInst
         op->setRegIndex (opcReg.regIndex);
 
         // Increments the number of source operands.
-        OpCount_t i = numSrcOps ();
+        OpCount_t i = getNumSrcOps ();
         setSrcOp (i++, op);
         setNumSrcOps (i);
     }
@@ -127,14 +222,14 @@ class Lily2StaticInst : public StaticInst
         op->setRegIndex (opcReg.regIndex);
 
         // Increments the number of destination operands.
-        OpCount_t i = numDestOps ();
+        OpCount_t i = getNumDestOps ();
         setDestOp (i++, op);
         setNumDestOps (i);
     }
 
     void printFU (std::stringstream &ss) const
     {
-        switch (staticFU ()) {
+        switch (getStaticFU ()) {
             case TheISA::FU_XA: ss << "[xa]"; break;
             case TheISA::FU_XM: ss << "[xm]"; break;
             case TheISA::FU_XD: ss << "[xd]"; break;
@@ -147,7 +242,7 @@ class Lily2StaticInst : public StaticInst
 
     void printCond (std::stringstream &ss) const
     {
-        switch (cond ()) {
+        switch (getCond ()) {
             case TheISA::COND_ALWAYS: ss << "      "; break;
             case TheISA::COND_CR0   : ss << "{ cr0}"; break;
             case TheISA::COND_NCR0  : ss << "{!cr0}"; break;
@@ -179,15 +274,15 @@ class Lily2StaticInst : public StaticInst
 
     void printSrcOps (std::stringstream &ss) const
     {
-        for (OpCount_t i = 0; i != numSrcOps (); ++i) {
-            printOp (ss, srcOp (i));
+        for (OpCount_t i = 0; i != getNumSrcOps (); ++i) {
+            printOp (ss, getSrcOp (i));
         }
     }
 
     void printDestOps (std::stringstream &ss) const
     {
-        for (OpCount_t i = 0; i != numDestOps (); ++i) {
-            printOp (ss, destOp (i));
+        for (OpCount_t i = 0; i != getNumDestOps (); ++i) {
+            printOp (ss, getDestOp (i));
         }
     }
 
@@ -236,26 +331,41 @@ class Lily2StaticInst : public StaticInst
         ss << regIndex;
     }
 
+  protected:
     // Number of source and destination operands.
-    OpCount_t _numSrcOps;
-    OpCount_t _numDestOps;
+    OpCount_t numSrcOps;
+    OpCount_t numDestOps;
 
     // Pointers of source and destination operands.
-    Op_t *_srcOp[MaxInstSrcOps];
-    Op_t *_destOp[MaxInstDestOps];
+    Op_t *srcOp[MaxInstSrcOps];
+    Op_t *destOp[MaxInstDestOps];
 
     // Functional unit of an instruction.
     // Static FU is for VLIW and dynamic FU is for Superscalar.
-    FU_t _staticFU;
-    FU_t _dynFU;
+    FU_t staticFU;
+    FU_t dynFU;
 
     // Execution condition of an instruction.
-    Cond_t _cond;
-    bool _condZ;
-    Op_t *_condOp;
+    Cond_t cond;
+    Op_t *condOp;
 
     // Flags of an instruction.
     std::bitset<NumFlags> flags;
+
+  protected:
+    // Printable variables.
+
+    // String of functional unit.
+    std::string staticFUStr;
+    std::string dynFUStr;
+
+    // String of condition.
+    std::string condStr;
+
+    // String of operands.
+    std::string srcOpStr[MaxInstSrcOps];
+    std::string destOpStr[MaxInstDestOps];
+
 };
 
 } // namespace Lily2ISAInst
