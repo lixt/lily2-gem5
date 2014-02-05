@@ -34,6 +34,7 @@
 // Declarations for execute() methods.
 def template BasicExecDeclare {{
         Fault execute(%(CPU_exec_context)s *, Trace::InstRecord *) const;
+        bool execCond (%(CPU_exec_context)s *) const;
 }};
 
 // Basic instruction class declaration template.
@@ -43,7 +44,7 @@ def template BasicDeclare {{
 
        public:
          /// Constructor.
-         %(class_name)s(ExtMachInst extMachInst);
+         %(class_name)s(MachInst machInst);
          %(BasicExecDeclare)s
 
      };
@@ -51,7 +52,7 @@ def template BasicDeclare {{
 
 // Basic instruction class constructor template.
 def template BasicConstructor {{
-    inline %(class_name)s::%(class_name)s(ExtMachInst extMachInst) : %(base_class)s("%(mnemonic)s", extMachInst, %(op_class)s)
+    inline %(class_name)s::%(class_name)s(MachInst machInst) : %(base_class)s("%(mnemonic)s", machInst, %(op_class)s)
     {
         %(constructor)s;
     }
@@ -77,16 +78,22 @@ def template BasicExecute {{
 
         return fault;
     }
+
+    bool %(class_name)s::execCond (%(CPU_exec_context)s *xc) const
+    {
+        bool condOp = xc->readCond (this);
+        return (getCondZ () == 0) ? condOp : !condOp;
+    }
 }};
 
 // Basic decode template.
 def template BasicDecode {{
-    return new %(class_name)s(extMachInst);
+    return new %(class_name)s(machInst);
 }};
 
 // Basic decode template, passing mnemonic in as string arg to constructor.
 def template BasicDecodeWithMnemonic {{
-    return new %(class_name)s("%(mnemonic)s", extMachInst);
+    return new %(class_name)s("%(mnemonic)s", machInst);
 }};
 
 // The most basic instruction format...

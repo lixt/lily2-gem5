@@ -11,8 +11,8 @@ output header {{
     class ArithOp : public Lily2StaticInst
     {
       protected:
-        ArithOp (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
-            : Lily2StaticInst (mnemonic, extMachInst, opClass) {}
+        ArithOp (const char *mnemonic, MachInst machInst, OpClass opClass)
+            : Lily2StaticInst (mnemonic, machInst, opClass) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
     };
@@ -21,8 +21,8 @@ output header {{
     class ArithVecOp : public Lily2StaticInst
     {
       protected:
-        ArithVecOp (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
-            : Lily2StaticInst (mnemonic, extMachInst, opClass) {}
+        ArithVecOp (const char *mnemonic, MachInst machInst, OpClass opClass)
+            : Lily2StaticInst (mnemonic, machInst, opClass) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
     };
@@ -38,12 +38,29 @@ output decoder {{
         printCond (ss);
         printName (ss);
 
+        printDestOp (ss, 0);
+        ss << ",";
+        printSrcOp (ss, 0);
+        ss << ",";
+        printSrcOp (ss, 1);
+
         return ss.str ();
     }
 
     std::string ArithVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
+
+        printFU (ss);
+        printCond (ss);
+        printName (ss);
+
+        printDestOp (ss, 0);
+        ss << ",";
+        printSrcOp (ss, 0);
+        ss << ",";
+        printSrcOp (ss, 1);
+
         return ss.str ();
     }
 }};
@@ -52,7 +69,7 @@ def format ArithOp(code, *opt_flags) {{
     iop = InstObjParams(name, Name, 'ArithOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
-    decode_block = BasicDecode.subst(iop)
+    decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};
 
@@ -60,6 +77,6 @@ def format ArithVecOp(code, *opt_flags) {{
     iop = InstObjParams(name, Name, 'ArithVecOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
-    decode_block = BasicDecode.subst(iop)
+    decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};

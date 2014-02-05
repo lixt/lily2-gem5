@@ -658,7 +658,7 @@ HybridCPU::decode (void)
     StaticInstPtr instPtr = NULL;
     TheISA::Decoder *decoder = &(thread->decoder);
 
-    instPtr = decoder->decode(inst, thread->instAddr ());
+    instPtr = decoder->decodeInst(inst, this);
 
 #if DEBUG
     std::cout << "<----- decode" << std::endl;

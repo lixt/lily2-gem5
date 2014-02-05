@@ -21,6 +21,13 @@ struct OpcCond_t
 {
     MachInst insn;
     Cond_t cond;
+    // Condition is positive or negative.
+    bool condZ;
+    // Condition operand.
+    OpLabel_t opLabel;
+    RegFile_t regFile;
+    RegIndex_t regIndex;
+    // Condition printable string.
     const char *str;
 };
 

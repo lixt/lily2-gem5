@@ -562,10 +562,10 @@ class Op32iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -592,10 +592,10 @@ class Op32fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_32F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -622,10 +622,10 @@ class Op64fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_64F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -652,10 +652,10 @@ class Opq8iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_Q8I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -682,10 +682,10 @@ class Opd16iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_D16I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -712,10 +712,10 @@ class Opq16iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_Q16I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -742,10 +742,10 @@ class Opd32iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_D32I, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -772,10 +772,10 @@ class Opd32fOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
+            c_src = '\n\t   decodeSrcRegOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
 
         if self.is_dest:
-            c_dest = '\n\t  decodeDestOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
+            c_dest = '\n\t  decodeDestRegOp (OP_D32F, REG_FILE, %s);' % (self.reg_spec)
 
         return c_src + c_dest
 
@@ -1629,7 +1629,7 @@ class ISAParser(Grammar):
         # wrap the decode block as a function definition
         t[4].wrap_decode_block('''
 StaticInstPtr
-%(isa_name)s::Decoder::decodeInst(%(isa_name)s::ExtMachInst extMachInst)
+%(isa_name)s::Decoder::decodeInst(%(isa_name)s::ExtMachInst machInst, HybridCPU *xc)
 {
     using namespace %(namespace)s;
 ''' % vars(), '}')
@@ -1758,7 +1758,7 @@ StaticInstPtr
     # This generates a preprocessor macro in the output file.
     def p_def_bitfield_0(self, t):
         'def_bitfield : DEF opt_signed BITFIELD ID LESS INTLIT COLON INTLIT GREATER SEMI'
-        expr = 'bits(extMachInst, %2d, %2d)' % (t[6], t[8])
+        expr = 'bits(machInst, %2d, %2d)' % (t[6], t[8])
         if (t[2] == 'signed'):
             expr = 'sext<%d>(%s)' % (t[6] - t[8] + 1, expr)
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
@@ -1767,7 +1767,7 @@ StaticInstPtr
     # alternate form for single bit: 'def [signed] bitfield <ID> [<bit>]'
     def p_def_bitfield_1(self, t):
         'def_bitfield : DEF opt_signed BITFIELD ID LESS INTLIT GREATER SEMI'
-        expr = 'bits(extMachInst, %2d, %2d)' % (t[6], t[6])
+        expr = 'bits(machInst, %2d, %2d)' % (t[6], t[6])
         if (t[2] == 'signed'):
             expr = 'sext<%d>(%s)' % (1, expr)
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
@@ -1778,7 +1778,7 @@ StaticInstPtr
         'def_bitfield_struct : DEF opt_signed BITFIELD ID id_with_dot SEMI'
         if (t[2] != ''):
             error(t, 'error: structure bitfields are always unsigned.')
-        expr = 'extMachInst.%s' % t[5]
+        expr = 'machInst.%s' % t[5]
         hash_define = '#undef %s\n#define %s\t%s\n' % (t[4], t[4], expr)
         t[0] = GenCode(self, header_output=hash_define)
 

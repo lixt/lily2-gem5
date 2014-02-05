@@ -385,6 +385,11 @@ class CheckerCPU : public BaseCPU
     typedef TheISA::Opd32f_t Opd32f_t;
     typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
 
+    bool readCond (const Lily2StaticInst *si)
+    {
+        return 0;
+    }
+
     Op32i_t readOp32i (const Lily2StaticInst *si, int idx)
     {
         return Op32i_t (static_cast<uint32_t> (0));

@@ -37,9 +37,11 @@
 #include "base/types.hh"
 #include "cpu/static_inst.hh"
 
+// Forward declaration.
+class HybridCPU;
+
 namespace Lily2ISA
 {
-
 class Decoder
 {
   protected:
@@ -90,7 +92,9 @@ class Decoder
     static GenericISA::BasicDecodeCache defaultCache;
 
   public:
-    StaticInstPtr decodeInst(ExtMachInst mach_inst);
+    // Decodes the machine code of an instruction.
+    // LILY2 needs CPU to decode the instruction.
+    StaticInstPtr decodeInst (ExtMachInst mach_inst, HybridCPU *xc = NULL);
 
     /// Decode a machine instruction.
     /// @param mach_inst The binary instruction to decode.

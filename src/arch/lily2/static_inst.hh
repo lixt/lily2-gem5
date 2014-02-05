@@ -24,6 +24,7 @@ class Lily2StaticInst : public StaticInst
     typedef TheISA::OpCount_t OpCount_t;
     typedef TheISA::OpLabel_t OpLabel_t;
     typedef TheISA::Op_t Op_t;
+    typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::FU_t FU_t;
     typedef TheISA::Cond_t Cond_t;
     // Typedef for opcode table.
@@ -32,8 +33,25 @@ class Lily2StaticInst : public StaticInst
     typedef TheISA::OpcReg_t OpcReg_t;
 
     // Constructor.
-    Lily2StaticInst (const char *mnemonic, ExtMachInst extMachInst, OpClass opClass)
-        : StaticInst (mnemonic, extMachInst, opClass) {}
+    Lily2StaticInst (const char *mnemonic, MachInst machInst, OpClass opClass)
+        : StaticInst (mnemonic, machInst, opClass),
+          numSrcOps (0), numDestOps (0),
+          staticFU (TheISA::FU_NIL), dynFU (TheISA::FU_NIL), cond (TheISA::COND_NIL),
+          staticFUStr (), dynFUStr (), condStr ()
+    {
+        for (OpCount_t i = 0; i != MaxInstSrcOps; ++i) {
+            srcOp[i] = NULL;
+            srcOpStr[i].assign ("");
+        }
+
+        for (OpCount_t i = 0; i != MaxInstDestOps; ++i) {
+            destOp[i] = NULL;
+            destOpStr[i].assign ("");
+        }
+    }
+
+    // Checks the execution condition of an instruction.
+    virtual bool execCond (HybridCPU *xc) const = 0;
 
     // Accesses instruction flags.
     bool isNop (void) const { return flags[IsNop]; }
@@ -108,6 +126,16 @@ class Lily2StaticInst : public StaticInst
         this->cond = cond;
     }
 
+    // Accessor and mutator of the execution condition Z.
+    bool getCondZ (void) const
+    {
+        return condZ;
+    }
+    void setCondZ (bool condZ)
+    {
+        this->condZ = condZ;
+    }
+
     // Accessor and mutator of the execution condition pointer.
     Op_t *getCondOp (void) const
     {
@@ -153,9 +181,9 @@ class Lily2StaticInst : public StaticInst
     {
         return srcOpStr[i];
     }
-    void setSrcOpStr (OpCount_t i, const char *srcOpStr)
+    void setSrcOpStr (OpCount_t i, const char *str)
     {
-        (this->srcOpStr[i]).assign (srcOpStr);
+        (this->srcOpStr[i]) += str;
     }
 
     // Accessor and mutator of the string of destination operand.
@@ -163,15 +191,15 @@ class Lily2StaticInst : public StaticInst
     {
         return destOpStr[i];
     }
-    void setDestOpStr (OpCount_t i, const char *destOpStr)
+    void setDestOpStr (OpCount_t i, const char *str)
     {
-        (this->destOpStr[i]).assign (destOpStr);
+        (destOpStr[i]) += str;
     }
 
     void advancePC (TheISA::PCState &pcState) const {}
 
     // Machine instruction.
-    ExtMachInst extMachInst;
+    MachInst machInst;
 
   protected:
     enum Flags {
@@ -184,6 +212,7 @@ class Lily2StaticInst : public StaticInst
     {
         OpcFU_t opcFU = Lily2ISA::getOpcFU (insnFU);
         setStaticFU (opcFU.FU);
+        setStaticFUStr (opcFU.str);
     }
 
     // Decodes the condition from the given machine code.
@@ -191,144 +220,125 @@ class Lily2StaticInst : public StaticInst
     {
         OpcCond_t opcCond = Lily2ISA::getOpcCond (insnCond);
         setCond (opcCond.cond);
+        setCondZ (opcCond.condZ);
+
+        Op_t *op = opFactory (opcCond.opLabel);
+        op->setImmFlag (false);
+        op->setRegFile (opcCond.regFile);
+        op->setRegIndex (opcCond.regIndex);
+
+        setCondStr (opcCond.str);
     }
 
-    // Decodes the source operand from the given machine code.
+    // Decodes the source register from the given machine code.
     // OPTION = 0: Inner-Cluster.
     // OPTION = 1: Cross-Cluster.
     // OPTION = 2: Miscellaneous.
-    void decodeSrcOp (OpLabel_t opLabel, MachInst insnSrcRegFile,
-                      MachInst insnSrcRegIndex, int option = 0)
+    void decodeSrcRegOp (OpLabel_t opLabel, MachInst insnSrcRegFile,
+                         MachInst insnSrcRegIndex, int option = 0)
     {
-        OpcReg_t opcReg = Lily2ISA::getOpcReg (insnSrcRegFile, insnSrcRegIndex, option);
-
         Op_t *op = opFactory (opLabel);
+
+        OpcReg_t opcReg;
+        switch (op->numRegs ()) {
+            case 1 : opcReg = Lily2ISA::getOpcReg
+                     (insnSrcRegFile, insnSrcRegIndex, option);
+                     break;
+            case 2 : opcReg = Lily2ISA::getOpcRegPair
+                     (insnSrcRegFile, insnSrcRegIndex, option);
+                     break;
+            case 4 : opcReg = Lily2ISA::getOpcRegPairPair
+                     (insnSrcRegFile, insnSrcRegIndex, option);
+                     break;
+            default: assert (0);
+        }
+
+        op->setImmFlag (false);
         op->setRegFile (opcReg.regFile);
         op->setRegIndex (opcReg.regIndex);
 
-        // Increments the number of source operands.
         OpCount_t i = getNumSrcOps ();
-        setSrcOp (i++, op);
-        setNumSrcOps (i);
+        setSrcOp (i, op);
+        setSrcOpStr (i, opcReg.str);
+        setNumSrcOps (i + 1);
     }
 
-    void decodeDestOp (OpLabel_t opLabel, MachInst insnDestRegFile,
-                       MachInst insnDestRegIndex, int option = 0)
+    void decodeSrcImmOp (OpLabel_t opLabel, MachInst insnSrcImm)
     {
-        OpcReg_t opcReg = Lily2ISA::getOpcReg (insnDestRegFile, insnDestRegIndex, option);
-
         Op_t *op = opFactory (opLabel);
+
+        op->setImmFlag (true);
+        op->setImmValue (insnSrcImm);
+
+        // 32-bit for printable immediate is enough.
+        // 2 for ``0x'' and 8 for hex format immediate string.
+        char *immStr = new char[10];
+        immStr[0] = '0';
+        immStr[1] = 'x';
+        sprintf (immStr + 2, "%x", insnSrcImm);
+
+        OpCount_t i = getNumSrcOps ();
+        setSrcOp (i, op);
+        setSrcOpStr (i, immStr);
+        setNumSrcOps (i + 1);
+    }
+
+    // Decodes the destination register from the given machine code.
+    // OPTION = 0: Inner-Cluster.
+    // OPTION = 1: Cross-Cluster.
+    // OPTION = 2: Miscellaneous.
+    void decodeDestRegOp (OpLabel_t opLabel, MachInst insnDestRegFile,
+                          MachInst insnDestRegIndex, int option = 0)
+    {
+        Op_t *op = opFactory (opLabel);
+
+        OpcReg_t opcReg;
+        switch (op->numRegs ()) {
+            case 1 : opcReg = Lily2ISA::getOpcReg
+                     (insnDestRegFile, insnDestRegIndex, option);
+                     break;
+            case 2 : opcReg = Lily2ISA::getOpcRegPair
+                     (insnDestRegFile, insnDestRegIndex, option);
+                     break;
+            case 4 : opcReg = Lily2ISA::getOpcRegPairPair
+                     (insnDestRegFile, insnDestRegIndex, option);
+                     break;
+            default: assert (0);
+        }
+
+        op->setImmFlag (false);
         op->setRegFile (opcReg.regFile);
         op->setRegIndex (opcReg.regIndex);
 
-        // Increments the number of destination operands.
         OpCount_t i = getNumDestOps ();
-        setDestOp (i++, op);
-        setNumDestOps (i);
+        setDestOp (i, op);
+        setDestOpStr (i, opcReg.str);
+        setNumDestOps (i + 1);
     }
 
     void printFU (std::stringstream &ss) const
     {
-        switch (getStaticFU ()) {
-            case TheISA::FU_XA: ss << "[xa]"; break;
-            case TheISA::FU_XM: ss << "[xm]"; break;
-            case TheISA::FU_XD: ss << "[xd]"; break;
-            case TheISA::FU_YA: ss << "[ya]"; break;
-            case TheISA::FU_YM: ss << "[ym]"; break;
-            case TheISA::FU_YD: ss << "[yd]"; break;
-            default           : ss << "[??]"; break;
-        }
+        ss << getStaticFUStr () << " ";
     }
 
     void printCond (std::stringstream &ss) const
     {
-        switch (getCond ()) {
-            case TheISA::COND_ALWAYS: ss << "      "; break;
-            case TheISA::COND_CR0   : ss << "{ cr0}"; break;
-            case TheISA::COND_NCR0  : ss << "{!cr0}"; break;
-            case TheISA::COND_CR1   : ss << "{ cr1}"; break;
-            case TheISA::COND_NCR1  : ss << "{!cr1}"; break;
-            case TheISA::COND_CR2   : ss << "{ cr2}"; break;
-            case TheISA::COND_NCR2  : ss << "{!cr2}"; break;
-            default                 : ss << "{????}"; break;
-        }
+        ss << getCondStr () << " ";
     }
 
     void printName (std::stringstream &ss) const
     {
-        ss << mnemonic;
+        ss << mnemonic << " ";
     }
 
-    void printOp (std::stringstream &ss, const Op_t *op) const
+    void printSrcOp (std::stringstream &ss, OpCount_t i) const
     {
-        RegFile_t regFile = op->regFile ();
-        RegIndex_t regIndex = op->regIndex ();
-
-        switch (op->numRegs ()) {
-            case 1 : printReg (ss, regFile, regIndex); break;
-            case 2 : printRegPair (ss, regFile, regIndex); break;
-            case 4 : printRegPairPair (ss, regFile, regIndex); break;
-            default: assert (0);
-        }
+        ss << getSrcOpStr (i);
     }
 
-    void printSrcOps (std::stringstream &ss) const
+    void printDestOp (std::stringstream &ss, OpCount_t i) const
     {
-        for (OpCount_t i = 0; i != getNumSrcOps (); ++i) {
-            printOp (ss, getSrcOp (i));
-        }
-    }
-
-    void printDestOps (std::stringstream &ss) const
-    {
-        for (OpCount_t i = 0; i != getNumDestOps (); ++i) {
-            printOp (ss, getDestOp (i));
-        }
-    }
-
-    void printReg (std::stringstream &ss,
-                   const RegFile_t &regFile,
-                   const RegIndex_t &regIndex) const
-    {
-        printRegFile (ss, regFile);
-        printRegIndex (ss, regIndex);
-    }
-
-    void printRegPair (std::stringstream &ss,
-                       const RegFile_t &regFile,
-                       const RegIndex_t &regIndex) const
-    {
-        printReg (ss, regFile, regIndex);
-        ss << ":";
-        printReg (ss, regFile, regIndex + 1);
-    }
-
-    void printRegPairPair (std::stringstream &ss,
-                           const RegFile_t &regFile,
-                           const RegIndex_t &regIndex) const
-    {
-        printReg (ss, regFile, regIndex);
-        ss << ":";
-        printReg (ss, regFile, regIndex + 1);
-        ss << ":";
-        printReg (ss, regFile, regIndex + 2);
-        ss << ":";
-        printReg (ss, regFile, regIndex + 3);
-    }
-
-    void printRegFile (std::stringstream &ss, const RegFile_t &regFile) const
-    {
-        switch (regFile) {
-            case TheISA::REG_X: ss << "x"; break;
-            case TheISA::REG_Y: ss << "y"; break;
-            case TheISA::REG_G: ss << "g"; break;
-            default           : ss << "?"; break;
-        }
-    }
-
-    void printRegIndex (std::stringstream &ss, const RegIndex_t &regIndex) const
-    {
-        ss << regIndex;
+        ss << getDestOpStr (i);
     }
 
   protected:
@@ -347,6 +357,7 @@ class Lily2StaticInst : public StaticInst
 
     // Execution condition of an instruction.
     Cond_t cond;
+    bool condZ;
     Op_t *condOp;
 
     // Flags of an instruction.

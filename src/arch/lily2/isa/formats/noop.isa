@@ -43,8 +43,8 @@ output header {{
 
       public:
         // Constructor
-        Nop(const std::string _originalDisassembly, ExtMachInst extMachInst)
-            : Lily2StaticInst("nop", extMachInst, No_OpClass),
+        Nop(const std::string _originalDisassembly, MachInst machInst)
+            : Lily2StaticInst("nop", machInst, No_OpClass),
               originalDisassembly(_originalDisassembly)
         {
             flags[IsNop] = true;
@@ -73,7 +73,7 @@ output decoder {{
     makeNop(Lily2StaticInst *inst)
     {
         std::string originalDisassembly = "(" + inst->disassemble (0) + ")";
-        Lily2StaticInst *nop = new Nop(originalDisassembly, inst->extMachInst);
+        Lily2StaticInst *nop = new Nop(originalDisassembly, inst->machInst);
         delete inst;
         return nop;
     }
@@ -85,12 +85,18 @@ output exec {{
     {
         return NoFault;
     }
+
+    bool
+    Nop::execCond (%(CPU_exec_context)s *) const
+    {
+        return 0;
+    }
 }};
 
 def template CondNopCheckDecode {{
 {
-    Lily2StaticInst *inst = new %(class_name)s(extMachInst);
-    if (!inst->cond(Z)) { /* Nop. */
+    Lily2StaticInst *inst = new %(class_name)s(machInst);
+    if (!inst->execCond(xc)) { /* Nop. */
         inst = makeNop(inst);
     }
     return inst;
@@ -104,7 +110,7 @@ def template OperateNopCheckDecode {{
      // i = makeNop(i);
      //}
      return i;
- }
+ PU_exec_context
 }};
 
 // IntImm & Memory  instructions use Rt as dest, so check for
@@ -131,6 +137,6 @@ def format BasicOperateWithNopCheck(code, *opt_args) {{
 }};
 
 def format Nop() {{
-        decode_block = 'return new Nop(\"\",extMachInst);\n'
+        decode_block = 'return new Nop(\"\",machInst);\n'
 }};
 

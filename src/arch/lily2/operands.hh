@@ -77,6 +77,17 @@ class Op_t
         this->_immFlag = _immFlag;
     }
 
+    // Accesses the immediate operand.
+    virtual MachInst immValue (void) const
+    {
+        return _immValue;
+    }
+    // Mutates the immediate operand.
+    virtual void setImmValue (MachInst _immValue)
+    {
+        this->_immValue = _immValue;
+    }
+
   protected:
     // Prints readable operand value.
     virtual void print (std::ostream &os) const = 0;
@@ -87,6 +98,7 @@ class Op_t
 
     // Immediate operand identifier, 1 indicates an immediate.
     bool _immFlag;
+    MachInst _immValue;
 
   private:
     // Implements the virtualization of output operator ``<<''.
@@ -125,6 +137,12 @@ class Op32i_t : public Op_t
     // Implements pure virtual function.
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
+
+    void setImmValue (MachInst _immValue)
+    {
+        this->_immValue = _immValue;
+        setUval (_immValue);
+    }
 
     // Implements pure virtual function.
     // Prints readable operand value.
