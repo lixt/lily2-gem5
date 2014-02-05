@@ -30,6 +30,9 @@
 #ifndef __ARCH_LILY2_REGISTERS_HH__
 #define __ARCH_LILY2_REGISTERS_HH__
 
+#include <vector>
+#include <iostream>
+#include <iomanip>
 #include "arch/lily2/generated/max_inst_regs.hh"
 #include "base/misc.hh"
 #include "base/types.hh"
@@ -50,7 +53,7 @@ const RegIndex_t NumXRegs = 24;
 const RegIndex_t NumYRegs = 24;
 const RegIndex_t NumGRegs = 8;
 
-// Type for register file.
+// Types for register files.
 typedef enum RegFile_t
 {
     REG_NIL,     // Illegal.
@@ -63,101 +66,236 @@ typedef enum RegFile_t
     NUM_REG_FILE // Number of register labels.
 } RegFile_t;
 
+// Characters for register files.
+static const char *RegFileStr[NUM_REG_FILE] =
+{
+    "nil", "x", "y", "g", "m",
+};
+
 // Types for three general register file.
 typedef uint32_t XRegValue_t;
 typedef uint32_t YRegValue_t;
 typedef uint32_t GRegValue_t;
 
 // Types for register files.
-template <size_t RegNum, class RegValue_t>
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
 {
   public:
     typedef Table<RegNum, 1, RegIndex_t, RegValue_t> Base;
+
+    // Typedef for the types in base class.
+    typedef typename Base::key_type key_type;
+    typedef typename Base::mapped_type mapped_type;
+    typedef typename Base::value_type value_type;
+
+    // Typedef for the POSITION.
     typedef typename Base::Position Position;
 
   public:
     // Constructor.
     // This constructor sets all the registers to zero.
-    explicit RegFile (RegFile_t fileName) : fileName (fileName)
-    {
-        clear ();
-    }
+    RegFile (void) {}
 
   public:
-    // Reads the register according to the given REGINDEX.
-    RegValue_t readReg (const RegIndex_t &regIndex) const;
+    // Gets the register value according to the given REGINDEX.
+    const RegValue_t& getRegValue (const RegIndex_t &regIndex) const;
 
-    // Writes the new REGVALUE to register according to the give REGINDEX.
-    void setReg (const RegIndex_t &regIndex, const RegValue_t &regValue);
-
-    // Clears all the registers to zeros.
-    void clear (void);
-    static void traverseClear (RegIndex_t &, RegValue_t &);
+    // Sets the register value according to the given REGINDEX and new REGVALUE.
+    void setRegValue (const RegIndex_t &regIndex, const RegValue_t &regValue);
 
   public:
-    // Prints out the register according to the given REGINDEX.
+    // Prints out debug information of the register file.
+    void print (std::ostream &os) const;
     void printReg (std::ostream &os, const RegIndex_t &regIndex) const;
 
-    // Prints out the whole register file.
-    void print (std::ostream &os) const;
-
   private:
-    // Register file name.
-    RegFile_t fileName;
+    // Functor used in PRINT.
+    class PrintValidFunctor
+    {
+      public:
+        explicit PrintValidFunctor (std::ostream *osPtr) :
+            osPtr (osPtr) {}
+
+      public:
+        void operator() (RegIndex_t &regIndex, RegValue_t &regValue)
+        {
+            (*osPtr) << RegFileStr[FileName] << regIndex
+                     << " = 0x"
+                     << std::hex << std::setfill (0) << std::setw (8) << regValue
+                     << std::endl;
+        }
+
+      private:
+        std::ostream *osPtr;
+    };
+
+    // Functor used in PRINT.
+    class PrintInvalidFunctor
+    {
+      public:
+        explicit PrintInvalidFunctor (std::ostream *osPtr) :
+            osPtr (osPtr) {}
+
+      public:
+        void operator() (RegIndex_t &regIndex, RegValue_t &regValue)
+        {
+            (*osPtr) << RegFileStr[FileName] << regIndex
+                     << " = (invalid)"
+                     << std::endl;
+        }
+
+      private:
+        std::ostream *osPtr;
+    };
 };
 
-template <size_t RegNum, class RegValue_t>
-void
-RegFile<RegNum, RegValue_t>::clear (void)
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+const RegValue_t&
+RegFile<FileName, RegNum, RegValue_t>::getRegValue (const RegIndex_t &regIndex) const
 {
-    traverse (traverseClear);
+    Position accessPos (regIndex, 1);
+    return access (accessPos);
 }
 
-template <size_t RegNum, class RegValue_t>
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 void
-RegFile<RegNum, RegValue_t>::traverseClear (RegIndex_t &regIndex, RegValue_t &regValue)
+RegFile<FileName, RegNum, RegValue_t>::setRegValue (const RegIndex_t &regIndex,
+                                                    const RegValue_t &regValue)
 {
-    memset (&regValue, 0, sizeof (RegValue_t));
-}
+    Position mutatePos (regIndex, 1);
 
-template <size_t RegNum, class RegValue_t>
-RegValue_t
-RegFile<RegNum, RegValue_t>::readReg (const RegIndex_t &regIndex) const
-{
-    // Position to read registers.
-    Position regPos (regIndex, 1);
-
-    return access (regPos);
-}
-
-template <size_t RegNum, class RegValue_t>
-void
-RegFile<RegNum, RegValue_t>::setReg (const RegIndex_t &regIndex, const RegValue_t &regValue)
-{
-    // Position to set registers.
-    Position regPos (regIndex, 1);
-
-    return mutate (regPos, regValue);
-}
-
-template <size_t RegNum, class RegValue_t>
-void
-RegFile<RegNum, RegValue_t>::printReg (std::ostream &os, const RegIndex_t &regIndex) const
-{
-    //os << RegFileStr[fileName] << "[" << regIndex << "]"
-       //<< " = " << readReg (regIndex);
-}
-
-template <size_t RegNum, class RegValue_t>
-void
-RegFile<RegNum, RegValue_t>::print (std::ostream &os) const
-{
-    for (RegIndex_t regIndex = 0; regIndex != RegNum; ++regIndex) {
-        printReg (os, regIndex);
-        os << std::endl;
+    if (isPosValid (mutatePos)) {
+        Base::mutate (mutatePos, regValue);
+    } else {
+        Base::insert (regIndex, regValue);
     }
 }
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+void
+RegFile<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
+{
+    PrintValidFunctor vfunc (&os);
+    PrintInvalidFunctor ifunc (&os);
+
+    traverse (vfunc, ifunc);
+}
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+void
+RegFile<FileName, RegNum, RegValue_t>::printReg (std::ostream &os,
+                                                 const RegIndex_t &regIndex) const
+{
+    PrintValidFunctor vfunc (&os);
+    PrintInvalidFunctor ifunc (&os);
+
+    traverseSet (vfunc, ifunc);
+}
+
+
+// Types for the mapped type of the register buffer.
+template <class RegValue_t>
+struct RegFileBufMapped_t
+{
+    RegValue_t regValue;
+    RegValue_t regMask;
+    Cycles regBackCycle;
+};
+
+// Each register has ten register buffers. This seems to be big enough.
+const size_t BufNum = 10;
+
+// Types for register file buffers.
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<RegValue_t>>
+{
+  public:
+    // Typedef for the base class.
+    typedef Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<RegValue_t>> Base;
+
+    // Typedef for the types in base class.
+    typedef typename Base::key_type key_type;
+    typedef typename Base::mapped_type mapped_type;
+    typedef typename Base::value_type value_type;
+
+    // Typedef for the POSITION.
+    typedef typename Base::Position Position;
+
+  public:
+    // Sets the register buffer.
+    void insert (const RegIndex_t &regIndex, const RegValue_t &regValue,
+                 const RegValue_t &regMask, const Cycles &regBackCycle);
+
+    // Gets the register value and register mask according to the given position.
+    const RegValue_t& getRegValue (const Position &accessPos) const;
+    const RegValue_t& getRegMask (const Position &accessPos) const;
+
+    // Updates the register back cycles per cycle and returns a vector of position
+    // whose register back cycle is equal to zero.
+    std::vector<Position> updateRegBackCycle (Cycles regBackCycleDelta);
+
+  private:
+    // Functor used by updateRegBackCycle.
+    class T_UpdateRegBackCycle
+    {
+      public:
+        explicit T_UpdateRegBackCycle (Cycles regBackCycleDelta) :
+            regBackCycleDelta (regBackCycleDelta) {}
+
+      public:
+        bool operator() (key_type &key, mapped_type &mapped)
+        {
+            bool retval;
+
+            if (mapped.regBackCycle >= regBackCycleDelta) {
+                retval = false;
+                mapped.regBackCycle = mapped.regBackCycle - regBackCycleDelta;
+            } else {
+                retval = true;
+                mapped.regBackCycle = 0;
+            }
+
+            return retval;
+        }
+
+      private:
+        Cycles regBackCycleDelta;
+    };
+};
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+void
+RegFileBuf<FileName, RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
+                                                 const RegValue_t &regValue,
+                                                 const RegValue_t &regMask,
+                                                 const Cycles &regBackCycle)
+{
+    Base::insert (regIndex, mapped_type (regValue, regMask, regBackCycle));
+}
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+const RegValue_t&
+RegFileBuf<FileName, RegNum, RegValue_t>::getRegValue (const Position &accessPos) const
+{
+    return (Base::access (accessPos)).regValue;
+}
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+const RegValue_t&
+RegFileBuf<FileName, RegNum, RegValue_t>::getRegMask (const Position &accessPos) const
+{
+    return (Base::access (accessPos)).regMask;
+}
+
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+std::vector<typename RegFileBuf<FileName, RegNum, RegValue_t>::Position>
+RegFileBuf<FileName, RegNum, RegValue_t>::updateRegBackCycle (Cycles regBackCycleDelta)
+{
+    T_UpdateRegBackCycle f (regBackCycleDelta);
+    return Base::traverseAndReturn (f);
+}
+
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;

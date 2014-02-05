@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012 Google
+ * Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,8 +25,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Authors: Gabe Black
  */
 
 #ifndef __ARCH_LILY2_DECODER_HH__
