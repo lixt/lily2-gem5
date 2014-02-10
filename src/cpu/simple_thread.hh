@@ -102,6 +102,21 @@ class SimpleThread : public ThreadState
     typedef TheISA::MiscReg MiscReg;
     typedef TheISA::FloatReg FloatReg;
     typedef TheISA::FloatRegBits FloatRegBits;
+    typedef TheISA::RegCount_t RegCount_t;
+    typedef TheISA::RegIndex_t RegIndex_t;
+    typedef TheISA::XRegValue_t XRegValue_t;
+    typedef TheISA::YRegValue_t YRegValue_t;
+    typedef TheISA::GRegValue_t GRegValue_t;
+    typedef TheISA::MRegValue_t MRegValue_t;
+    typedef TheISA::RegFile<TheISA::REG_X, TheISA::NumXRegs, XRegValue_t> XRegFile;
+    typedef TheISA::RegFile<TheISA::REG_Y, TheISA::NumYRegs, YRegValue_t> YRegFile;
+    typedef TheISA::RegFile<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> GRegFile;
+    typedef TheISA::RegFile<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> MRegFile;
+    typedef TheISA::RegFileBuf<TheISA::REG_X, TheISA::NumXRegs, XRegValue_t> XRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::REG_Y, TheISA::NumYRegs, YRegValue_t> YRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> GRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::REG_M, TheISA::NumMRegs, MRegValue_t> MRegFileBuf;
+
   public:
     typedef ThreadContext::Status Status;
 
@@ -112,6 +127,18 @@ class SimpleThread : public ThreadState
     } floatRegs;
     TheISA::IntReg intRegs[TheISA::NumIntRegs];
     TheISA::ISA *const isa;    // one "instance" of the current ISA.
+
+    // LILY2 register files.
+    XRegFile xRegs;
+    YRegFile yRegs;
+    GRegFile gRegs;
+    MRegFile mRegs;
+
+    // LILY2 register file buffers.
+    XRegFileBuf xRegBufs;
+    YRegFileBuf yRegBufs;
+    GRegFileBuf gRegBufs;
+    MRegFileBuf mRegBufs;
 
     TheISA::PCState _pcState;
 
@@ -291,6 +318,30 @@ class SimpleThread : public ThreadState
             setFloatRegBitsFlat(flatIndex, val);
         DPRINTF(FloatRegs, "Setting float reg %d (%d) bits to %#x, %#f.\n",
                 reg_idx, flatIndex, val, floatRegs.f[flatIndex]);
+    }
+
+    XRegFile&
+    getXRegs (void)
+    {
+        return xRegs;
+    }
+
+    YRegFile&
+    getYRegs (void)
+    {
+        return yRegs;
+    }
+
+    GRegFile&
+    getGRegs (void)
+    {
+        return gRegs;
+    }
+
+    MRegFile&
+    getMRegs (void)
+    {
+        return mRegs;
     }
 
     TheISA::PCState

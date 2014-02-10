@@ -150,16 +150,16 @@ class Table
     void print (std::ostream &os, PrintFunctor pfunc) const;
 
   protected:
-    // Informs an invalid position fault and force quits the program.
-    void invalidPosFault (const Position &position) const
+    // Informs an invalid position range fault and force quits the program.
+    void invalidPosRangeFault (const Position &position) const
     {
         std::cerr << "Invalid position range fault occurs."
                   << "Fault position: " << position << std::endl;
         assert (0);
     }
 
-    // Informs an invalid entry fault and force quits the program.
-    void invalidEntryFault (const Position &position) const
+    // Informs an invalid position fault and force quits the program.
+    void invalidPosFault (const Position &position) const
     {
         std::cerr << "Invalid position fault occurs."
                   << "Fault position: " << position << std::endl;
@@ -328,7 +328,7 @@ class Table
     }
     const entry_type* getEntryPtr (const Position &position) const
     {
-        entry_type *retval;
+        const entry_type *retval;
 
         if (isPosValid (position)) {
             retval = &table[position.set][position.way];
@@ -368,7 +368,7 @@ class Table
     }
 
     // Bottom accessor and mutator of the table valid field.
-    bool entryValid (const entry_type *entryPtr)
+    bool entryValid (const entry_type *entryPtr) const
     {
         return entryPtr->valid;
     }

@@ -24,7 +24,6 @@ class Lily2StaticInst : public StaticInst
     typedef TheISA::OpCount_t OpCount_t;
     typedef TheISA::OpLabel_t OpLabel_t;
     typedef TheISA::Op_t Op_t;
-    typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::FU_t FU_t;
     typedef TheISA::Cond_t Cond_t;
     // Typedef for opcode table.
@@ -77,7 +76,7 @@ class Lily2StaticInst : public StaticInst
     }
 
     // Accessor and mutator of the source operand pointers.
-    Op_t *getSrcOp (OpCount_t i) const
+    Op_t *getSrcOp (OpCount_t i)
     {
         return srcOp[i];
     }
@@ -87,7 +86,7 @@ class Lily2StaticInst : public StaticInst
     }
 
     // Accessor and mutator of the destination operand pointers.
-    Op_t *getDestOp (OpCount_t i) const
+    Op_t *getDestOp (OpCount_t i)
     {
         return destOp[i];
     }

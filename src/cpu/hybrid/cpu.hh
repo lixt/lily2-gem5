@@ -274,6 +274,7 @@ class HybridCPU : public BaseSimpleCPU
     // Test the MACHO.
     Macho<int, int> pipelineState;
 
+    typedef TheISA::Op_t Op_t;
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op32f_t Op32f_t;
     typedef TheISA::Op64f_t Op64f_t;
@@ -289,9 +290,38 @@ class HybridCPU : public BaseSimpleCPU
         return 0;
     }
 
-    Op32i_t readOp32i (const Lily2StaticInst *si, int idx)
+    Op32i_t& readOp32i (Lily2StaticInst *si, int idx)
     {
-        return Op32i_t (static_cast<uint32_t> (0));
+        Op32i_t *op = dynamic_cast<Op32i_t *> (si->getSrcOp (idx));
+
+        // Dynamic cast checking.
+        if (op == NULL) {
+            assert (0);
+        }
+
+        if (op->immFlag ()) {
+            // The immediate value is already stored in OP.
+            return *op;
+        } else {
+            switch (op->regFile ()) {
+                case TheISA::REG_X:
+                    op->setUval ((thread->getXRegs ()).getRegValue (op->regIndex ()));
+                    break;
+                case TheISA::REG_Y:
+                    op->setUval ((thread->getYRegs ()).getRegValue (op->regIndex ()));
+                    break;
+                case TheISA::REG_G:
+                    op->setUval ((thread->getGRegs ()).getRegValue (op->regIndex ()));
+                    break;
+                case TheISA::REG_M:
+                    op->setUval ((thread->getMRegs ()).getRegValue (op->regIndex ()));
+                    break;
+                default:
+                    assert (0);
+            }
+
+            return *op;
+        }
     }
 
     Op32f_t readOp32f (const Lily2StaticInst *si, int idx)

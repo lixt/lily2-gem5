@@ -52,6 +52,7 @@ typedef int16_t RegIndex_t;
 const RegIndex_t NumXRegs = 24;
 const RegIndex_t NumYRegs = 24;
 const RegIndex_t NumGRegs = 8;
+const RegIndex_t NumMRegs = 8;
 
 // Types for register files.
 typedef enum RegFile_t
@@ -76,6 +77,7 @@ static const char *RegFileStr[NUM_REG_FILE] =
 typedef uint32_t XRegValue_t;
 typedef uint32_t YRegValue_t;
 typedef uint32_t GRegValue_t;
+typedef uint32_t MRegValue_t;
 
 // Types for register files.
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
@@ -99,7 +101,7 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
 
   public:
     // Gets the register value according to the given REGINDEX.
-    const RegValue_t& getRegValue (const RegIndex_t &regIndex) const;
+    RegValue_t getRegValue (const RegIndex_t &regIndex) const;
 
     // Sets the register value according to the given REGINDEX and new REGVALUE.
     void setRegValue (const RegIndex_t &regIndex, const RegValue_t &regValue);
@@ -124,11 +126,11 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
 };
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
-const RegValue_t&
+RegValue_t
 RegFile<FileName, RegNum, RegValue_t>::getRegValue (const RegIndex_t &regIndex) const
 {
     Position accessPos (regIndex, 1);
-    return access (accessPos);
+    return Base::access (accessPos);
 }
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
@@ -197,8 +199,8 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
                  const RegValue_t &regMask, const Cycles &regBackCycle);
 
     // Gets the register value and register mask according to the given position.
-    const RegValue_t& getRegValue (const Position &accessPos) const;
-    const RegValue_t& getRegMask (const Position &accessPos) const;
+    RegValue_t getRegValue (const Position &accessPos) const;
+    RegValue_t getRegMask (const Position &accessPos) const;
 
     // Updates the register back cycles per cycle and returns a vector of position
     // whose register back cycle is equal to zero.
@@ -265,14 +267,14 @@ RegFileBuf<FileName, RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
 }
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
-const RegValue_t&
+RegValue_t
 RegFileBuf<FileName, RegNum, RegValue_t>::getRegValue (const Position &accessPos) const
 {
     return (Base::access (accessPos)).regValue;
 }
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
-const RegValue_t&
+RegValue_t
 RegFileBuf<FileName, RegNum, RegValue_t>::getRegMask (const Position &accessPos) const
 {
     return (Base::access (accessPos)).regMask;

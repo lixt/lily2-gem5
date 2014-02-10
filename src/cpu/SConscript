@@ -45,7 +45,7 @@ if env['TARGET_ISA'] == 'no':
 
 # Template for execute() signature.
 exec_sig_template = '''
-virtual Fault execute(%(type)s *xc, Trace::InstRecord *traceData) const = 0;
+virtual Fault execute(%(type)s *xc, Trace::InstRecord *traceData) = 0;
 virtual Fault eaComp(%(type)s *xc, Trace::InstRecord *traceData) const
 { panic("eaComp not defined!"); M5_DUMMY_RETURN };
 virtual Fault initiateAcc(%(type)s *xc, Trace::InstRecord *traceData) const
