@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
+ * All rights reserved
+ *
  * Copyright (c) 2011 ARM Limited
  * All rights reserved
  *

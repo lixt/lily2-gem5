@@ -10,6 +10,7 @@
 #include <utility>
 #include <cassert>
 #include <vector>
+#include "macro.hh"
 
 template <size_t Set>
 class average
@@ -140,6 +141,13 @@ class Table
     // position will be returned and vice versa.
     template <class ValidFunctor, class InvalidFunctor = NullFunctor>
     std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc);
+
+    // Prints out readable debug information of the table, calls PFUNC on every
+    // entry, returns nothing.
+    // PFUNC should take std::ostream&, const key_type& and const mapped_type& as the
+    // types of the three paramters and returns nothing.
+    template <class PrintFunctor>
+    void print (std::ostream &os, PrintFunctor pfunc) const;
 
   protected:
     // Informs an invalid position fault and force quits the program.
@@ -586,6 +594,24 @@ TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFun
     }
 
     return vecPos;
+}
+
+TEMPLATE_LIST
+template <class PrintFunctor>
+void
+TEMPLATE_CLASS::print (std::ostream &os, PrintFunctor pfunc) const
+{
+    for (int i = 0; i != Set; ++i) {
+        os << "Set " << DEF_OUTPUT_FORMAT << i << ":";
+
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+            pfunc (os, entryKey (curPos), entryMapped (curPos));
+            os << std::endl;
+        }
+
+        os << std::endl;
+    }
 }
 
 #undef TEMPLATE_LIST

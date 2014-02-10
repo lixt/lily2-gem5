@@ -110,43 +110,16 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
     void printReg (std::ostream &os, const RegIndex_t &regIndex) const;
 
   private:
-    // Functor used in PRINT.
-    class PrintValidFunctor
+    class PrintFunctor
     {
       public:
-        explicit PrintValidFunctor (std::ostream *osPtr) :
-            osPtr (osPtr) {}
-
-      public:
-        void operator() (RegIndex_t &regIndex, RegValue_t &regValue)
+        void operator() (std::ostream &os, const RegIndex_t &regIndex, const RegValue_t &regValue)
         {
-            (*osPtr) << RegFileStr[FileName] << regIndex
-                     << " = 0x"
-                     << std::hex << std::setfill (0) << std::setw (8) << regValue
-                     << std::endl;
+            os << RegFileStr[FileName]
+               << "RegIndex = " << DEF_OUTPUT_FORMAT << regIndex
+               << ", "
+               << "RegValue = " << REG_OUTPUT_FORMAT << regValue;
         }
-
-      private:
-        std::ostream *osPtr;
-    };
-
-    // Functor used in PRINT.
-    class PrintInvalidFunctor
-    {
-      public:
-        explicit PrintInvalidFunctor (std::ostream *osPtr) :
-            osPtr (osPtr) {}
-
-      public:
-        void operator() (RegIndex_t &regIndex, RegValue_t &regValue)
-        {
-            (*osPtr) << RegFileStr[FileName] << regIndex
-                     << " = (invalid)"
-                     << std::endl;
-        }
-
-      private:
-        std::ostream *osPtr;
     };
 };
 
@@ -176,10 +149,8 @@ template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 void
 RegFile<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
 {
-    PrintValidFunctor vfunc (&os);
-    PrintInvalidFunctor ifunc (&os);
-
-    traverse (vfunc, ifunc);
+    PrintFunctor pfunc;
+    Base::print (os, pfunc);
 }
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
@@ -187,10 +158,8 @@ void
 RegFile<FileName, RegNum, RegValue_t>::printReg (std::ostream &os,
                                                  const RegIndex_t &regIndex) const
 {
-    PrintValidFunctor vfunc (&os);
-    PrintInvalidFunctor ifunc (&os);
-
-    traverseSet (vfunc, ifunc);
+    PrintFunctor pfunc;
+    pfunc (os, regIndex, getRegValue (regIndex));
 }
 
 
@@ -204,7 +173,7 @@ struct RegFileBufMapped_t
 };
 
 // Each register has ten register buffers. This seems to be big enough.
-const size_t BufNum = 10;
+const size_t BufNum = 2;
 
 // Types for register file buffers.
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
@@ -235,12 +204,16 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
     // whose register back cycle is equal to zero.
     std::vector<Position> updateRegBackCycle (Cycles regBackCycleDelta);
 
+  public:
+    // Prints the debug information of register file buffer.
+    void print (std::ostream &os) const;
+
   private:
-    // Functor used by updateRegBackCycle.
-    class T_UpdateRegBackCycle
+    // Functor used in UPDATEREGBACKCYCLE.
+    class UpdateRegBackCycleFunctor
     {
       public:
-        explicit T_UpdateRegBackCycle (Cycles regBackCycleDelta) :
+        explicit UpdateRegBackCycleFunctor (Cycles regBackCycleDelta) :
             regBackCycleDelta (regBackCycleDelta) {}
 
       public:
@@ -262,12 +235,29 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
       private:
         Cycles regBackCycleDelta;
     };
+
+    // Functor used in PRINT.
+    class PrintFunctor
+    {
+      public:
+        void operator() (std::ostream &os, const key_type &key, const mapped_type &mapped)
+        {
+            os << RegFileStr[FileName]
+               << "RegIndex = " << DEF_OUTPUT_FORMAT << key
+               << ", "
+               << "RegValue = " << REG_OUTPUT_FORMAT << mapped.regValue
+               << ", "
+               << "RegMask = " << REG_OUTPUT_FORMAT << mapped.regMask
+               << ", "
+               << "RegBackCycle = " << DEF_OUTPUT_FORMAT << mapped.regBackCycle;
+        }
+    };
 };
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 void
 RegFileBuf<FileName, RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
-                                                 const RegValue_t &regValue,
+                                                  const RegValue_t &regValue,
                                                  const RegValue_t &regMask,
                                                  const Cycles &regBackCycle)
 {
@@ -292,10 +282,17 @@ template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 std::vector<typename RegFileBuf<FileName, RegNum, RegValue_t>::Position>
 RegFileBuf<FileName, RegNum, RegValue_t>::updateRegBackCycle (Cycles regBackCycleDelta)
 {
-    T_UpdateRegBackCycle f (regBackCycleDelta);
-    return Base::traverseAndReturn (f);
+    UpdateRegBackCycleFunctor func (regBackCycleDelta);
+    return Base::traverseAndReturn (func);
 }
 
+template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+void
+RegFileBuf<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
+{
+    PrintFunctor pfunc;
+    Base::print (os, pfunc);
+}
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;
