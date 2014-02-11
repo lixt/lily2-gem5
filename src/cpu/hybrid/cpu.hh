@@ -274,6 +274,8 @@ class HybridCPU : public BaseSimpleCPU
     // Test the MACHO.
     Macho<int, int> pipelineState;
 
+    typedef TheISA::FuncUnit_t FuncUnit_t;
+
     typedef TheISA::Op_t Op_t;
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op32f_t Op32f_t;
@@ -290,43 +292,74 @@ class HybridCPU : public BaseSimpleCPU
         return 0;
     }
 
-    Op32i_t& readOp32i (Lily2StaticInst *si, int idx)
+    const Op32i_t& readOp32i (Lily2StaticInst *si, int idx)
     {
         Op32i_t *op = dynamic_cast<Op32i_t *> (si->getSrcOp (idx));
-
-        // Dynamic cast checking.
-        if (op == NULL) {
-            assert (0);
-        }
+        assert (op);
 
         if (op->immFlag ()) {
             // The immediate value is already stored in OP.
-            return *op;
+            ;
         } else {
+            uint32_t val;
             switch (op->regFile ()) {
                 case TheISA::REG_X:
-                    op->setUval ((thread->getXRegs ()).getRegValue (op->regIndex ()));
+                    val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+                    op->setUval (val);
                     break;
                 case TheISA::REG_Y:
-                    op->setUval ((thread->getYRegs ()).getRegValue (op->regIndex ()));
+                    val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+                    op->setUval (val);
                     break;
                 case TheISA::REG_G:
-                    op->setUval ((thread->getGRegs ()).getRegValue (op->regIndex ()));
+                    val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+                    op->setUval (val);
                     break;
                 case TheISA::REG_M:
-                    op->setUval ((thread->getMRegs ()).getRegValue (op->regIndex ()));
+                    val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+                    op->setUval (val);
                     break;
                 default:
                     assert (0);
             }
-
-            return *op;
         }
+
+        return *op;
     }
 
-    Op32f_t readOp32f (const Lily2StaticInst *si, int idx)
+    const Op32f_t& readOp32f (Lily2StaticInst *si, int idx)
     {
-        return Op32f_t (static_cast<float> (0.0));
+        Op32f_t *op = dynamic_cast<Op32f_t *> (si->getSrcOp (idx));
+        assert (op);
+
+        if (op->immFlag ()) {
+            // The Immediate value is already stored in OP.
+            ;
+        } else {
+            uint32_t val;
+            switch (op->regFile ()) {
+                case TheISA::REG_X:
+                    val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+                    op->setFval (*(reinterpret_cast<float *> (&val)));
+                    break;
+                case TheISA::REG_Y:
+                    val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+                    op->setFval (*(reinterpret_cast<float *> (&val)));
+                    break;
+                case TheISA::REG_G:
+                    val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+                    op->setFval (*(reinterpret_cast<float *> (&val)));
+                    break;
+                case TheISA::REG_M:
+                    val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+                    op->setFval (*(reinterpret_cast<float *> (&val)));
+                    break;
+                default:
+                    assert (0);
+            }
+        }
+
+        return *op;
     }
 
     Op64f_t readOp64f (const Lily2StaticInst *si, int idx)
@@ -359,9 +392,11 @@ class HybridCPU : public BaseSimpleCPU
         return Opd32f_t (static_cast<float> (0.0));
     }
 
-    void setOp32i (const Lily2StaticInst *si, int idx,
+    void setOp32i (Lily2StaticInst *si, int idx,
                    Op32i_t &val, Op32i_t &mask)
-    {}
+    {
+
+    }
 
     void setOp32f (const Lily2StaticInst *si, int idx,
                    Op32f_t &val, Op32f_t &mask)
@@ -390,6 +425,14 @@ class HybridCPU : public BaseSimpleCPU
     void setOpd32f (const Lily2StaticInst *si, int idx,
                     Opd32f_t &val, Opd32f_t &mask)
     {}
+
+    // Factory of functional unit delay slots.
+    Cycles funcUnitDSFactory (const OpClass &opClass) const;
+
+  private:
+    // Functional unit delay slots.
+    int IntArithDS;
+    int SimdIntArithDS;
 };
 
 #endif // __CPU_HYBRID_CPU_HH__

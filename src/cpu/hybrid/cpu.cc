@@ -123,7 +123,9 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       simpointStream(NULL),
       currentBBV(0, 0),
       currentBBVInstCount(0),
-      pipelineState (0)
+      pipelineState (0),
+      IntArithDS (p->IntArithDS),
+      SimdIntArithDS (p->SimdIntArithDS)
 {
     _status = Idle;
 
@@ -735,6 +737,16 @@ HybridCPU::profileSimPoint()
             intervalDrift = (intervalCount + intervalDrift) - intervalSize;
             intervalCount = 0;
         }
+    }
+}
+
+Cycles
+HybridCPU::funcUnitDSFactory (const OpClass& opClass) const
+{
+    switch (opClass) {
+        case IntArithOp: return Cycles (IntArithDS);
+        case SimdIntArithOp: return Cycles (SimdIntArithDS);
+        default: assert (0);
     }
 }
 

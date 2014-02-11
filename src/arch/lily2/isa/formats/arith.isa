@@ -12,7 +12,7 @@ output header {{
     {
       protected:
         ArithOp (const char *mnemonic, MachInst machInst, OpClass opClass)
-            : Lily2StaticInst (mnemonic, machInst, opClass) {}
+            : Lily2StaticInst (mnemonic, machInst, IntArithOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
     };
@@ -22,7 +22,7 @@ output header {{
     {
       protected:
         ArithVecOp (const char *mnemonic, MachInst machInst, OpClass opClass)
-            : Lily2StaticInst (mnemonic, machInst, opClass) {}
+            : Lily2StaticInst (mnemonic, machInst, SimdIntArithOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
     };
@@ -34,7 +34,7 @@ output decoder {{
     {
         std::stringstream ss;
 
-        printFU (ss);
+        printFuncUnit (ss);
         printCond (ss);
         printName (ss);
 
@@ -51,7 +51,7 @@ output decoder {{
     {
         std::stringstream ss;
 
-        printFU (ss);
+        printFuncUnit (ss);
         printCond (ss);
         printName (ss);
 

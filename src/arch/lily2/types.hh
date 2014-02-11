@@ -41,7 +41,7 @@ typedef uint32_t MachInst;
 typedef uint64_t ExtMachInst;
 
 // Types for functional units.
-enum FU_t {
+enum FuncUnit_t {
     FU_NIL, // Illegal.
 
     FU_XA,  // XA.

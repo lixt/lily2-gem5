@@ -24,10 +24,10 @@ class Lily2StaticInst : public StaticInst
     typedef TheISA::OpCount_t OpCount_t;
     typedef TheISA::OpLabel_t OpLabel_t;
     typedef TheISA::Op_t Op_t;
-    typedef TheISA::FU_t FU_t;
+    typedef TheISA::FuncUnit_t FuncUnit_t;
     typedef TheISA::Cond_t Cond_t;
     // Typedef for opcode table.
-    typedef TheISA::OpcFU_t OpcFU_t;
+    typedef TheISA::OpcFuncUnit_t OpcFuncUnit_t;
     typedef TheISA::OpcCond_t OpcCond_t;
     typedef TheISA::OpcReg_t OpcReg_t;
 
@@ -35,8 +35,9 @@ class Lily2StaticInst : public StaticInst
     Lily2StaticInst (const char *mnemonic, MachInst machInst, OpClass opClass)
         : StaticInst (mnemonic, machInst, opClass),
           numSrcOps (0), numDestOps (0),
-          staticFU (TheISA::FU_NIL), dynFU (TheISA::FU_NIL), cond (TheISA::COND_NIL),
-          staticFUStr (), dynFUStr (), condStr ()
+          staticFuncUnit (TheISA::FU_NIL), dynFuncUnit (TheISA::FU_NIL),
+          cond (TheISA::COND_NIL), staticFuncUnitStr (), dynFuncUnitStr (),
+          condStr ()
     {
         for (OpCount_t i = 0; i != MaxInstSrcOps; ++i) {
             srcOp[i] = NULL;
@@ -96,23 +97,23 @@ class Lily2StaticInst : public StaticInst
     }
 
     // Accessor and mutator of static functional unit.
-    FU_t getStaticFU (void) const
+    FuncUnit_t getStaticFuncUnit (void) const
     {
-        return staticFU;
+        return staticFuncUnit;
     }
-    void setStaticFU (FU_t staticFU)
+    void setStaticFuncUnit (FuncUnit_t staticFuncUnit)
     {
-        this->staticFU = staticFU;
+        this->staticFuncUnit = staticFuncUnit;
     }
 
     // Accessor and mutator of dynamic functional unit.
-    FU_t getDynFU (void) const
+    FuncUnit_t getDynFuncUnit (void) const
     {
-        return dynFU;
+        return dynFuncUnit;
     }
-    void setDynFU (FU_t dynFU)
+    void setDynFuncUnit (FuncUnit_t dynFuncUnit)
     {
-        this->dynFU = dynFU;
+        this->dynFuncUnit = dynFuncUnit;
     }
 
     // Accessor and mutator of execution condition.
@@ -146,23 +147,23 @@ class Lily2StaticInst : public StaticInst
     }
 
     // Accessor and mutator of the string of static functional unit.
-    std::string getStaticFUStr (void) const
+    std::string getStaticFuncUnitStr (void) const
     {
-        return staticFUStr;
+        return staticFuncUnitStr;
     }
-    void setStaticFUStr (const char *staticFUStr)
+    void setStaticFuncUnitStr (const char *staticFuncUnitStr)
     {
-        (this->staticFUStr).assign (staticFUStr);
+        (this->staticFuncUnitStr).assign (staticFuncUnitStr);
     }
 
     // Accessor and mutator of the string of dynamic functional unit.
-    std::string getDynFUStr (void) const
+    std::string getDynFuncUnitStr (void) const
     {
-        return dynFUStr;
+        return dynFuncUnitStr;
     }
-    void setDynFUStr (const char *dynFUStr)
+    void setDynFuncUnitStr (const char *dynFuncUnitStr)
     {
-        (this->dynFUStr).assign (dynFUStr);
+        (this->dynFuncUnitStr).assign (dynFuncUnitStr);
     }
 
     // Accessor and mutator of the string of condition.
@@ -207,11 +208,11 @@ class Lily2StaticInst : public StaticInst
     };
 
     // Decodes the functional unit from the given machine code.
-    void decodeFU (MachInst insnFU)
+    void decodeFuncUnit (MachInst insnFuncUnit)
     {
-        OpcFU_t opcFU = Lily2ISA::getOpcFU (insnFU);
-        setStaticFU (opcFU.FU);
-        setStaticFUStr (opcFU.str);
+        OpcFuncUnit_t opcFuncUnit = Lily2ISA::getOpcFuncUnit (insnFuncUnit);
+        setStaticFuncUnit (opcFuncUnit.FuncUnit);
+        setStaticFuncUnitStr (opcFuncUnit.str);
     }
 
     // Decodes the condition from the given machine code.
@@ -315,9 +316,9 @@ class Lily2StaticInst : public StaticInst
         setNumDestOps (i + 1);
     }
 
-    void printFU (std::stringstream &ss) const
+    void printFuncUnit (std::stringstream &ss) const
     {
-        ss << getStaticFUStr () << " ";
+        ss << getStaticFuncUnitStr () << " ";
     }
 
     void printCond (std::stringstream &ss) const
@@ -351,8 +352,8 @@ class Lily2StaticInst : public StaticInst
 
     // Functional unit of an instruction.
     // Static FU is for VLIW and dynamic FU is for Superscalar.
-    FU_t staticFU;
-    FU_t dynFU;
+    FuncUnit_t staticFuncUnit;
+    FuncUnit_t dynFuncUnit;
 
     // Execution condition of an instruction.
     Cond_t cond;
@@ -366,8 +367,8 @@ class Lily2StaticInst : public StaticInst
     // Printable variables.
 
     // String of functional unit.
-    std::string staticFUStr;
-    std::string dynFUStr;
+    std::string staticFuncUnitStr;
+    std::string dynFuncUnitStr;
 
     // String of condition.
     std::string condStr;

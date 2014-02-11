@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
+ * All rights reserved.
+ *
  * Copyright (c) 2010 ARM Limited
  * All rights reserved
  *
@@ -86,6 +89,11 @@ const OpClass MemReadOp = Enums::MemRead;
 const OpClass MemWriteOp = Enums::MemWrite;
 const OpClass IprAccessOp = Enums::IprAccess;
 const OpClass InstPrefetchOp = Enums::InstPrefetch;
+
+// LILY2 OpClasses.
+const OpClass IntArithOp = Enums::IntArith;
+const OpClass SimdIntArithOp = Enums::SimdIntArith;
+
 const OpClass Num_OpClasses = Num_OpClass;
 
 #endif // __CPU__OP_CLASS_HH__

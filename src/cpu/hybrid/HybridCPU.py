@@ -1,5 +1,5 @@
 # Copyright (c) 2014 DSP Group, Institute of Microeletronics, Tsinghua University
-# All rights reserved. 
+# All rights reserved.
 #
 # Copyright (c) 2012 ARM Limited
 # All rights reserved.
@@ -67,3 +67,7 @@ class HybridCPU(BaseSimpleCPU):
     simpoint_profile = Param.Bool(False, "Generate SimPoint BBVs")
     simpoint_interval = Param.UInt64(100000000, "SimPoint Interval Size (insts)")
     simpoint_profile_file = Param.String("simpoint.bb.gz", "SimPoint BBV file")
+
+    # Functional unit delay slots.
+    IntArithDS = Param.Int (0, "Integer arithmetic instruction delay slots")
+    SimdIntArithDS = Param.Int (0, "Simd integer arithmetic instruction delay slots")

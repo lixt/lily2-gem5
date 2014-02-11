@@ -1,3 +1,6 @@
+# Copyright (c) 2014 DSP Group, Institute of Microelectronics, Tsinghua University
+# All rights reserved.
+#
 # Copyright (c) 2010 ARM Limited
 # All rights reserved.
 #
@@ -49,7 +52,9 @@ class OpClass(Enum):
             'SimdSqrt', 'SimdFloatAdd', 'SimdFloatAlu', 'SimdFloatCmp',
             'SimdFloatCvt', 'SimdFloatDiv', 'SimdFloatMisc', 'SimdFloatMult',
             'SimdFloatMultAcc', 'SimdFloatSqrt',
-            'MemRead', 'MemWrite', 'IprAccess', 'InstPrefetch']
+            'MemRead', 'MemWrite', 'IprAccess', 'InstPrefetch',
+            'IntArith',
+            'SimdIntArith']
 
 class OpDesc(SimObject):
     type = 'OpDesc'

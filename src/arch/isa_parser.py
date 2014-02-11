@@ -1308,7 +1308,7 @@ class InstObjParams(object):
         header = ''
         header += '\n\t    setNumSrcOps (0);'
         header += '\n\t    setNumDestOps (0);'
-        header += '\n\t    decodeFU (CFU);'
+        header += '\n\t    decodeFuncUnit (CFU);'
         header += '\n\t    decodeCond (COND);'
 
         self.constructor = header + \

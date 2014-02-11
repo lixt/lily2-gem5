@@ -7,7 +7,7 @@
 
 namespace Lily2ISA
 {
-const OpcFU_t OpcFUs[] =
+const OpcFuncUnit_t OpcFuncUnits[] =
 {
      {0, FU_XA, "[xa]"},
      {1, FU_XA, "[xa]"},
@@ -18,7 +18,7 @@ const OpcFU_t OpcFUs[] =
      {6, FU_YM, "[ym]"},
      {7, FU_YD, "[yd]"},
 };
-const size_t NumOpcFUs = ARRAY_SIZE (OpcFUs);
+const size_t NumOpcFuncUnits = ARRAY_SIZE (OpcFuncUnits);
 
 const OpcCond_t OpcConds[] =
 {
@@ -144,12 +144,12 @@ const OpcReg_t OpcMRegPairPairs[] =
 };
 const size_t NumOpcMRegPairPairs = ARRAY_SIZE (OpcMRegPairPairs);
 
-const OpcFU_t &
-getOpcFU (MachInst insnFU)
+const OpcFuncUnit_t &
+getOpcFuncUnit (MachInst insnFuncUnit)
 {
-    for (int i = 0; i != NumOpcFUs; ++i) {
-        if (OpcFUs[i].insn == insnFU) {
-            return OpcFUs[i];
+    for (int i = 0; i != NumOpcFuncUnits; ++i) {
+        if (OpcFuncUnits[i].insn == insnFuncUnit) {
+            return OpcFuncUnits[i];
         }
     }
 

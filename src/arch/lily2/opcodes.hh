@@ -32,10 +32,10 @@ struct OpcCond_t
 };
 
 // Type for opcode table of functional units.
-struct OpcFU_t
+struct OpcFuncUnit_t
 {
     MachInst insn;
-    FU_t FU;
+    FuncUnit_t FuncUnit;
     const char *str;
 };
 
@@ -49,12 +49,12 @@ struct OpcReg_t
 };
 
 // Typedefs.
-typedef struct OpcFU_t OpcFU_t;
+typedef struct OpcFuncUnit_t OpcFuncUnit_t;
 typedef struct OpcReg_t OpcReg_t;
 typedef struct OpcCond_t OpcCond_t;
 
 // Gets the opcodes of the functional units.
-const OpcFU_t& getOpcFU (MachInst insnFU);
+const OpcFuncUnit_t& getOpcFuncUnit (MachInst insnFuncUnit);
 
 // Gets the opcodes of the conditions.
 const OpcCond_t& getOpcCond (MachInst insnCond);
