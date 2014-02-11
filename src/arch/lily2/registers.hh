@@ -260,10 +260,15 @@ template <RegFile_t FileName, size_t RegNum, class RegValue_t>
 void
 RegFileBuf<FileName, RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
                                                   const RegValue_t &regValue,
-                                                 const RegValue_t &regMask,
-                                                 const Cycles &regBackCycle)
+                                                  const RegValue_t &regMask,
+                                                  const Cycles &regBackCycle)
 {
-    Base::insert (regIndex, mapped_type (regValue, regMask, regBackCycle));
+    mapped_type mapped;
+    mapped.regValue = regValue;
+    mapped.regMask = regMask;
+    mapped.regBackCycle = regBackCycle;
+
+    Base::insert (regIndex, mapped);
 }
 
 template <RegFile_t FileName, size_t RegNum, class RegValue_t>

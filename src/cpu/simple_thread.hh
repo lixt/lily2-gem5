@@ -344,6 +344,30 @@ class SimpleThread : public ThreadState
         return mRegs;
     }
 
+    XRegFileBuf&
+    getXRegBufs (void)
+    {
+        return xRegBufs;
+    }
+
+    YRegFileBuf&
+    getYRegBufs (void)
+    {
+        return yRegBufs;
+    }
+
+    GRegFileBuf&
+    getGRegBufs (void)
+    {
+        return gRegBufs;
+    }
+
+    MRegFileBuf&
+    getMRegBufs (void)
+    {
+        return mRegBufs;
+    }
+
     TheISA::PCState
     pcState()
     {

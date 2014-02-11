@@ -12,18 +12,16 @@
 #include <vector>
 #include "macro.hh"
 
-template <size_t Set>
-class average
+template <class T>
+struct average
 {
-    size_t operator() (size_t key)
-    {
-        return key % Set;
-    }
+    size_t operator() (const T& x) { return static_cast<size_t> (x); }
 };
 
 class error
 {
-    size_t operator() (size_t set, size_t way)
+  public:
+    size_t operator() (size_t set)
     {
         std::cout << "Table is full." << std::endl;
         assert (0);
@@ -35,7 +33,7 @@ template <size_t Set,
           class Key,
           class T,
           class Compare = std::less<Key>,
-          class Hash = average<Set>,
+          class Hash = average<Key>,
           class Replace = error>
 class Table
 {
@@ -348,7 +346,7 @@ class Table
     {
         return entryPtr->key;
     }
-    void setEntryKey (const entry_type *entryPtr, const key_type &key)
+    void setEntryKey (entry_type *entryPtr, const key_type &key)
     {
         entryPtr->key = key;
     }
@@ -362,7 +360,7 @@ class Table
     {
         return entryPtr->mapped;
     }
-    void setEntryMapped (const entry_type *entryPtr, const mapped_type &mapped)
+    void setEntryMapped (entry_type *entryPtr, const mapped_type &mapped)
     {
         entryPtr->mapped = mapped;
     }
@@ -372,13 +370,15 @@ class Table
     {
         return entryPtr->valid;
     }
-    void setEntryValid (const entry_type *entryPtr, bool valid)
+    void setEntryValid (entry_type *entryPtr, bool valid)
     {
         entryPtr->valid = valid;
     }
 
   private:
-    // Replace policy.
+    // Functors.
+    compare_type compare;
+    hash_type hash;
     replace_type replace;
 
   private:
@@ -427,7 +427,7 @@ TEMPLATE_LIST
 typename TEMPLATE_CLASS::Position
 TEMPLATE_CLASS::search (const key_type &key) const
 {
-    size_t set = Hash (key) % Set;
+    size_t set = hash (key) % Set;
 
     for (int wi = 0; wi != Way; ++wi) {
         Position curPos = Position (set, wi);
@@ -488,7 +488,7 @@ TEMPLATE_LIST
 typename TEMPLATE_CLASS::Position
 TEMPLATE_CLASS::insert (const key_type &key, const mapped_type &mapped)
 {
-    size_t set = Hash (key) % Set;
+    size_t set = hash (key) % Set;
 
     Position insertPos = findVacantPosInSet (set);
     if (insertPos == nil ()) {

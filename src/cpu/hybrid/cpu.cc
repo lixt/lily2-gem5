@@ -740,6 +740,156 @@ HybridCPU::profileSimPoint()
     }
 }
 
+const Op32i_t&
+HybridCPU::readOp32i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Op32i_t *op = dynamic_cast<Op32i_t *> (si->getSrcOp (idx));
+    assert (op);
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+        ;
+    } else {
+        uint32_t val;
+        switch (op->regFile ()) {
+            case TheISA::REG_X:
+                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+                op->setUval (val);
+                break;
+            case TheISA::REG_Y:
+                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+                op->setUval (val);
+                break;
+            case TheISA::REG_G:
+                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+                op->setUval (val);
+                break;
+            case TheISA::REG_M:
+                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+                op->setUval (val);
+                break;
+            default:
+                assert (0);
+        }
+    }
+
+    return *op;
+}
+
+const Op32f_t&
+HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Op32f_t *op = dynamic_cast<Op32f_t *> (si->getSrcOp (idx));
+    assert (op);
+
+    if (op->immFlag ()) {
+        // The Immediate value is already stored in OP.
+        ;
+    } else {
+        uint32_t val;
+        switch (op->regFile ()) {
+            case TheISA::REG_X:
+                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+                op->setFval (*(reinterpret_cast<float *> (&val)));
+                break;
+            case TheISA::REG_Y:
+                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+                op->setFval (*(reinterpret_cast<float *> (&val)));
+                break;
+            case TheISA::REG_G:
+                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+                op->setFval (*(reinterpret_cast<float *> (&val)));
+                break;
+            case TheISA::REG_M:
+                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+                op->setFval (*(reinterpret_cast<float *> (&val)));
+                break;
+            default:
+                assert (0);
+        }
+    }
+
+    return *op;
+}
+
+void
+HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op32i_t& val, const Op32i_t& mask)
+{
+    Op32i_t *op;
+    assert (op = dynamic_cast<Op32i_t *> (si->getDestOp (idx)));
+
+    uint32_t regValue = val.uval ();
+    uint32_t regMask = mask.uval ();
+    Cycles regBackCycle = funcUnitDSFactory (si->opClass ());
+
+    op->setUval (regValue);
+
+    switch (op->regFile ()) {
+        case TheISA::REG_X:
+            (thread->getXRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_Y:
+            (thread->getYRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_G:
+            (thread->getGRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_M:
+            (thread->getMRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        default:
+            assert (0);
+    }
+}
+
+void
+HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op32f_t& val, const Op32f_t& mask)
+{
+    Op32f_t *op;
+    assert (op = dynamic_cast<Op32f_t *> (si->getDestOp (idx)));
+
+    uint32_t regValue = val.bval ();
+    uint32_t regMask = mask.bval ();
+    Cycles regBackCycle = funcUnitDSFactory (si->opClass ());
+
+    op->setBval (regValue);
+
+    switch (op->regFile ()) {
+        case TheISA::REG_X:
+            (thread->getXRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_Y:
+            (thread->getYRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_G:
+            (thread->getGRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        case TheISA::REG_M:
+            (thread->getMRegBufs ()).insert (op->regIndex (),
+                    regValue, regMask, regBackCycle);
+            break;
+
+        default:
+            assert (0);
+    }
+}
+
 Cycles
 HybridCPU::funcUnitDSFactory (const OpClass& opClass) const
 {

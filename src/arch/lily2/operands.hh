@@ -197,6 +197,8 @@ class Op32f_t : public Op_t
     // Accessor and mutator of operand value.
     float fval (void) const { return val.fval; }
     void setFval (float val) { this->val.fval = val; }
+    uint32_t bval (void) const { return val.bval; }
+    void setBval (uint32_t val) { this->val.bval = val; }
 
   private:
     // Number of registers a word contains.
@@ -205,6 +207,7 @@ class Op32f_t : public Op_t
   private:
     union {
         float fval;
+        uint32_t bval;
     } val;
 };
 
