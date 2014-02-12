@@ -123,7 +123,7 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       simpointStream(NULL),
       currentBBV(0, 0),
       currentBBVInstCount(0),
-      pipelineState (0),
+      pipelineMacho (R_Idle),
       IntArithDS (p->IntArithDS),
       SimdIntArithDS (p->SimdIntArithDS)
 {
@@ -738,6 +738,78 @@ HybridCPU::profileSimPoint()
             intervalCount = 0;
         }
     }
+}
+
+void
+HybridCPU::initPipelineMacho (void)
+{
+    // Pipeline is always in idle state at the beginning of tick().
+    // In Risc, the state transfer prototype is showed below:
+    //     idle -> ... -> run -> ... -> advance
+    // In Vliw, the state transfer prototype is showed below:
+
+    // R_Idle.
+    // The initial state when entering the tick() is R_Idle.
+    // Tries to issue inst in R_Idle state.
+    pipelineMacho.regStateEvent (R_Idle, Issue, R_Run);
+    // Stays R_Idle if issue is failure.
+    pipelineMacho.regStateEvent (R_Idle, NoIssue, R_Idle);
+    // Turns to R_Advance or R_Flush if branch inst is met.
+    pipelineMacho.regStateEvent (R_Idle, BPreded, R_Advance);
+    pipelineMacho.regStateEvent (R_Idle, MisBPred, R_Flush);
+    // Turns to R_InstWait if iterative inst is met.
+    pipelineMacho.regStateEvent (R_Idle, IterInst, R_InstWait);
+    // Turns to R_2_R or R_2_V if mode switching inst is met.
+    pipelineMacho.regStateEvent (R_Idle, ToRiscInst, R_2_R);
+    pipelineMacho.regStateEvent (R_Idle, ToVliwInst, R_2_V);
+    // Fault event.
+    pipelineMacho.regLocalDefaultState (R_Idle, FaultState);
+
+    // R_Run.
+    // Tries to issue inst in R_Run state.
+    pipelineMacho.regStateEvent (R_Run, Issue, R_Run);
+    // Turns to R_Advance if issue is failure.
+    pipelineMacho.regStateEvent (R_Run, NoIssue, R_Advance);
+    // Turns to R_Advance or R_Flush if branch inst is met.
+    pipelineMacho.regStateEvent (R_Run, BPreded, R_Advance);
+    pipelineMacho.regStateEvent (R_Run, MisBPred, R_Flush);
+    // Turns to R_InstWait if iterative inst is met.
+    pipelineMacho.regStateEvent (R_Run, IterInst, R_InstWait);
+    // Turns to R_2_R or R_2_V if mode switching inst is met.
+    pipelineMacho.regStateEvent (R_Run, ToRiscInst, R_2_R);
+    pipelineMacho.regStateEvent (R_Run, ToVliwInst, R_2_V);
+    // Fault event.
+    pipelineMacho.regLocalDefaultState (R_Run, FaultState);
+
+    // R_Flush.
+    // Branch misprediction leads to pipeline flush state.
+    // Loops 7 times and updates register dependence table, register file
+    // buffer and cycles in each loop. After finishing that, turns to
+    // R_Advance under any circumstance.
+    pipelineMacho.regLocalDefaultState (R_Flush, R_Advance);
+
+    // R_InstWait.
+    // Iterative instruction like DIV leads to pipeline inst waiting state.
+    // Loops a certain times and updates only the cycles in each loop.
+    // After finishing that, treats the inst as a one cycle inst and
+    // turns to R_Run under any circumstance.
+    pipelineMacho.regLocalDefaultState (R_InstWait, R_Run);
+
+    // R_Advance.
+    // Exits the tick() in R_Advance state and turns to R_Idle state.
+    pipelineMacho.regLocalDefaultState (R_Advance, R_Idle);
+
+    // R_2_R.
+    // Switching mode from Risc to Risc leads to pipeline R_2_R state.
+    // Do nothing and turns to R_Advance under any circumstance.
+    pipelineMacho.regLocalDefaultState (R_2_R, R_Advance);
+
+    // R_2_V.
+    // Switching mode from Risc to Vliw leads to pipeline R_2_V state.
+    // Loops 3 times and updates the register dependence table, register file
+    // buffer and cycles in each loop. After doing that, turns to V_Advance
+    // under any circumstance.
+    pipelineMacho.regLocalDefaultState (R_2_V, V_Advance);
 }
 
 const Op32i_t&

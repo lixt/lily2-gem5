@@ -266,13 +266,58 @@ class HybridCPU : public BaseSimpleCPU
      */
     void printAddr(Addr a);
 
-    // LILY2 interfaces.
+    /************************* LILY2 Parts ***************************/
+
+  private:
+    enum PipelineState {
+        FaultState     ,
+        R_Idle         , // No instruction executed this iteration.
+        R_Run          , // At least 1 inst executed this iteration.
+        R_Flush        , // Branch misprediction penalty.
+        R_InstWait     , // Waits for iterative inst.
+        R_Advance      , // Quits this iteration.
+        R_2_R          ,
+        R_2_V          ,
+        V_Idle         ,
+        V_Run          ,
+        V_Flush        ,
+        V_FlushRun     ,
+        V_Stall        ,
+        V_StallRun     ,
+        V_InstWait     ,
+        V_InstWaitRun  ,
+        V_ICacheWait   ,
+        V_ICacheWaitRun,
+        V_DCacheWait   ,
+        V_DCacheWaitRun,
+        V_Advance      ,
+        V_2_R          ,
+        V_2_V          ,
+    };
+
+    enum PipelineEvent {
+        Issue     , // Issue success.
+        NoIssue   , // Issue failure.
+        BPreded   , // Branch predicted.
+        MisBPred  , // Branch misprediction.
+        MisVPred  , // Value misprediction.
+        IterInst  , // Iterative instructions.
+        ICacheMiss, // Instruction cache misses.
+        DCacheMiss, // Data cache misses.
+        ToRiscInst, // Risc to Risc.
+        ToVliwInst, // Vliw to Vliw.
+    };
+
+  private:
+    Macho<PipelineState, PipelineEvent> pipelineMacho;
+
+  private:
+    void initPipelineMacho (void);
+
     Cycles fetch (void);
     void setupFetchRequest (Request *req);
     StaticInstPtr decode (void);
 
-    // Test the MACHO.
-    Macho<int, int> pipelineState;
 
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
@@ -289,6 +334,7 @@ class HybridCPU : public BaseSimpleCPU
     typedef TheISA::Opd32f_t Opd32f_t;
     typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
 
+  public:
     bool readCond (const Lily2StaticInst *si)
     {
         return 0;
