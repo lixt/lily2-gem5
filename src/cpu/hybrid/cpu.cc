@@ -502,11 +502,62 @@ HybridCPU::tick()
 
         Fault fault = NoFault;
 
-        TheISA::PCState pcState = thread->pcState();
+        /************************ Enter LILY2 region **********************/
 
-        fetch ();
+        curPipelineState = pipelineMacho.getCurState ();
 
-        curStaticInst = decode ();
+        while (curPipelineState == R_Idle || curPipelineState == R_Run) {
+            // Gets the PCState from the thread.
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Fetches the instruction.
+            fetch ();
+
+            // Decodes the instruction.
+            decode ();
+
+            // Dispatches the instruction.
+            dispatch ();
+
+            // Pipeline state transfer.
+            if (!curStaticInst) {
+                curPipelineEvent = NoIssue;
+            } else {
+                // Executes the instruction.
+                execute ();
+
+                if (curStaticInst->isIter ()) {
+                    // Iterative inst.
+                    curPipelineEvent = IterInst;
+                } else if (curStaticInst->isControl ()) {
+                    // Flow control inst.
+                    curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
+                } else if (curStaticInst->isMemRef ()) {
+                    // Memory reference inst.
+                    curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
+                } else if (curStaticInst->isModeSwitch ()) {
+                    // Mode switch inst.
+                    curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
+                } else {
+                    // Default.
+                    curPipelineEvent = Issue;
+                }
+
+                //pcState.advance ();
+                //thread->pcState (pcState);
+            }
+            curPipelineState = pipelineMacho.transfer (curPipelineEvent);
+        }
+
+        // Calls the pre-update corresponding callbacks.
+        callPrePipelineCallback ();
+
+        // Commits the instructions.
+        update ();
+
+        // Calls the post-update corresponding callbacks.
+        callPostPipelineCallback ();
+
         /*
         bool needToFetch = !isRomMicroPC(pcState.microPC()) &&
                            !curMacroStaticInst;
@@ -592,8 +643,7 @@ HybridCPU::tick()
         if(fault != NoFault || !stayAtPC)
             advancePC(fault);
         */
-        pcState.advance ();
-        thread->pcState (pcState);
+
     }
 
     if (tryCompleteDrain())
@@ -654,22 +704,73 @@ HybridCPU::fetch (void)
     return Cycles (0);
 }
 
-StaticInstPtr
+void
 HybridCPU::decode (void)
 {
-    StaticInstPtr instPtr = NULL;
+    curStaticInst = NULL;
     TheISA::Decoder *decoder = &(thread->decoder);
 
-    instPtr = decoder->decodeInst(inst, this);
+    StaticInst *tmpStaticInst = (decoder->decodeInst (inst, this)).get ();
+    curStaticInst = Lily2StaticInstPtr (dynamic_cast<Lily2StaticInst *> (tmpStaticInst));
 
 #if DEBUG
     std::cout << "<----- decode" << std::endl;
     std::cout << "       disassemble: "
-              << instPtr->disassemble (thread->instAddr ()) << std::endl;
+              << curStaticInst->disassemble (thread->instAddr ()) << std::endl;
     std::cout << "-----> decode" << std::endl;
+    std::cout << std::endl;
 #endif
+}
 
-    return instPtr;
+void
+HybridCPU::dispatch (void)
+{
+    ;
+
+#if DEBUG
+    std::cout << "<----- dispatch" << std::endl;
+    std::cout << "-----> dispatch" << std::endl;
+    std::cout << std::endl;
+#endif
+}
+
+void
+HybridCPU::execute (void)
+{
+    ;
+
+#if DEBUG
+    std::cout << "<----- execute" << std::endl;
+    std::cout << "-----> execute" << std::endl;
+    std::cout << std::endl;
+#endif
+}
+
+void
+HybridCPU::update (void)
+{
+    ;
+
+#if DEBUG
+    std::cout << "<----- update" << std::endl;
+    std::cout << "-----> update" << std::endl;
+    std::cout << std::endl;
+#endif
+}
+
+void
+HybridCPU::updateRegDepTable (void)
+{
+}
+
+void
+HybridCPU::updateRegFileBuf (void)
+{
+}
+
+void
+HybridCPU::updateCycle (void)
+{
 }
 
 void
@@ -782,34 +883,126 @@ HybridCPU::initPipelineMacho (void)
     pipelineMacho.regLocalDefaultState (R_Run, FaultState);
 
     // R_Flush.
-    // Branch misprediction leads to pipeline flush state.
-    // Loops 7 times and updates register dependence table, register file
-    // buffer and cycles in each loop. After finishing that, turns to
-    // R_Advance under any circumstance.
-    pipelineMacho.regLocalDefaultState (R_Flush, R_Advance);
+    // Caused by branch mispredictions.
+    // Break the issue iteration.
+    pipelineMacho.regLocalDefaultState (R_Flush, R_Idle);
 
     // R_InstWait.
-    // Iterative instruction like DIV leads to pipeline inst waiting state.
-    // Loops a certain times and updates only the cycles in each loop.
-    // After finishing that, treats the inst as a one cycle inst and
-    // turns to R_Run under any circumstance.
-    pipelineMacho.regLocalDefaultState (R_InstWait, R_Run);
+    // Caused by iterative instructions.
+    // Break the issue iteration.
+    pipelineMacho.regLocalDefaultState (R_InstWait, R_Idle);
 
     // R_Advance.
-    // Exits the tick() in R_Advance state and turns to R_Idle state.
+    // Caused by normal dependencies.
+    // Break the issue iteration.
     pipelineMacho.regLocalDefaultState (R_Advance, R_Idle);
 
     // R_2_R.
-    // Switching mode from Risc to Risc leads to pipeline R_2_R state.
-    // Do nothing and turns to R_Advance under any circumstance.
-    pipelineMacho.regLocalDefaultState (R_2_R, R_Advance);
+    // Caused by SETR instruction.
+    // Break the issue iteration.
+    pipelineMacho.regLocalDefaultState (R_2_R, R_Idle);
 
     // R_2_V.
-    // Switching mode from Risc to Vliw leads to pipeline R_2_V state.
-    // Loops 3 times and updates the register dependence table, register file
-    // buffer and cycles in each loop. After doing that, turns to V_Advance
-    // under any circumstance.
-    pipelineMacho.regLocalDefaultState (R_2_V, V_Advance);
+    // Caused by SETV instruction.
+    // Break the issue iteration.
+    pipelineMacho.regLocalDefaultState (R_2_V, V_Idle);
+}
+
+void
+HybridCPU::callPrePipelineCallback (void)
+{
+    if (prePipelineCallback != NULL) {
+        (this->*prePipelineCallback) ();
+    }
+}
+
+void
+HybridCPU::callPostPipelineCallback (void)
+{
+    if (postPipelineCallback != NULL) {
+        (this->*postPipelineCallback) ();
+    }
+}
+
+void
+HybridCPU::setCallback (PipelineState state)
+{
+    switch (state) {
+        case R_InstWait:
+            prePipelineCallback = &HybridCPU::callback_R_InstWait;
+            postPipelineCallback = NULL;
+            break;
+        case R_Flush:
+            prePipelineCallback = NULL;
+            postPipelineCallback = &HybridCPU::callback_R_Flush;
+            break;
+        case R_Advance:
+            prePipelineCallback = NULL;
+            postPipelineCallback = &HybridCPU::callback_R_Advance;
+            break;
+        case R_2_R:
+            prePipelineCallback = NULL;
+            postPipelineCallback = &HybridCPU::callback_R_2_R;
+            break;
+        case R_2_V:
+            prePipelineCallback = NULL;
+            postPipelineCallback = &HybridCPU::callback_R_2_V;
+            break;
+        default:
+            assert (0);
+    }
+}
+
+void
+HybridCPU::callback_R_Idle (void)
+{
+    // Loops (1).
+    // URDT.
+    // URFB.
+    // UC.
+}
+
+void
+HybridCPU::callback_R_Run (void)
+{
+    // Loops (0).
+}
+
+void
+HybridCPU::callback_R_Flush (void)
+{
+    // Loops (delay slot).
+    // URDT.
+    // URFB.
+    // UC.
+}
+
+void
+HybridCPU::callback_R_InstWait (void)
+{
+    // Loops (execution cycles - 1).
+    // UC.
+}
+
+void
+HybridCPU::callback_R_Advance (void)
+{
+    // Loops (0).
+}
+
+void
+HybridCPU::callback_R_2_R (void)
+{
+    // Loops (0).
+}
+
+void
+HybridCPU::callback_R_2_V (void)
+{
+    // Loops (mode switching cycles).
+    // URDT.
+    // URFB.
+    // UC.
 }
 
 const Op32i_t&

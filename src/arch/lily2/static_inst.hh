@@ -53,9 +53,6 @@ class Lily2StaticInst : public StaticInst
     // Checks the execution condition of an instruction.
     virtual bool execCond (HybridCPU *xc) const = 0;
 
-    // Accesses instruction flags.
-    bool isNop (void) const { return flags[IsNop]; }
-
     // Accessor and mutator of number of source operands.
     OpCount_t getNumSrcOps (void) const
     {
@@ -198,12 +195,109 @@ class Lily2StaticInst : public StaticInst
 
     void advancePC (TheISA::PCState &pcState) const {}
 
+    // Accessor and mutator of branch address.
+    Addr getBAddr (void) const
+    {
+        return bAddr;
+    }
+    void setBAddr (Addr bAddr)
+    {
+        this->bAddr = bAddr;
+    }
+
+    // Accessor and mutator of predict branch address.
+    Addr getBPredAddr (void) const
+    {
+        return bPredAddr;
+    }
+    void setBPredAddr (Addr bPredAddr)
+    {
+        this->bPredAddr = bPredAddr;
+    }
+
+    // Accessor and mutator of branch predict result.
+    bool getBPreded (void) const
+    {
+        return bPreded;
+    }
+    void setBPreded (bool bPreded)
+    {
+        this->bPreded = bPreded;
+    }
+
+    // Accessor and mutator of value address.
+    Addr getVAddr (void) const
+    {
+        return vAddr;
+    }
+    void setVAddr (Addr vAddr)
+    {
+        this->vAddr = vAddr;
+    }
+
+    // Accessor and mutator of predict value address.
+    Addr getVPredAddr (void) const
+    {
+        return vPredAddr;
+    }
+    void setVPredAddr (Addr vPredAddr)
+    {
+        this->vPredAddr = vPredAddr;
+    }
+
+    // Accessor and mutator of value predict result.
+    bool getVPreded (void) const
+    {
+        return vPreded;
+    }
+    void setVPreded (bool vPreded)
+    {
+        this->vPreded = vPreded;
+    }
+
+
+  public:
+    bool isNop (void) const { return flags[IsNop]; }
+    bool isIter (void) const { return flags[IsIter]; }
+    bool isMemRef (void) const { return flags[IsMemRef]; }
+    bool isLoad (void) const { return flags[IsLoad]; }
+    bool isStore (void) const { return flags[IsStore]; }
+    bool isMemRefDS (void) const { return flags[IsMemRefDS]; }
+    bool isLoadDS (void) const { return flags[IsLoadDS]; }
+    bool isStoreDS (void) const { return flags[IsStoreDS]; }
+    bool isControl (void) const { return flags[IsControl]; }
+    bool isBranch (void) const { return flags[IsBranch]; }
+    bool isCall (void) const { return flags[IsCall]; }
+    bool isModeSwitch (void) const { return flags[IsModeSwitch]; }
+    bool isToRisc (void) const { return flags[IsToRisc]; }
+    bool isToVliw (void) const { return flags[IsToVliw]; }
+
+  public:
     // Machine instruction.
     MachInst machInst;
 
   protected:
     enum Flags {
         IsNop,
+
+        IsIter, // Iterative.
+
+        IsMemRef, // Memory reference.
+        IsLoad, // Load.
+        IsStore, // Store.
+
+        IsMemRefDS, // Memory reference with delay slot.
+        IsLoadDS, // Load with delay slot.
+        IsStoreDS, // Store with delay slot.
+
+        IsControl, // Flow control.
+        IsBranch,  // Jump.
+        IsCall,    // Jump and link.
+
+        IsModeSwitch, // Mode switching.
+        IsToRisc, // Switch to Risc.
+        IsToVliw, // Switch to Vliw.
+
         NumFlags
     };
 
@@ -377,7 +471,22 @@ class Lily2StaticInst : public StaticInst
     std::string srcOpStr[MaxInstSrcOps];
     std::string destOpStr[MaxInstDestOps];
 
+  protected:
+    // Prediction variables.
+
+    // Branch prediction.
+    Addr bAddr;
+    Addr bPredAddr;
+    bool bPreded;
+
+    // Value prediction.
+    Addr vAddr;
+    Addr vPredAddr;
+    bool vPreded;
 };
+
+// Smart pointer of LILY2STATICINST.
+typedef RefCountingPtr<Lily2StaticInst> Lily2StaticInstPtr;
 
 } // namespace Lily2ISAInst
 

@@ -269,15 +269,24 @@ class HybridCPU : public BaseSimpleCPU
     /************************* LILY2 Parts ***************************/
 
   private:
+    // arch/lily2/types.hh
+    typedef Lily2ISA::MachInst MachInst;
+    // arch/lily2/static_inst.hh
+    typedef Lily2ISAInst::Lily2StaticInstPtr Lily2StaticInstPtr;
+
+  private:
+    // Types for pipeline states.
     enum PipelineState {
         FaultState     ,
+
         R_Idle         , // No instruction executed this iteration.
         R_Run          , // At least 1 inst executed this iteration.
         R_Flush        , // Branch misprediction penalty.
         R_InstWait     , // Waits for iterative inst.
         R_Advance      , // Quits this iteration.
-        R_2_R          ,
-        R_2_V          ,
+
+        NumRStates     ,
+
         V_Idle         ,
         V_Run          ,
         V_Flush        ,
@@ -291,15 +300,24 @@ class HybridCPU : public BaseSimpleCPU
         V_DCacheWait   ,
         V_DCacheWaitRun,
         V_Advance      ,
+
+        NumVStates     ,
+
+        R_2_R          ,
+        R_2_V          ,
         V_2_R          ,
         V_2_V          ,
+
+        NumStates      ,
     };
 
+    // Types for pipeline events.
     enum PipelineEvent {
         Issue     , // Issue success.
         NoIssue   , // Issue failure.
         BPreded   , // Branch predicted.
         MisBPred  , // Branch misprediction.
+        VPreded   , // Value predicted.
         MisVPred  , // Value misprediction.
         IterInst  , // Iterative instructions.
         ICacheMiss, // Instruction cache misses.
@@ -308,15 +326,65 @@ class HybridCPU : public BaseSimpleCPU
         ToVliwInst, // Vliw to Vliw.
     };
 
+    // Types for pipeline callbacks.
+    typedef void (HybridCPU::*PipelineCallback) (void);
+
+    // Pipeline callbacks.
+    void callback_R_Idle (void);
+    void callback_R_Run (void);
+    void callback_R_Flush (void);
+    void callback_R_InstWait (void);
+    void callback_R_Advance (void);
+    void callback_R_2_R (void);
+    void callback_R_2_V (void);
+
   private:
     Macho<PipelineState, PipelineEvent> pipelineMacho;
+    PipelineState curPipelineState;
+    PipelineEvent curPipelineEvent;
+    PipelineCallback curPipelineCallback;
+    PipelineCallback prePipelineCallback;
+    PipelineCallback postPipelineCallback;
+
+    MachInst inst;
+    Lily2StaticInstPtr curStaticInst;
 
   private:
+    // Initializes the pipeline state machine.
     void initPipelineMacho (void);
+    // Calls pipeline callbacks.
+    void callPrePipelineCallback (void);
+    void callPostPipelineCallback (void);
+    // Sets the pre/post callbacks.
+    void setCallback (PipelineState);
 
+    // Fetches the instruction from icache and returns the fetch cycles.
+    // The fetched instruction machine code is stored in the member
+    // variable INST.
     Cycles fetch (void);
+    // FETCH auxiliary function.
     void setupFetchRequest (Request *req);
-    StaticInstPtr decode (void);
+
+    // Decodes the instruction machine code stored in the member variable
+    // INST. The decoded pointer to static instruction is stored in the
+    // member variable CURSTATICINST.
+    void decode (void);
+
+    // Dispatches the instruction stored in the member variable CURSTATICINST.
+    // If the instruction can be issued, hold the CURSTATICINST. Otherwise,
+    // set the CURSTATICINST a null pointer.
+    void dispatch (void);
+
+    // Executes the instruction stored in the member variable CURSTATICINST
+    // if it is not a null pointer.
+    void execute (void);
+
+    // Updates the cycle-related modules.
+    void update (void);
+    // COMMIT auxiliary function.
+    void updateRegDepTable (void);
+    void updateRegFileBuf (void);
+    void updateCycle (void);
 
 
     typedef TheISA::FuncUnit_t FuncUnit_t;

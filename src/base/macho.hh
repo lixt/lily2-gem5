@@ -13,63 +13,145 @@ template <class State,
 class Macho
 {
   public:
+    typedef void (*Callback) (void);
     typedef State state_type;
     typedef Event event_type;
+    typedef Callback callback_type;
     typedef StateCompare state_compare_type;
     typedef EventCompare event_compare_type;
+    typedef std::less<callback_type> callback_compare_type;
 
-  public:
-    // Constructor.
-    explicit Macho (state_type initState) : curState (initState) {}
+  private:
+    static state_compare_type state_less;
+    static event_compare_type event_less;
+    static callback_compare_type callback_less;
 
   public:
     // Registers legal state transitions.
     // When the MACHO is in OLDSTATE and an EVENT occurs, the MACHO should turn
     // into NEWSTATE.
-    int regStateEvent (state_type oldState, event_type event, state_type newState);
+    int regStateEvent (const state_type& oldState,
+                       const event_type& event,
+                       const state_type& newState,
+                       const callback_type& callback = NULL);
 
     // Registers the local default state.
-    int regLocalDefaultState (state_type oldState, state_type newState);
+    int regLocalDefaultState (const state_type& oldState,
+                              const state_type& newState,
+                              const callback_type& callback = NULL);
 
     // Registers the global default state.
-    int regGlobalDefaultState (state_type state);
+    int regGlobalDefaultState (const state_type& state,
+                               const callback_type& callback = NULL);
 
     // Transfers the current state according to the given EVENT.
-    state_type transfer (event_type event);
+    state_type transfer (const event_type& event);
 
   private:
+    // Pair of state and event.
+    typedef struct state_event {
+        state_type state;
+        event_type event;
+
+        state_event (const state_type& state, const event_type& event) :
+            state (state), event (event) {}
+
+        friend bool operator< (const state_event& x, const state_event& y)
+        {
+            if (state_less (x.state, y.state)) {
+                return true;
+            }
+
+            if (state_less (y.state, x.state)) {
+                return false;
+            }
+
+            return event_less (x.event, y.event);
+        }
+    } state_event_type;
+
+    // Pair of state and callback.
+    typedef struct state_callback {
+        state_type state;
+        callback_type callback;
+
+        state_callback (const state_type& state, const callback_type& callback) :
+            state (state), callback (callback) {}
+
+        friend bool operator< (const state_callback& x, const state_callback& y)
+        {
+            if (state_less (x.state, y.state)) {
+                return true;
+            }
+
+            if (state_less (y.state, x.state)) {
+                return false;
+            }
+
+            return callback_less (x.callback, y.callback);
+        }
+
+        friend bool operator!= (const state_callback& x, const state_callback& y)
+        {
+            return (x < y) && (y < x);
+        }
+    } state_callback_type;
+
+    // Types for global default state transition table.
+    typedef std::map<state_callback_type, int>        gdstt_table_type;
+    typedef typename gdstt_table_type::key_type       gdstt_key_type;
+    typedef typename gdstt_table_type::mapped_type    gdstt_mapped_type;
+    typedef typename gdstt_table_type::value_type     gdstt_value_type;
+    typedef typename gdstt_table_type::iterator       gdstt_iterator;
+    typedef typename gdstt_table_type::const_iterator gdstt_const_iterator;
+
+
     // Types for default state transition table.
-    typedef std::map<state_type, state_type> dstt_table_type;
-    typedef typename dstt_table_type::key_type dstt_key_type;
-    typedef typename dstt_table_type::mapped_type dstt_mapped_type;
-    typedef typename dstt_table_type::value_type dstt_value_type;
-    typedef typename dstt_table_type::iterator dstt_iterator;
-    typedef typename dstt_table_type::const_iterator dstt_const_iterator;
+    typedef std::map<state_type, state_callback_type> ldstt_table_type;
+    typedef typename ldstt_table_type::key_type       ldstt_key_type;
+    typedef typename ldstt_table_type::mapped_type    ldstt_mapped_type;
+    typedef typename ldstt_table_type::value_type     ldstt_value_type;
+    typedef typename ldstt_table_type::iterator       ldstt_iterator;
+    typedef typename ldstt_table_type::const_iterator ldstt_const_iterator;
 
     // Types for state transition table.
-    typedef std::map<std::pair<state_type, event_type>, state_type> stt_table_type;
-    typedef typename stt_table_type::key_type stt_key_type;
-    typedef typename stt_table_type::mapped_type stt_mapped_type;
-    typedef typename stt_table_type::value_type stt_value_type;
-    typedef typename stt_table_type::iterator stt_iterator;
-    typedef typename stt_table_type::const_iterator stt_const_iterator;
+    typedef std::map<state_event_type, state_callback_type> stt_table_type;
+    typedef typename stt_table_type::key_type               stt_key_type;
+    typedef typename stt_table_type::mapped_type            stt_mapped_type;
+    typedef typename stt_table_type::value_type             stt_value_type;
+    typedef typename stt_table_type::iterator               stt_iterator;
+    typedef typename stt_table_type::const_iterator         stt_const_iterator;
+
+  public:
+    // Constructor.
+    explicit Macho (const state_type& initState)
+    {
+        this->curState = initState;
+    }
+
+    // Accessor and mutator of the current state.
+    const state_type& getCurState (void) const
+    {
+        return curState;
+    }
+    void setCurState (const state_type& curState)
+    {
+        this->curState = curState;
+    }
 
   private:
-    // Constructor.
-    // Must give the initial state.
+    // Default constructor is illegal.
     Macho (void) {}
 
   private:
     // Current state.
-    // Must be initialized.
     state_type curState;
 
-    // Global default state.
-    state_type globalDefaultState;
-    bool isGlobalDefaultStateInit;
+    // Global default state transition table.
+    gdstt_table_type gdstt;
 
-    // Default state transition table.
-    dstt_table_type dstt;
+    // Local default state transition table.
+    ldstt_table_type ldstt;
 
     // State transition table.
     stt_table_type stt;
@@ -86,93 +168,109 @@ class Macho
 
 TEMPLATE_LIST
 int
-TEMPLATE_CLASS::regStateEvent (state_type oldState,
-                               event_type event,
-                               state_type newState)
+TEMPLATE_CLASS::regStateEvent (const state_type& oldState,
+                               const event_type& event,
+                               const state_type& newState,
+                               const callback_type& callback)
 {
     stt_key_type insertKey (oldState, event);
-    stt_mapped_type insertMapped = newState;
+    stt_mapped_type insertMapped (newState, callback);
     stt_value_type insertValue (insertKey, insertMapped);
-
-    // Equavalence checking.
     stt_const_iterator cit = stt.find (insertKey);
+
     if (cit != stt.end ()) {
-        if (cit->second != newState) {
-            // Confliction occurs.
-            return 0;
-        } else {
-            // Equavalent transition.
-            return 1;
-        }
-    }
-
-    // Inserts into the state transition table.
-    stt.insert (insertValue);
-
-    return 1;
-}
-
-TEMPLATE_LIST
-int
-TEMPLATE_CLASS::regLocalDefaultState (state_type oldState,
-                                      state_type newState)
-{
-    dstt_key_type insertKey = oldState;
-    dstt_mapped_type insertMapped = newState;
-    dstt_value_type insertValue (insertKey, insertMapped);
-
-    // Equavalence checking.
-    dstt_const_iterator cit = dstt.find (insertKey);
-    if (cit != dstt.end ()) {
         if (cit->second != insertMapped) {
-            // Confliction occurs.
+            // Same key, different mapped.
             return 0;
         } else {
+            // Same key, same mapped.
             return 1;
         }
+    } else {
+        stt.insert (insertValue);
+        return 1;
     }
-
-    // Inserts into the default state transition table.
-    dstt.insert (insertValue);
-
-    return 1;
 }
 
 TEMPLATE_LIST
 int
-TEMPLATE_CLASS::regGlobalDefaultState (state_type state)
+TEMPLATE_CLASS::regLocalDefaultState (const state_type& oldState,
+                                      const state_type& newState,
+                                      const callback_type& callback)
 {
-    // Confliction checking.
-    if (isGlobalDefaultStateInit) {
-        return (globalDefaultState == state) ? 1 : 0;
-    }
+    ldstt_key_type insertKey = oldState;
+    ldstt_mapped_type insertMapped (newState, callback);
+    ldstt_value_type insertValue (insertKey, insertMapped);
+    ldstt_const_iterator cit = ldstt.find (insertKey);
 
-    // Registers the global default state.
-    isGlobalDefaultStateInit = true;
-    globalDefaultState = state;
+    if (cit != ldstt.end ()) {
+        if (cit->second != insertMapped) {
+            // Same key, different mapped.
+            return 0;
+        } else {
+            // Same key, same mapped.
+            return 1;
+        }
+    } else {
+        ldstt.insert (insertValue);
+        return 1;
+    }
+}
+
+TEMPLATE_LIST
+int
+TEMPLATE_CLASS::regGlobalDefaultState (const state_type& state,
+                                       const callback_type& callback)
+{
+    // Conflict checking.
+    state_callback_type insert (state, callback);
+    gdstt_const_iterator cit = gdstt.find (insert);
+    if (gdstt.size () != 0) {
+        if (cit != gdstt.end ()) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        gdstt.insert (insert, 0); // 0 is meaningless.
+        return 1;
+    }
 }
 
 TEMPLATE_LIST
 typename TEMPLATE_CLASS::state_type
-TEMPLATE_CLASS::transfer (event_type event)
+TEMPLATE_CLASS::transfer (const event_type& event)
 {
     state_type retState;
+    callback_type callback;
 
     stt_key_type sttKey (curState, event);
     stt_const_iterator i = stt.find (sttKey);
 
     if (i != stt.end ()) {
-        retState = i->second;
+        retState = (i->second).state;
+        callback = (i->second).callback;
     } else {
-        dstt_key_type dsttKey = curState;
-        dstt_const_iterator j = dstt.find (dsttKey);
+        ldstt_key_type ldsttKey = curState;
+        ldstt_const_iterator j = ldstt.find (ldsttKey);
 
-        if (j != dstt.end ()) {
-            retState = j->second;
+        if (j != ldstt.end ()) {
+            retState = (j->second).state;
+            callback = (j->second).callback;
         } else {
-            retState = globalDefaultState;
+            gdstt_const_iterator k = gdstt.begin ();
+
+            if (k == gdstt.end ()) {
+                assert (0);
+            } else {
+                retState = (k->first).state;
+                callback = (k->first).callback;
+            }
         }
     }
+
+    // Calls the callbacks.
+    callback ();
 
     return retState;
 }
