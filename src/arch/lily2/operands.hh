@@ -6,6 +6,7 @@
 #ifndef __ARCH_LILY2_OPERANDS_HH__
 #define __ARCH_LILY2_OPERANDS_HH__
 
+#include "base/macro.hh"
 #include "base/types.hh"
 #include "base/bitfield.hh"
 #include "arch/registers.hh"
@@ -146,7 +147,15 @@ class Op32i_t : public Op_t
 
     // Implements pure virtual function.
     // Prints readable operand value.
-    void print (std::ostream &os) const {}
+    void print (std::ostream &os) const
+    {
+        os << OP32I_HEX << uval ()
+           << "("
+           << OP32I_DEC << sval ()
+           << ","
+           << OP32I_DEC << uval ()
+           << ")";
+    }
 
     // Accessors and mutators of the operand value.
     int32_t  sval (void) const { return val.sval; }

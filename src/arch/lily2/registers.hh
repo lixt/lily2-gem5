@@ -118,7 +118,7 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
         void operator() (std::ostream &os, const RegIndex_t &regIndex, const RegValue_t &regValue)
         {
             os << RegFileStr[FileName]
-               << "RegIndex = " << DEF_OUTPUT_FORMAT << regIndex
+               << "RegIndex = " << DEC << regIndex
                << ", "
                << "RegValue = " << REG_OUTPUT_FORMAT << regValue;
         }
@@ -245,13 +245,13 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
         void operator() (std::ostream &os, const key_type &key, const mapped_type &mapped)
         {
             os << RegFileStr[FileName]
-               << "RegIndex = " << DEF_OUTPUT_FORMAT << key
+               << "RegIndex = " << DEC << key
                << ", "
                << "RegValue = " << REG_OUTPUT_FORMAT << mapped.regValue
                << ", "
                << "RegMask = " << REG_OUTPUT_FORMAT << mapped.regMask
                << ", "
-               << "RegBackCycle = " << DEF_OUTPUT_FORMAT << mapped.regBackCycle;
+               << "RegBackCycle = " << DEC << mapped.regBackCycle;
         }
     };
 };
@@ -300,6 +300,7 @@ RegFileBuf<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
     PrintFunctor pfunc;
     Base::print (os, pfunc);
 }
+
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;

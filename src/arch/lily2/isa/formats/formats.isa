@@ -44,6 +44,9 @@
 //Include the arithmetic formats
 ##include "arith.isa"
 
+//Include the move formats
+##include "move.isa"
+
 //Include the logic formats
 //##include "logic.isa"
 

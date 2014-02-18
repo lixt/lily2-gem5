@@ -320,6 +320,50 @@ class SimpleThread : public ThreadState
                 reg_idx, flatIndex, val, floatRegs.f[flatIndex]);
     }
 
+    XRegValue_t readXReg (RegIndex_t regIndex)
+    {
+        return xRegs.getRegValue (regIndex);
+    }
+
+    YRegValue_t readYReg (RegIndex_t regIndex)
+    {
+        return yRegs.getRegValue (regIndex);
+    }
+
+    GRegValue_t readGReg (RegIndex_t regIndex)
+    {
+        return gRegs.getRegValue (regIndex);
+    }
+
+    MRegValue_t readMReg (RegIndex_t regIndex)
+    {
+        return mRegs.getRegValue (regIndex);
+    }
+
+    void setXRegBuf (const RegIndex_t& regIndex, const XRegValue_t& regValue,
+                     const XRegValue_t& regMask, const Cycles& regBackCycle)
+    {
+        xRegBufs.insert (regIndex, regValue, regMask, regBackCycle);
+    }
+
+    void setYRegBuf (const RegIndex_t& regIndex, const YRegValue_t& regValue,
+                     const YRegValue_t& regMask, const Cycles& regBackCycle)
+    {
+        yRegBufs.insert (regIndex, regValue, regMask, regBackCycle);
+    }
+
+    void setGRegBuf (const RegIndex_t& regIndex, const GRegValue_t& regValue,
+                     const GRegValue_t& regMask, const Cycles& regBackCycle)
+    {
+        gRegBufs.insert (regIndex, regValue, regMask, regBackCycle);
+    }
+
+    void setMRegBuf (const RegIndex_t& regIndex, const MRegValue_t& regValue,
+                     const MRegValue_t& regMask, const Cycles& regBackCycle)
+    {
+        mRegBufs.insert (regIndex, regValue, regMask, regBackCycle);
+    }
+
     XRegFile&
     getXRegs (void)
     {

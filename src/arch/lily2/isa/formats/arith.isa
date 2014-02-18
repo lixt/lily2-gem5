@@ -15,6 +15,7 @@ output header {{
             : Lily2StaticInst (mnemonic, machInst, IntArithOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
+        std::string generateOperation (void) const;
     };
 
     // Base class for arithmetic vector instructions.
@@ -25,6 +26,7 @@ output header {{
             : Lily2StaticInst (mnemonic, machInst, SimdIntArithOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
+        std::string generateOperation (void) const;
     };
 }};
 
@@ -47,6 +49,19 @@ output decoder {{
         return ss.str ();
     }
 
+    std::string ArithOp::generateOperation (void) const
+    {
+        std::stringstream ss;
+
+        printDestOpValue (ss, 0);
+        ss << ",";
+        printSrcOpValue (ss, 0);
+        ss << ",";
+        printSrcOpValue (ss, 1);
+
+        return ss.str ();
+    }
+
     std::string ArithVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
@@ -60,6 +75,19 @@ output decoder {{
         printSrcOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 1);
+
+        return ss.str ();
+    }
+
+    std::string ArithVecOp::generateOperation (void) const
+    {
+        std::stringstream ss;
+
+        printDestOpValue (ss, 0);
+        ss << ",";
+        printSrcOpValue (ss, 0);
+        ss << ",";
+        printSrcOpValue (ss, 1);
 
         return ss.str ();
     }

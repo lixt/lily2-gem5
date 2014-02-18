@@ -78,6 +78,10 @@ class Lily2StaticInst : public StaticInst
     {
         return srcOp[i];
     }
+    Op_t *getSrcOp (OpCount_t i) const
+    {
+        return srcOp[i];
+    }
     void setSrcOp (OpCount_t i, Op_t *srcOp)
     {
         this->srcOp[i] = srcOp;
@@ -85,6 +89,10 @@ class Lily2StaticInst : public StaticInst
 
     // Accessor and mutator of the destination operand pointers.
     Op_t *getDestOp (OpCount_t i)
+    {
+        return destOp[i];
+    }
+    Op_t *getDestOp (OpCount_t i) const
     {
         return destOp[i];
     }
@@ -253,6 +261,13 @@ class Lily2StaticInst : public StaticInst
     void setVPreded (bool vPreded)
     {
         this->vPreded = vPreded;
+    }
+
+  public:
+    // Shows the operation of an instruction.
+    std::string operate (void) const
+    {
+        return generateOperation ();
     }
 
 
@@ -434,6 +449,19 @@ class Lily2StaticInst : public StaticInst
     {
         ss << getDestOpStr (i);
     }
+
+    void printSrcOpValue (std::stringstream &ss, OpCount_t i) const
+    {
+        ss << (*getSrcOp (i));
+    }
+
+    void printDestOpValue (std::stringstream &ss, OpCount_t i) const
+    {
+        ss << *(getDestOp (i));
+    }
+
+    // Shows the results of the instructions.
+    virtual std::string generateOperation (void) const = 0;
 
   protected:
     // Number of source and destination operands.

@@ -529,7 +529,7 @@ class Operand(object):
         # Note that initializations in the declarations are solely
         # to avoid 'uninitialized variable' errors from the compiler.
         op_decl = self.ctype + ' ' + self.base_name + ';\n'
-        op_mask_decl = self.ctype + ' ' + self.base_name + '_Mask = '
+        op_mask_decl = self.ctype + ' ' + self.base_name + '_mask = '
 
         if self.is_dest:
             if (self.ctype == 'Op32i_t'):
@@ -579,7 +579,7 @@ class Op32iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -609,7 +609,7 @@ class Op32fOperand(Operand):
         {
             %s final_val = %s;
             xc->setOp32f (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -639,7 +639,7 @@ class Op64fOperand(Operand):
         {
             %s final_val = %s;
             xc->setOp64F (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -669,7 +669,7 @@ class Opq8iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOpq8i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -699,7 +699,7 @@ class Opd16iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOpd16i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -729,7 +729,7 @@ class Opq16iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOpq16i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -759,7 +759,7 @@ class Opd32iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOpd32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
@@ -789,9 +789,27 @@ class Opd32fOperand(Operand):
         {
             %s final_val = %s;
             xc->setOpd32f (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_Mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
+
+class I16_Op32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM16);'
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
 
 class IntRegOperand(Operand):
     def isReg(self):

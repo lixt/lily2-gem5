@@ -92,6 +92,7 @@ const OpClass InstPrefetchOp = Enums::InstPrefetch;
 
 // LILY2 OpClasses.
 const OpClass IntArithOp = Enums::IntArith;
+const OpClass IntMoveOp = Enums::IntMove;
 const OpClass SimdIntArithOp = Enums::SimdIntArith;
 
 const OpClass Num_OpClasses = Num_OpClass;

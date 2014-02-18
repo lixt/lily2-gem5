@@ -270,7 +270,9 @@ TEMPLATE_CLASS::transfer (const event_type& event)
     }
 
     // Calls the callbacks.
-    callback ();
+    if (callback != NULL) {
+        callback ();
+    }
 
     return retState;
 }

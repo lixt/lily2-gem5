@@ -475,6 +475,7 @@ class HybridCPU : public BaseSimpleCPU
   private:
     // Functional unit delay slots.
     int IntArithDS;
+    int IntMoveDS;
     int SimdIntArithDS;
 };
 

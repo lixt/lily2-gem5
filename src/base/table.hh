@@ -18,14 +18,9 @@ struct average
     size_t operator() (const T& x) { return static_cast<size_t> (x); }
 };
 
-class error
+struct error
 {
-  public:
-    size_t operator() (size_t set)
-    {
-        std::cout << "Table is full." << std::endl;
-        assert (0);
-    }
+    size_t operator() (size_t set) { assert (0); }
 };
 
 template <size_t Set,
@@ -75,6 +70,9 @@ class Table
     }
 
   public:
+    Table (void) { clear (); }
+
+  public:
     // Functions start with ``cb'' will call the callback functions in the
     // Replace funtor and update the replace policy data.
 
@@ -98,6 +96,11 @@ class Table
     // the insertion, returns the position.
     Position insert (const key_type &key, const mapped_type &mapped);
     Position cbInsert (const key_type &key, const mapped_type &mapped);
+
+    void remove (const Position& position);
+    void cbRemove (const Position& position);
+
+    void clear (void);
 
   protected:
     // NULL functor that do nothing.
@@ -262,9 +265,7 @@ class Table
     {
         for (int i = 0; i != Set; ++i) {
             Position curPos = findVacantPosInSet (i);
-            if (curPos == nil ()) {
-                continue;
-            } else {
+            if (curPos != nil ()) {
                 return curPos;
             }
         }
@@ -277,10 +278,8 @@ class Table
     Position findVacantPosInSet (size_t set) const
     {
         for (int j = 0; j != Way; ++j) {
-            Position curPos = Position (set, j);
-            if (isPosValid (curPos)) {
-                continue;
-            } else {
+            Position curPos (set, j);
+            if (!isPosValid (curPos)) {
                 return curPos;
             }
         }
@@ -316,8 +315,8 @@ class Table
     {
         entry_type *retval;
 
-        if (isPosValid (position)) {
-            retval =  &table[position.set][position.way];
+        if (isPosRangeValid (position)) {
+            retval = &table[position.set][position.way];
         } else {
             retval = NULL;
         }
@@ -328,7 +327,7 @@ class Table
     {
         const entry_type *retval;
 
-        if (isPosValid (position)) {
+        if (isPosRangeValid (position)) {
             retval = &table[position.set][position.way];
         } else {
             retval = NULL;
@@ -513,6 +512,41 @@ TEMPLATE_CLASS::cbInsert (const key_type &key, const mapped_type &mapped)
 }
 
 TEMPLATE_LIST
+void
+TEMPLATE_CLASS::remove (const Position& removePos)
+{
+    if (!isPosRangeValid (removePos)) {
+        invalidPosRangeFault (removePos);
+    }
+
+    setEntryValid (removePos, false);
+}
+
+TEMPLATE_LIST
+void
+TEMPLATE_CLASS::cbRemove (const Position& removePos)
+{
+    if (!isPosRangeValid (removePos)) {
+        invalidPosRangeFault (removePos);
+    }
+
+    setEntryValid (removePos, false);
+    replace.removeCallback (removePos.set, removePos.way);
+}
+
+TEMPLATE_LIST
+void
+TEMPLATE_CLASS::clear (void)
+{
+    for (size_t i = 0; i != Set; ++i) {
+        for (size_t j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+            remove (curPos);
+        }
+    }
+}
+
+TEMPLATE_LIST
 template <class ValidFunctor, class InvalidFunctor>
 void
 TEMPLATE_CLASS::traverse (ValidFunctor vfunc, InvalidFunctor ifunc)
@@ -602,7 +636,7 @@ void
 TEMPLATE_CLASS::print (std::ostream &os, PrintFunctor pfunc) const
 {
     for (int i = 0; i != Set; ++i) {
-        os << "Set " << DEF_OUTPUT_FORMAT << i << ":";
+        os << "Set " << DEC << i << ":";
 
         for (int j = 0; j != Way; ++j) {
             Position curPos (i, j);

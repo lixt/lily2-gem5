@@ -29,10 +29,10 @@
 def operand_types {{
 
     # Scalar Operands.
-    'ssw'  : 'Op32i_t', # Signed single word.
-    'usw'  : 'Op32i_t', # Unsigned single word.
-    'ssf'  : 'Op32f_t', # Single single-precision.
-    'sdf'  : 'Op64f_t', # Single double-precision.
+    'sw'  : 'Op32i_t',  # Signed single word.
+    'uw'  : 'Op32i_t',  # Unsigned single word.
+    'sf'  : 'Op32f_t',  # Single single-precision.
+    'df'  : 'Op64f_t',  # Single double-precision.
 
     # Vector Operands.
     'sqb' : 'Opq8i_t',  # Signed quadruple byte.
@@ -49,19 +49,19 @@ def operand_types {{
 def operands {{
 
     # 32-bit integer operands.
-    'swd': ('Op32i', 'ssw', 'RD', '', 1),
-    'swa': ('Op32i', 'ssw', 'RA', '', 2),
-    'swb': ('Op32i', 'ssw', 'RB', '', 3),
+    'wd': ('Op32i', 'sw', 'RD', '', 1),
+    'wa': ('Op32i', 'sw', 'RA', '', 2),
+    'wb': ('Op32i', 'sw', 'RB', '', 3),
 
     # Single-Precision operands.
-    'ssfd': ('Op32f', 'ssf', 'RD', '', 1),
-    'ssfa': ('Op32f', 'ssf', 'RA', '', 2),
-    'ssfb': ('Op32f', 'ssf', 'RB', '', 3),
+    'sfd': ('Op32f', 'sf', 'RD', '', 1),
+    'sfa': ('Op32f', 'sf', 'RA', '', 2),
+    'sfb': ('Op32f', 'sf', 'RB', '', 3),
 
     # Double-Precision operands.
-    'sdfd': ('Op64f', 'sdf', 'DD', '', 1),
-    'sdfa': ('Op64f', 'sdf', 'DA', '', 2),
-    'sdfb': ('Op64f', 'sdf', 'DB', '', 3),
+    'dfd': ('Op64f', 'df', 'DD', '', 1),
+    'dfa': ('Op64f', 'df', 'DA', '', 2),
+    'dfb': ('Op64f', 'df', 'DB', '', 3),
 
     # 4-Way 8-bit integer operands.
     'qbd': ('Opq8i', 'sqb', 'RD', '', 1),
@@ -88,4 +88,6 @@ def operands {{
     'dsfa': ('Opd32f', 'dsf', 'DA', '', 2),
     'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
+    # 16-bit immediate operands.
+    'i16': ('I16_Op32i', 'uw', 'IMM16', '', 1),
 }};

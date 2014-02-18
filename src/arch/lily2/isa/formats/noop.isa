@@ -52,8 +52,8 @@ output header {{
 
         ~Nop() { }
 
-        std::string
-        generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        std::string generateOperation (void) const;
 
         %(BasicExecDeclare)s
     };
@@ -64,6 +64,11 @@ output decoder {{
                                          const SymbolTable *symtab) const
     {
         return csprintf("%-10s %s", "nop", originalDisassembly);
+    }
+
+    std::string Nop::generateOperation (void) const
+    {
+        return std::string ("nil");
     }
 
     // When the execution condition is false, turn the instruction

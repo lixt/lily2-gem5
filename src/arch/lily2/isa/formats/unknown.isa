@@ -53,8 +53,8 @@ output header {{
 
         %(BasicExecDeclare)s
 
-        std::string
-        generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        std::string generateOperation (void) const;
     };
 }};
 
@@ -63,6 +63,11 @@ output decoder {{
     Unknown::generateDisassembly(Addr pc, const SymbolTable *symtab) const
     {
         return csprintf("%-10s (inst 0x%x)", "unknown", machInst);
+    }
+
+    std::string Unknown::generateOperation (void) const
+    {
+        return std::string ("nil");
     }
 }};
 

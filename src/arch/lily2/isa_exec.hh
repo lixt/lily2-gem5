@@ -40,6 +40,16 @@ inline Opd32i_t add_w_2 (Opd32i_t opa, Opd32i_t opb)
                      _add (opa.svlo (), opb.svlo ()));
 }
 
+inline Op32i_t mkl (Op32i_t op)
+{
+    return Op32i_t (_mkl (op.uval ()));
+}
+
+inline Op32i_t mkh (Op32i_t op)
+{
+    return Op32i_t (_mkh (op.uval ()));
+}
+
 } // namespace Lily2ISA
 
 #endif // __ARCH_LILY2_ISA_EXEC_HH__

@@ -70,4 +70,5 @@ class HybridCPU(BaseSimpleCPU):
 
     # Functional unit delay slots.
     IntArithDS = Param.Int (0, "Integer arithmetic instruction delay slots")
+    IntMoveDS = Param.Int (0, "Integer movement instruction delay slots")
     SimdIntArithDS = Param.Int (0, "Simd integer arithmetic instruction delay slots")

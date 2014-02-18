@@ -106,6 +106,8 @@ HybridCPU::init()
     ifetch_req.setThreadContext(_cpuId, 0); // Add thread ID if we add MT
     data_read_req.setThreadContext(_cpuId, 0); // Add thread ID here too
     data_write_req.setThreadContext(_cpuId, 0); // Add thread ID here too
+
+    initPipelineMacho ();
 }
 
 HybridCPU::HybridCPU(HybridCPUParams *p)
@@ -125,6 +127,7 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       currentBBVInstCount(0),
       pipelineMacho (R_Idle),
       IntArithDS (p->IntArithDS),
+      IntMoveDS (p->IntMoveDS),
       SimdIntArithDS (p->SimdIntArithDS)
 {
     _status = Idle;
@@ -710,8 +713,8 @@ HybridCPU::decode (void)
     curStaticInst = NULL;
     TheISA::Decoder *decoder = &(thread->decoder);
 
-    StaticInst *tmpStaticInst = (decoder->decodeInst (inst, this)).get ();
-    curStaticInst = Lily2StaticInstPtr (dynamic_cast<Lily2StaticInst *> (tmpStaticInst));
+    StaticInstPtr tmpStaticInst = decoder->decodeInst (inst, this);
+    curStaticInst = dynamic_cast<Lily2StaticInst *> (tmpStaticInst.get ());
 
 #if DEBUG
     std::cout << "<----- decode" << std::endl;
@@ -737,10 +740,14 @@ HybridCPU::dispatch (void)
 void
 HybridCPU::execute (void)
 {
-    ;
-
 #if DEBUG
     std::cout << "<----- execute" << std::endl;
+#endif
+
+    curStaticInst->execute (this, traceData);
+#if DEBUG
+    std::cout << "       operation:"
+              << curStaticInst->operate () << std::endl;
     std::cout << "-----> execute" << std::endl;
     std::cout << std::endl;
 #endif
@@ -1015,22 +1022,24 @@ HybridCPU::readOp32i (Lily2StaticInst *si, const OpCount_t& idx)
         // The immediate value is already stored in OP.
         ;
     } else {
-        uint32_t val;
+        uint32_t val = 0;
+        RegIndex_t regIndex = op->regIndex ();
+
         switch (op->regFile ()) {
             case TheISA::REG_X:
-                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+                val = thread->readXReg (regIndex);
                 op->setUval (val);
                 break;
             case TheISA::REG_Y:
-                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+                val = thread->readYReg (regIndex);
                 op->setUval (val);
                 break;
             case TheISA::REG_G:
-                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+                val = thread->readGReg (regIndex);
                 op->setUval (val);
                 break;
             case TheISA::REG_M:
-                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+                val = thread->readMReg (regIndex);
                 op->setUval (val);
                 break;
             default:
@@ -1084,6 +1093,7 @@ HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
     Op32i_t *op;
     assert (op = dynamic_cast<Op32i_t *> (si->getDestOp (idx)));
 
+    RegIndex_t regIndex = op->regIndex ();
     uint32_t regValue = val.uval ();
     uint32_t regMask = mask.uval ();
     Cycles regBackCycle = funcUnitDSFactory (si->opClass ());
@@ -1092,23 +1102,19 @@ HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
 
     switch (op->regFile ()) {
         case TheISA::REG_X:
-            (thread->getXRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
+            thread->setXRegBuf (regIndex, regValue, regMask, regBackCycle);
             break;
 
         case TheISA::REG_Y:
-            (thread->getYRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
+            thread->setYRegBuf (regIndex, regValue, regMask, regBackCycle);
             break;
 
         case TheISA::REG_G:
-            (thread->getGRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
+            thread->setGRegBuf (regIndex, regValue, regMask, regBackCycle);
             break;
 
         case TheISA::REG_M:
-            (thread->getMRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
+            thread->setMRegBuf (regIndex, regValue, regMask, regBackCycle);
             break;
 
         default:
@@ -1160,6 +1166,7 @@ HybridCPU::funcUnitDSFactory (const OpClass& opClass) const
 {
     switch (opClass) {
         case IntArithOp: return Cycles (IntArithDS);
+        case IntMoveOp: return Cycles (IntMoveDS);
         case SimdIntArithOp: return Cycles (SimdIntArithDS);
         default: assert (0);
     }

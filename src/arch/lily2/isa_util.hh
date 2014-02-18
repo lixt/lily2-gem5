@@ -16,6 +16,18 @@ T _add (T opa, T opb)
     return opa + opb;
 }
 
+inline
+uint32_t _mkl (uint32_t op)
+{
+    return op;
+}
+
+inline
+uint32_t _mkh (uint32_t op)
+{
+    return op << 16;
+}
+
 } // namespace Lily2ISA
 
 #endif // __ARCH_LILY2_ISA_UTIL_HH__
