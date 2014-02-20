@@ -50,6 +50,7 @@
 #include "base/hashmap.hh"
 #include "base/macho.hh"
 #include "cpu/hybrid/base.hh"
+#include "cpu/hybrid/resources/reg_dep.hh"
 #include "params/HybridCPU.hh"
 #include "arch/lily2/operands.hh"
 #include "arch/lily2/static_inst.hh"
