@@ -426,7 +426,8 @@ TEMPLATE_LIST
 typename TEMPLATE_CLASS::Position
 TEMPLATE_CLASS::search (const key_type &key) const
 {
-    size_t set = hash (key) % Set;
+    Hash searchHash;
+    size_t set = searchHash (key) % Set;
 
     for (int wi = 0; wi != Way; ++wi) {
         Position curPos = Position (set, wi);

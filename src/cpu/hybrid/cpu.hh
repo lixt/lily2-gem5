@@ -271,7 +271,15 @@ class HybridCPU : public BaseSimpleCPU
 
   private:
     // arch/lily2/types.hh
-    typedef Lily2ISA::MachInst MachInst;
+    typedef TheISA::MachInst MachInst;
+    // arch/lily2/registers.hh
+    typedef TheISA::RegCount_t RegCount_t;
+    typedef TheISA::RegFile_t RegFile_t;
+    typedef TheISA::RegIndex_t RegIndex_t;
+    // arch/lily2/operands.hh
+    typedef TheISA::OpCount_t OpCount_t;
+    typedef TheISA::OpLabel_t OpLabel_t;
+    typedef TheISA::Op_t Op_t;
     // arch/lily2/static_inst.hh
     typedef Lily2ISAInst::Lily2StaticInstPtr Lily2StaticInstPtr;
 
@@ -350,6 +358,15 @@ class HybridCPU : public BaseSimpleCPU
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
 
+    // Issued instructions.
+    int issued;
+
+    // Register dependence tables.
+    RegDepTable<TheISA::REG_X, TheISA::NumXRegs> XRegDepTable;
+    RegDepTable<TheISA::REG_Y, TheISA::NumYRegs> YRegDepTable;
+    RegDepTable<TheISA::REG_G, TheISA::NumGRegs> GRegDepTable;
+    RegDepTable<TheISA::REG_M, TheISA::NumMRegs> MRegDepTable;
+
   private:
     // Initializes the pipeline state machine.
     void initPipelineMacho (void);
@@ -375,6 +392,23 @@ class HybridCPU : public BaseSimpleCPU
     // If the instruction can be issued, hold the CURSTATICINST. Otherwise,
     // set the CURSTATICINST a null pointer.
     void dispatch (void);
+    void rDispatch (void);
+    void vDispatch (void);
+    bool isOverIssueWidth  (void) const;
+    bool isRegDep          (void) const;
+    bool isOpRegDep        (Op_t *) const;
+    bool isXRegDep         (const RegIndex_t&) const;
+    bool isXRegPairDep     (const RegIndex_t&) const;
+    bool isXRegPairPairDep (const RegIndex_t&) const;
+    bool isYRegDep         (const RegIndex_t&) const;
+    bool isYRegPairDep     (const RegIndex_t&) const;
+    bool isYRegPairPairDep (const RegIndex_t&) const;
+    bool isGRegDep         (const RegIndex_t&) const;
+    bool isGRegPairDep     (const RegIndex_t&) const;
+    bool isGRegPairPairDep (const RegIndex_t&) const;
+    bool isMRegDep         (const RegIndex_t&) const;
+    bool isMRegPairDep     (const RegIndex_t&) const;
+    bool isMRegPairPairDep (const RegIndex_t&) const;
 
     // Executes the instruction stored in the member variable CURSTATICINST
     // if it is not a null pointer.
@@ -390,9 +424,6 @@ class HybridCPU : public BaseSimpleCPU
 
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
-    typedef TheISA::OpCount_t OpCount_t;
-    typedef TheISA::OpLabel_t OpLabel_t;
-    typedef TheISA::Op_t Op_t;
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op32f_t Op32f_t;
     typedef TheISA::Op64f_t Op64f_t;
@@ -474,6 +505,11 @@ class HybridCPU : public BaseSimpleCPU
     Cycles funcUnitDSFactory (const OpClass &opClass) const;
 
   private:
+    // Python configuration variables.
+
+    // Issue width.
+    int IssueWidth;
+
     // Functional unit delay slots.
     int IntArithDS;
     int IntMoveDS;

@@ -68,6 +68,9 @@ class HybridCPU(BaseSimpleCPU):
     simpoint_interval = Param.UInt64(100000000, "SimPoint Interval Size (insts)")
     simpoint_profile_file = Param.String("simpoint.bb.gz", "SimPoint BBV file")
 
+    # Issue width.
+    IssueWidth = Param.Int (1, "Issue width.")
+
     # Functional unit delay slots.
     IntArithDS = Param.Int (0, "Integer arithmetic instruction delay slots")
     IntMoveDS = Param.Int (0, "Integer movement instruction delay slots")

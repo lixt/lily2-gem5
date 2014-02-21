@@ -118,9 +118,9 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
         void operator() (std::ostream &os, const RegIndex_t &regIndex, const RegValue_t &regValue)
         {
             os << RegFileStr[FileName]
-               << "RegIndex = " << DEC << regIndex
+               << "RegIndex = " << IO_REGINDEX << regIndex
                << ", "
-               << "RegValue = " << REG_OUTPUT_FORMAT << regValue;
+               << "RegValue = " << IO_REGVALUE << regValue;
         }
     };
 };
@@ -245,13 +245,13 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
         void operator() (std::ostream &os, const key_type &key, const mapped_type &mapped)
         {
             os << RegFileStr[FileName]
-               << "RegIndex = " << DEC << key
+               << "RegIndex = " << IO_REGINDEX << key
                << ", "
-               << "RegValue = " << REG_OUTPUT_FORMAT << mapped.regValue
+               << "RegValue = " << IO_REGVALUE << mapped.regValue
                << ", "
-               << "RegMask = " << REG_OUTPUT_FORMAT << mapped.regMask
+               << "RegMask = " << IO_REGVALUE << mapped.regMask
                << ", "
-               << "RegBackCycle = " << DEC << mapped.regBackCycle;
+               << "RegBackCycle = " << IO_CYCLE << mapped.regBackCycle;
         }
     };
 };

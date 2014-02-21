@@ -126,6 +126,8 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       currentBBV(0, 0),
       currentBBVInstCount(0),
       pipelineMacho (R_Idle),
+      XRegDepTable (), YRegDepTable (), GRegDepTable (), MRegDepTable (),
+      IssueWidth (p->IssueWidth),
       IntArithDS (p->IntArithDS),
       IntMoveDS (p->IntMoveDS),
       SimdIntArithDS (p->SimdIntArithDS)
@@ -671,19 +673,18 @@ HybridCPU::setupFetchRequest(Request *req)
         (0, fetchPC, sizeof(MachInst), Request::INST_FETCH, instMasterId(), instAddr);
 
 #if DEBUG
-    std::cout << "<----- fetch" << std::endl;
-    std::cout << "       fetchPC = 0x"
-              << std::hex << std::setfill ('0') << std::setw (8)
-              << instAddr << std::endl;
-    std::cout << "       aligned fetchPC = 0x"
-              << std::hex << std::setfill ('0') << std::setw (8)
-              << fetchPC << std::endl;
+    std::cout << "fetchPC = " << IO_ADDR << instAddr << std::endl;
+    std::cout << "aligned fetchPC = " << IO_ADDR << fetchPC << std::endl;
 #endif
 }
 
 Cycles
 HybridCPU::fetch (void)
 {
+#if DEBUG
+    std::cout << "<---------- fetch" << std::endl;
+#endif
+
     setupFetchRequest (&ifetch_req);
 
     thread->itb->translateAtomic(&ifetch_req, tc, BaseTLB::Execute);
@@ -696,11 +697,8 @@ HybridCPU::fetch (void)
     inst = gtobe (inst);
 
 #if DEBUG
-    std::cout << "       fetch instruction = 0x"
-              << std::hex << std::setfill ('0') << std::setw (8)
-              << inst << std::endl;
-    std::cout << "-----> fetch" << std::endl;
-    std::cout << std::endl;
+    std::cout << "fetch instruction = " << IO_MACHINST << inst << std::endl;
+    std::cout << "----------> fetch" << std::endl << std::endl;
 #endif
 
     /* TODO */
@@ -710,6 +708,10 @@ HybridCPU::fetch (void)
 void
 HybridCPU::decode (void)
 {
+#if DEBUG
+    std::cout << "<---------- decode" << std::endl;
+#endif
+
     curStaticInst = NULL;
     TheISA::Decoder *decoder = &(thread->decoder);
 
@@ -717,51 +719,224 @@ HybridCPU::decode (void)
     curStaticInst = dynamic_cast<Lily2StaticInst *> (tmpStaticInst.get ());
 
 #if DEBUG
-    std::cout << "<----- decode" << std::endl;
-    std::cout << "       disassemble: "
+    std::cout << "disassemble: "
               << curStaticInst->disassemble (thread->instAddr ()) << std::endl;
-    std::cout << "-----> decode" << std::endl;
-    std::cout << std::endl;
+    std::cout << "----------> decode" << std::endl << std::endl;
 #endif
 }
 
 void
 HybridCPU::dispatch (void)
 {
-    ;
+    rDispatch ();
+}
+
+void
+HybridCPU::rDispatch (void)
+{
+#if DEBUG
+    std::cout << "<---------- rDispatch" << std::endl;
+#endif
+
+    // Checks the following things is Risc dispatch.
+    // 1. Issue width.
+    // 2. Register dependences.
+
+    bool rIsOverIssueWidth = isOverIssueWidth ();
+    bool rIsRegDep = isRegDep ();
+
+    bool rIsNoIssue = rIsOverIssueWidth || rIsRegDep;
 
 #if DEBUG
-    std::cout << "<----- dispatch" << std::endl;
-    std::cout << "-----> dispatch" << std::endl;
-    std::cout << std::endl;
+    if (!rIsNoIssue) {
+        std::cout << "dispatch success." << std::endl;
+    } else {
+        std::cout << "dispatch failure." << std::endl;
+        if (rIsOverIssueWidth) {
+            std::cout << "failure reason: issue width." << std::endl;
+        }
+        if (rIsRegDep) {
+            std::cout << "failure reason: register dependence." << std::endl;
+        }
+    }
+    std::cout << "----------> rDispatch" << std::endl;
 #endif
+}
+
+bool
+HybridCPU::isOverIssueWidth (void) const
+{
+    return (issued >= IssueWidth) ? true : false;
+}
+
+bool
+HybridCPU::isRegDep (void) const
+{
+    // Source operands.
+    for (OpCount_t i = 0; i != curStaticInst->getNumSrcOps (); ++i) {
+        if (isOpRegDep (curStaticInst->getSrcOp (i))) {
+            return true;
+        }
+    }
+
+    // Destination operands.
+    for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
+        if (isOpRegDep (curStaticInst->getDestOp (i))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+HybridCPU::isOpRegDep (Op_t *op) const
+{
+    // Gets the operand register attributes.
+    RegFile_t regFile = op->regFile ();
+    RegIndex_t regIndex = op->regIndex ();
+    RegCount_t regCount = op->numRegs ();
+
+    switch (regFile) {
+        case TheISA::REG_X:
+            switch (regCount) {
+                case 1 : return isXRegDep (regIndex);
+                case 2 : return isXRegPairDep (regIndex);
+                case 4 : return isXRegPairPairDep (regIndex);
+                default: assert (0);
+            }
+
+        case TheISA::REG_Y:
+            switch (regCount) {
+                case 1 : return isYRegDep (regIndex);
+                case 2 : return isYRegPairDep (regIndex);
+                case 4 : return isYRegPairPairDep (regIndex);
+                default: assert (0);
+            }
+
+         case TheISA::REG_G:
+            switch (regCount) {
+                case 1 : return isGRegDep (regIndex);
+                case 2 : return isGRegPairDep (regIndex);
+                case 4 : return isGRegPairPairDep (regIndex);
+                default: assert (0);
+            }
+
+        case TheISA::REG_M:
+            switch (regCount) {
+                case 1 : return isMRegDep (regIndex);
+                case 2 : return isMRegPairDep (regIndex);
+                case 4 : return isMRegPairPairDep (regIndex);
+                default: assert (0);
+            }
+
+        default: assert (0);
+    }
+}
+
+bool
+HybridCPU::isXRegDep (const RegIndex_t& regIndex) const
+{
+    return XRegDepTable.isRegDep (regIndex);
+}
+
+bool
+HybridCPU::isXRegPairDep (const RegIndex_t& regIndex) const
+{
+    return XRegDepTable.isRegPairDep (regIndex);
+}
+
+bool
+HybridCPU::isXRegPairPairDep (const RegIndex_t& regIndex) const
+{
+    return XRegDepTable.isRegPairPairDep (regIndex);
+}
+
+bool
+HybridCPU::isYRegDep (const RegIndex_t& regIndex) const
+{
+    return YRegDepTable.isRegDep (regIndex);
+}
+
+bool
+HybridCPU::isYRegPairDep (const RegIndex_t& regIndex) const
+{
+    return YRegDepTable.isRegPairDep (regIndex);
+}
+
+bool
+HybridCPU::isYRegPairPairDep (const RegIndex_t& regIndex) const
+{
+    return YRegDepTable.isRegPairPairDep (regIndex);
+}
+
+bool
+HybridCPU::isGRegDep (const RegIndex_t& regIndex) const
+{
+    return GRegDepTable.isRegDep (regIndex);
+}
+
+bool
+HybridCPU::isGRegPairDep (const RegIndex_t& regIndex) const
+{
+    return GRegDepTable.isRegPairDep (regIndex);
+}
+
+bool
+HybridCPU::isGRegPairPairDep (const RegIndex_t& regIndex) const
+{
+    return GRegDepTable.isRegPairPairDep (regIndex);
+}
+
+bool
+HybridCPU::isMRegDep (const RegIndex_t& regIndex) const
+{
+    return MRegDepTable.isRegDep (regIndex);
+}
+
+bool
+HybridCPU::isMRegPairDep (const RegIndex_t& regIndex) const
+{
+    return MRegDepTable.isRegPairDep (regIndex);
+}
+
+bool
+HybridCPU::isMRegPairPairDep (const RegIndex_t& regIndex) const
+{
+    return MRegDepTable.isRegPairPairDep (regIndex);
+}
+
+void
+HybridCPU::vDispatch (void)
+{
+
 }
 
 void
 HybridCPU::execute (void)
 {
 #if DEBUG
-    std::cout << "<----- execute" << std::endl;
+    std::cout << "<---------- execute" << std::endl;
 #endif
 
     curStaticInst->execute (this, traceData);
 #if DEBUG
-    std::cout << "       operation:"
-              << curStaticInst->operate () << std::endl;
-    std::cout << "-----> execute" << std::endl;
-    std::cout << std::endl;
+    std::cout << "operation: " << curStaticInst->operate () << std::endl;
+    std::cout << "----------> execute" << std::endl << std::endl;
 #endif
 }
 
 void
 HybridCPU::update (void)
 {
+#if DEBUG
+    std::cout << "<----------" << std::endl;
+#endif
+
     ;
 
 #if DEBUG
-    std::cout << "<----- update" << std::endl;
-    std::cout << "-----> update" << std::endl;
-    std::cout << std::endl;
+    std::cout << "----------> update" << std::endl << std::endl;
 #endif
 }
 

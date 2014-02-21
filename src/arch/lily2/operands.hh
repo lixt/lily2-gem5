@@ -149,11 +149,11 @@ class Op32i_t : public Op_t
     // Prints readable operand value.
     void print (std::ostream &os) const
     {
-        os << OP32I_HEX << uval ()
+        os << IO_OP32I_HEX << uval ()
            << "("
-           << OP32I_DEC << sval ()
+           << IO_OP32I_DEC << sval ()
            << ","
-           << OP32I_DEC << uval ()
+           << IO_OP32I_DEC << uval ()
            << ")";
     }
 
