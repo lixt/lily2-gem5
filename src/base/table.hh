@@ -113,12 +113,14 @@ class Table
         }
     };
 
+    static NullFunctor nfunc;
+
     // Traverses the table, calls VFUNC on every valid entry and IFUNC on every
     // invalid entry, returns nothing.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters.
     template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    void traverse (ValidFunctor vfunc, InvalidFunctor ifunc);
+    void traverse (ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
 
     // Traverses the table, calls VFUNC on every valid entry and IFUNC on every
     // invalid entry, returns a vector of positions.
@@ -126,14 +128,14 @@ class Table
     // two parameters and returns a bool variable. TRUE indicates the current
     // position will be returned and vice versa.
     template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    std::vector<Position> traverseAndReturn (ValidFunctor vfunc, InvalidFunctor ifunc);
+    std::vector<Position> traverseAndReturn (ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
 
     // Traverses a set of the table, calls VFUNC on every valid entry and IFUNC on
     // every invalid entry, returns nothing.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters.
     template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    void traverseSet (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc);
+    void traverseSet (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
 
     // Traverses a set of the table, calls VFUNC on every valid entry and IFUNC on
     // every invalid entry, returns a vector of positions.
@@ -141,7 +143,7 @@ class Table
     // two parameters and returns a bool variable. TRUE indicates the current
     // position will be returned and vice versa.
     template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc);
+    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
 
     // Prints out readable debug information of the table, calls PFUNC on every
     // entry, returns nothing.
@@ -200,22 +202,22 @@ class Table
     // Upper accessor and mutator of the table key.
     key_type &entryKey (const Position &position)
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         return entryKey (getEntryPtr (position));
     }
     const key_type &entryKey (const Position &position) const
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         return entryKey (getEntryPtr (position));
     }
     void setEntryKey (const Position &position, const key_type &key)
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         setEntryKey (getEntryPtr (position), key);
     }
@@ -223,22 +225,22 @@ class Table
     // Upper accessor and mutator of the table mapped value.
     mapped_type &entryMapped (const Position &position)
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         return entryMapped (getEntryPtr (position));
     }
     const mapped_type &entryMapped (const Position &position) const
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         return entryMapped (getEntryPtr (position));
     }
     void setEntryMapped (const Position &position, const mapped_type &mapped)
     {
-        if (!isPosValid (position)) {
-            invalidPosFault (position);
+        if (!isPosRangeValid (position)) {
+            invalidPosRangeFault (position);
         }
         setEntryMapped (getEntryPtr (position), mapped);
     }
@@ -337,7 +339,7 @@ class Table
     }
 
     // Bottom accessor and mutator of the table key.
-    key_type& entryKey (const entry_type *entryPtr)
+    key_type& entryKey (entry_type *entryPtr)
     {
         return entryPtr->key;
     }
@@ -351,7 +353,7 @@ class Table
     }
 
     // Bottom accessor and mutator of the table mapped value.
-    mapped_type& entryMapped (const entry_type *entryPtr)
+    mapped_type& entryMapped (entry_type *entryPtr)
     {
         return entryPtr->mapped;
     }

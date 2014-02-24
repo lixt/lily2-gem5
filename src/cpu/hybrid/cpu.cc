@@ -524,34 +524,14 @@ HybridCPU::tick()
             // Dispatches the instruction.
             dispatch ();
 
-            // Pipeline state transfer.
-            if (!curStaticInst) {
-                curPipelineEvent = NoIssue;
-            } else {
-                // Executes the instruction.
-                execute ();
+            // Updates the dispatch infos.
+            preExecute ();
 
-                if (curStaticInst->isIter ()) {
-                    // Iterative inst.
-                    curPipelineEvent = IterInst;
-                } else if (curStaticInst->isControl ()) {
-                    // Flow control inst.
-                    curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
-                } else if (curStaticInst->isMemRef ()) {
-                    // Memory reference inst.
-                    curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
-                } else if (curStaticInst->isModeSwitch ()) {
-                    // Mode switch inst.
-                    curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
-                } else {
-                    // Default.
-                    curPipelineEvent = Issue;
-                }
+            // Executes the instruction.
+            execute ();
 
-                //pcState.advance ();
-                //thread->pcState (pcState);
-            }
-            curPipelineState = pipelineMacho.transfer (curPipelineEvent);
+            // Do statistics and updates the pipeline state.
+            postExecute ();
         }
 
         // Calls the pre-update corresponding callbacks.
@@ -738,7 +718,7 @@ HybridCPU::rDispatch (void)
     std::cout << "<---------- rDispatch" << std::endl;
 #endif
 
-    // Checks the following things is Risc dispatch.
+    // Checks the following things in Risc dispatch.
     // 1. Issue width.
     // 2. Register dependences.
 
@@ -746,6 +726,11 @@ HybridCPU::rDispatch (void)
     bool rIsRegDep = isRegDep ();
 
     bool rIsNoIssue = rIsOverIssueWidth || rIsRegDep;
+
+    if (rIsNoIssue) {
+        // Sets the CURSTATICINST null if dispatch is failure.
+        curStaticInst = NULL;
+    }
 
 #if DEBUG
     if (!rIsNoIssue) {
@@ -759,7 +744,106 @@ HybridCPU::rDispatch (void)
             std::cout << "failure reason: register dependence." << std::endl;
         }
     }
-    std::cout << "----------> rDispatch" << std::endl;
+    std::cout << "----------> rDispatch" << std::endl << std::endl;
+#endif
+}
+
+void
+HybridCPU::vDispatch (void)
+{
+
+}
+
+void
+HybridCPU::execute (void)
+{
+#if DEBUG
+    std::cout << "<---------- execute" << std::endl;
+#endif
+
+    if (curStaticInst) {
+        curStaticInst->execute (this, traceData);
+    }
+
+#if DEBUG
+    if (curStaticInst) {
+        std::cout << "operation: " << curStaticInst->operate () << std::endl;
+    } else {
+        std::cout << "(nil)" << std::endl;
+    }
+    std::cout << "----------> execute" << std::endl << std::endl;
+#endif
+}
+
+void
+HybridCPU::preExecute (void)
+{
+    switch (dispModeFactory (curPipelineState)) {
+        case TheISA::DISPMODE_RISC: rPreExecute (); break;
+        case TheISA::DISPMODE_VLIW: vPreExecute (); break;
+        default: assert (0);
+    }
+}
+
+void
+HybridCPU::rPreExecute (void)
+{
+#if DEBUG
+    std::cout << "<---------- rPreExecute" << std::endl;
+#endif
+
+    if (curStaticInst) {
+        // Updates the insruction issued.
+        writeIssued ();
+
+        // Updates the register dependence table.
+        writeRegDep ();
+    }
+
+#if DEBUG
+    std::cout << "issued insts: " << issued << std::endl;
+    std::cout << "register dependence table: ";
+    std::cout << "----------> rPreExecute" << std::endl << std::endl;
+#endif
+}
+
+void
+HybridCPU::vPreExecute (void)
+{
+}
+
+void
+HybridCPU::postExecute (void)
+{
+#if DEBUG
+    std::cout << "<---------- postExecute" << std::endl;
+#endif
+
+    if (!curStaticInst) {
+        curPipelineEvent = NoIssue;
+    } else {
+        if (curStaticInst->isIter ()) {
+            // Iterative inst.
+            curPipelineEvent = IterInst;
+        } else if (curStaticInst->isControl ()) {
+            // Flow control inst.
+            curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
+        } else if (curStaticInst->isMemRef ()) {
+            // Memory reference inst.
+            curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
+        } else if (curStaticInst->isModeSwitch ()) {
+            // Mode switch inst.
+            curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
+        } else {
+            // Default.
+            curPipelineEvent = Issue;
+        }
+    }
+
+    curPipelineState = pipelineMacho.transfer (curPipelineEvent);
+
+#if DEBUG
+    std::cout << "----------> postExecute" << std::endl << std::endl;
 #endif
 }
 
@@ -792,6 +876,11 @@ HybridCPU::isRegDep (void) const
 bool
 HybridCPU::isOpRegDep (Op_t *op) const
 {
+    // Checks operand is immediate or not.
+    if (op->immFlag ()) {
+        return false;
+    }
+
     // Gets the operand register attributes.
     RegFile_t regFile = op->regFile ();
     RegIndex_t regIndex = op->regIndex ();
@@ -907,24 +996,139 @@ HybridCPU::isMRegPairPairDep (const RegIndex_t& regIndex) const
 }
 
 void
-HybridCPU::vDispatch (void)
+HybridCPU::writeIssued (void)
 {
-
+    ++issued;
 }
 
 void
-HybridCPU::execute (void)
+HybridCPU::writeRegDep (void)
 {
-#if DEBUG
-    std::cout << "<---------- execute" << std::endl;
-#endif
-
-    curStaticInst->execute (this, traceData);
-#if DEBUG
-    std::cout << "operation: " << curStaticInst->operate () << std::endl;
-    std::cout << "----------> execute" << std::endl << std::endl;
-#endif
+    for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
+        writeOpRegDep (curStaticInst->getDestOp (i));
+    }
 }
+
+void
+HybridCPU::writeOpRegDep (Op_t *op)
+{
+    if (!op->immFlag ()) {
+        // Operand is not an immediate value.
+        RegFile_t regFile = op->regFile ();
+        RegIndex_t regIndex = op->regIndex ();
+        RegCount_t regCount = op->numRegs ();
+        Cycles regBackCycle = funcUnitLatencyFactory (curStaticInst->opClass ());
+
+        switch (regFile) {
+            case TheISA::REG_X:
+                switch (regCount) {
+                    case 1 : return writeXRegDep         (regIndex, regBackCycle);
+                    case 2 : return writeXRegPairDep     (regIndex, regBackCycle);
+                    case 4 : return writeXRegPairPairDep (regIndex, regBackCycle);
+                    default: assert (0);
+                }
+
+            case TheISA::REG_Y:
+                switch (regCount) {
+                    case 1 : return writeYRegDep         (regIndex, regBackCycle);
+                    case 2 : return writeYRegPairDep     (regIndex, regBackCycle);
+                    case 4 : return writeYRegPairPairDep (regIndex, regBackCycle);
+                    default: assert (0);
+                }
+
+             case TheISA::REG_G:
+                switch (regCount) {
+                    case 1 : return writeGRegDep         (regIndex, regBackCycle);
+                    case 2 : return writeGRegPairDep     (regIndex, regBackCycle);
+                    case 4 : return writeGRegPairPairDep (regIndex, regBackCycle);
+                    default: assert (0);
+                }
+
+            case TheISA::REG_M:
+                switch (regCount) {
+                    case 1 : return writeMRegDep         (regIndex, regBackCycle);
+                    case 2 : return writeMRegPairDep     (regIndex, regBackCycle);
+                    case 4 : return writeMRegPairPairDep (regIndex, regBackCycle);
+                    default: assert (0);
+                }
+
+            default: assert (0);
+        }
+    }
+}
+
+void
+HybridCPU::writeXRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    XRegDepTable.insertReg (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeXRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    XRegDepTable.insertRegPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeXRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    XRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeYRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    YRegDepTable.insertReg (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeYRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    YRegDepTable.insertRegPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeYRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    YRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeGRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    GRegDepTable.insertReg (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeGRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    GRegDepTable.insertRegPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeGRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    GRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeMRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    MRegDepTable.insertReg (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeMRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    MRegDepTable.insertRegPair (regIndex, regBackCycle);
+}
+
+void
+HybridCPU::writeMRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    MRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+}
+
 
 void
 HybridCPU::update (void)
@@ -1271,7 +1475,7 @@ HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
     RegIndex_t regIndex = op->regIndex ();
     uint32_t regValue = val.uval ();
     uint32_t regMask = mask.uval ();
-    Cycles regBackCycle = funcUnitDSFactory (si->opClass ());
+    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
 
     op->setUval (regValue);
 
@@ -1306,7 +1510,7 @@ HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
 
     uint32_t regValue = val.bval ();
     uint32_t regMask = mask.bval ();
-    Cycles regBackCycle = funcUnitDSFactory (si->opClass ());
+    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
 
     op->setBval (regValue);
 
@@ -1336,8 +1540,14 @@ HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
     }
 }
 
+DispMode_t
+HybridCPU::dispModeFactory (const PipelineState& pipelineState) const
+{
+    return TheISA::DISPMODE_RISC;
+}
+
 Cycles
-HybridCPU::funcUnitDSFactory (const OpClass& opClass) const
+HybridCPU::funcUnitLatencyFactory (const OpClass& opClass) const
 {
     switch (opClass) {
         case IntArithOp: return Cycles (IntArithDS);

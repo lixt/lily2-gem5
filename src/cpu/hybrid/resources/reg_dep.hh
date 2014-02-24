@@ -27,9 +27,11 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     typedef typename Base::Position Position;
 
   public:
-    // Inserts the register and register back cycle into the register dependence
-    // table.
-    void insert (const RegIndex_t& regIndex, const Cycles& regBackCycle);
+    // Inserts the register, register-pair, register-pair-pair and register back
+    // cycle into the register dependence table.
+    void insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle);
+    void insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle);
+    void insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle);
 
     // Checks register, register-pair or register-pair-pair dependences. Returns
     // true if dependence exists.
@@ -40,6 +42,9 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     // Updates the register dependence table. Decreases the register back cycles
     // and removes out the due registers.
     void update (const Cycles& regBackCycleDelta);
+
+    // Prints readable debug infos about the register dependence table.
+    void print (std::ostream&) const;
 
   private:
     // Decreases the register back cycles in the register dependence table.
@@ -58,7 +63,7 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
         explicit DecrRegBackCycleFunctor (const Cycles& regbackCycleDelta)
             : regBackCycleDelta (regBackCycleDelta) {}
 
-        bool operator() (const key_type& key, const mapped_type& mapped)
+        bool operator() (key_type& key, mapped_type& mapped)
         {
             if (mapped <= regBackCycleDelta) {
                 mapped = 0;
@@ -69,13 +74,40 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
             }
         }
     };
+
+    // Funtor used in PRINT.
+    struct PrintFunctor
+    {
+        void operator() (std::ostream& os, const key_type& key, const mapped_type& mapped)
+        {
+            os << "(" << key << "," << mapped << ")";
+        }
+    };
 };
 
 template <TheISA::RegFile_t FileName, size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::insert (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+RegDepTable<FileName, RegNum>::insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     Base::insert (regIndex, regBackCycle);
+}
+
+template <TheISA::RegFile_t FileName, size_t RegNum>
+void
+RegDepTable<FileName, RegNum>::insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    insertReg (regIndex, regBackCycle);
+    insertReg (regIndex + 1, regBackCycle);
+}
+
+template <TheISA::RegFile_t FileName, size_t RegNum>
+void
+RegDepTable<FileName, RegNum>::insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    insertReg (regIndex, regBackCycle);
+    insertReg (regIndex + 1, regBackCycle);
+    insertReg (regIndex + 2, regBackCycle);
+    insertReg (regIndex + 3, regBackCycle);
 }
 
 template <TheISA::RegFile_t FileName, size_t RegNum>
@@ -129,6 +161,14 @@ void
 RegDepTable<FileName, RegNum>::remove (const Position& removePos)
 {
     Base::remove (removePos);
+}
+
+template <TheISA::RegFile_t FileName, size_t RegNum>
+void
+RegDepTable<FileName, RegNum>::print (std::ostream& os) const
+{
+    PrintFunctor pfunc;
+    Base::print (os, pfunc);
 }
 
 #endif // __CPU_HYBRID_RESOURCES_REG_DEP_HH__

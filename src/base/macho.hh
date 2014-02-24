@@ -274,6 +274,7 @@ TEMPLATE_CLASS::transfer (const event_type& event)
         callback ();
     }
 
+    setCurState (retState);
     return retState;
 }
 

@@ -40,6 +40,16 @@ namespace Lily2ISA
 typedef uint32_t MachInst;
 typedef uint64_t ExtMachInst;
 
+// Types for dispatch modes.
+enum DispMode_t {
+    DISPMODE_NIL,
+
+    DISPMODE_RISC,
+    DISPMODE_VLIW,
+
+    NUM_DISPMODE
+};
+
 // Types for functional units.
 enum FuncUnit_t {
     FU_NIL, // Illegal.

@@ -272,6 +272,7 @@ class HybridCPU : public BaseSimpleCPU
   private:
     // arch/lily2/types.hh
     typedef TheISA::MachInst MachInst;
+    typedef TheISA::DispMode_t DispMode_t;
     // arch/lily2/registers.hh
     typedef TheISA::RegCount_t RegCount_t;
     typedef TheISA::RegFile_t RegFile_t;
@@ -394,25 +395,18 @@ class HybridCPU : public BaseSimpleCPU
     void dispatch (void);
     void rDispatch (void);
     void vDispatch (void);
-    bool isOverIssueWidth  (void) const;
-    bool isRegDep          (void) const;
-    bool isOpRegDep        (Op_t *) const;
-    bool isXRegDep         (const RegIndex_t&) const;
-    bool isXRegPairDep     (const RegIndex_t&) const;
-    bool isXRegPairPairDep (const RegIndex_t&) const;
-    bool isYRegDep         (const RegIndex_t&) const;
-    bool isYRegPairDep     (const RegIndex_t&) const;
-    bool isYRegPairPairDep (const RegIndex_t&) const;
-    bool isGRegDep         (const RegIndex_t&) const;
-    bool isGRegPairDep     (const RegIndex_t&) const;
-    bool isGRegPairPairDep (const RegIndex_t&) const;
-    bool isMRegDep         (const RegIndex_t&) const;
-    bool isMRegPairDep     (const RegIndex_t&) const;
-    bool isMRegPairPairDep (const RegIndex_t&) const;
+
+    // Things done before the execution. Updates the dispatch infos.
+    void preExecute (void);
+    void rPreExecute (void);
+    void vPreExecute (void);
 
     // Executes the instruction stored in the member variable CURSTATICINST
     // if it is not a null pointer.
     void execute (void);
+
+    // Things done after the execution. Updates the pipeline state.
+    void postExecute (void);
 
     // Updates the cycle-related modules.
     void update (void);
@@ -421,6 +415,45 @@ class HybridCPU : public BaseSimpleCPU
     void updateRegFileBuf (void);
     void updateCycle (void);
 
+  private:
+    // Interfaces for member functions.
+    bool isOverIssueWidth     (void) const;
+    bool isRegDep             (void) const;
+    bool isOpRegDep           (Op_t *) const;
+    bool isXRegDep            (const RegIndex_t&) const;
+    bool isXRegPairDep        (const RegIndex_t&) const;
+    bool isXRegPairPairDep    (const RegIndex_t&) const;
+    bool isYRegDep            (const RegIndex_t&) const;
+    bool isYRegPairDep        (const RegIndex_t&) const;
+    bool isYRegPairPairDep    (const RegIndex_t&) const;
+    bool isGRegDep            (const RegIndex_t&) const;
+    bool isGRegPairDep        (const RegIndex_t&) const;
+    bool isGRegPairPairDep    (const RegIndex_t&) const;
+    bool isMRegDep            (const RegIndex_t&) const;
+    bool isMRegPairDep        (const RegIndex_t&) const;
+    bool isMRegPairPairDep    (const RegIndex_t&) const;
+    void writeIssued          (void);
+    void writeRegDep          (void);
+    void writeOpRegDep        (Op_t *);
+    void writeXRegDep         (const RegIndex_t&, const Cycles& cycle);
+    void writeXRegPairDep     (const RegIndex_t&, const Cycles& cycle);
+    void writeXRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
+    void writeYRegDep         (const RegIndex_t&, const Cycles& cycle);
+    void writeYRegPairDep     (const RegIndex_t&, const Cycles& cycle);
+    void writeYRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
+    void writeGRegDep         (const RegIndex_t&, const Cycles& cycle);
+    void writeGRegPairDep     (const RegIndex_t&, const Cycles& cycle);
+    void writeGRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
+    void writeMRegDep         (const RegIndex_t&, const Cycles& cycle);
+    void writeMRegPairDep     (const RegIndex_t&, const Cycles& cycle);
+    void writeMRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
+
+  private:
+    // Factory of dispatch modes.
+    DispMode_t dispModeFactory (const PipelineState& pipelineState) const;
+
+    // Factory of functional unit delay slots.
+    Cycles funcUnitLatencyFactory (const OpClass &opClass) const;
 
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
@@ -501,8 +534,6 @@ class HybridCPU : public BaseSimpleCPU
                     Opd32f_t &val, Opd32f_t &mask)
     {}
 
-    // Factory of functional unit delay slots.
-    Cycles funcUnitDSFactory (const OpClass &opClass) const;
 
   private:
     // Python configuration variables.

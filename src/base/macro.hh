@@ -31,6 +31,6 @@
 
 // Output formats of registers.
 #define IO_REGINDEX DEC
-#define IO_REGVALUE "0x" << std::hex << std::setfill (0) << std::setw (8)
+#define IO_REGVALUE "0x" << std::hex << std::setfill ('0') << std::setw (8)
 
 #endif // __BASE_MACRO_HH__
