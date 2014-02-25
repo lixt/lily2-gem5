@@ -110,6 +110,22 @@ HybridCPU::init()
     initPipelineMacho ();
 }
 
+const std::string HybridCPU::PipelineStateStr[] =
+{
+    "FaultState",
+    "R_Idle",
+    "R_Run",
+    "R_Flush",
+    "R_InstWait",
+    "R_Advance",
+
+    "V_Idle",
+    "R_2_R",
+    "R_2_V",
+    "V_2_R",
+    "V_2_V",
+};
+
 HybridCPU::HybridCPU(HybridCPUParams *p)
     : BaseSimpleCPU(p), tickEvent(this), width(p->width), locked(false),
       simulate_data_stalls(p->simulate_data_stalls),
@@ -126,7 +142,7 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       currentBBV(0, 0),
       currentBBVInstCount(0),
       pipelineMacho (R_Idle),
-      XRegDepTable (), YRegDepTable (), GRegDepTable (), MRegDepTable (),
+      xRegDepTable (), yRegDepTable (), gRegDepTable (), mRegDepTable (),
       IssueWidth (p->IssueWidth),
       IntArithDS (p->IntArithDS),
       IntMoveDS (p->IntMoveDS),
@@ -485,7 +501,9 @@ HybridCPU::tick()
 {
 #if DEBUG
     std::cout << std::endl;
-    std::cout << "********************** NEW CYCLE **********************" << std::endl;
+    std::cout << "********************** CYCLE "
+              << cycle
+              << " **********************" << std::endl;
 #endif
 
     DPRINTF(HybridCPU, "Tick\n");
@@ -512,9 +530,6 @@ HybridCPU::tick()
         curPipelineState = pipelineMacho.getCurState ();
 
         while (curPipelineState == R_Idle || curPipelineState == R_Run) {
-            // Gets the PCState from the thread.
-            TheISA::PCState pcState = thread->pcState ();
-
             // Fetches the instruction.
             fetch ();
 
@@ -534,11 +549,14 @@ HybridCPU::tick()
             postExecute ();
         }
 
+        // Sets the pipeline state callbacks.
+        setCallback ();
+
         // Calls the pre-update corresponding callbacks.
         callPrePipelineCallback ();
 
-        // Commits the instructions.
-        update ();
+        // Renews the pipeline.
+        renew ();
 
         // Calls the post-update corresponding callbacks.
         callPostPipelineCallback ();
@@ -802,7 +820,12 @@ HybridCPU::rPreExecute (void)
 
 #if DEBUG
     std::cout << "issued insts: " << issued << std::endl;
-    std::cout << "register dependence table: ";
+    std::cout << "x register dependence table:" << std::endl;
+    xRegDepTable.print (std::cout);
+    std::cout << "y register dependence table:" << std::endl;
+    yRegDepTable.print (std::cout);
+    std::cout << "g register dependence table:" << std::endl;
+    gRegDepTable.print (std::cout);
     std::cout << "----------> rPreExecute" << std::endl << std::endl;
 #endif
 }
@@ -842,8 +865,45 @@ HybridCPU::postExecute (void)
 
     curPipelineState = pipelineMacho.transfer (curPipelineEvent);
 
+    // Advance the pc if dispatch is success.
+    if (curStaticInst) {
+        TheISA::PCState pcState = thread->pcState ();
+        pcState.advance ();
+        thread->pcState (pcState);
+    }
+
 #if DEBUG
+    debugPipeline (std::cout);
     std::cout << "----------> postExecute" << std::endl << std::endl;
+#endif
+}
+
+
+void
+HybridCPU::renew (void)
+{
+#if DEBUG
+    std::cout << "<---------- renew" << std::endl;
+#endif
+
+    Cycles decrRegBackCycleDelta (1);
+
+    // Renew the dispatch infos.
+    renewIssued ();
+
+    renewRegDep (decrRegBackCycleDelta);
+
+    // Writes the register file buffers back to register files.
+    renewRegFileBuf (decrRegBackCycleDelta);
+
+    // Increase the cycles.
+    renewCycle (decrRegBackCycleDelta);
+
+    // Resets the pipeline state to idle.
+    pipelineMacho.transfer (curPipelineEvent);
+
+#if DEBUG
+    std::cout << "----------> renew" << std::endl << std::endl;
 #endif
 }
 
@@ -926,73 +986,73 @@ HybridCPU::isOpRegDep (Op_t *op) const
 bool
 HybridCPU::isXRegDep (const RegIndex_t& regIndex) const
 {
-    return XRegDepTable.isRegDep (regIndex);
+    return xRegDepTable.isRegDep (regIndex);
 }
 
 bool
 HybridCPU::isXRegPairDep (const RegIndex_t& regIndex) const
 {
-    return XRegDepTable.isRegPairDep (regIndex);
+    return xRegDepTable.isRegPairDep (regIndex);
 }
 
 bool
 HybridCPU::isXRegPairPairDep (const RegIndex_t& regIndex) const
 {
-    return XRegDepTable.isRegPairPairDep (regIndex);
+    return xRegDepTable.isRegPairPairDep (regIndex);
 }
 
 bool
 HybridCPU::isYRegDep (const RegIndex_t& regIndex) const
 {
-    return YRegDepTable.isRegDep (regIndex);
+    return yRegDepTable.isRegDep (regIndex);
 }
 
 bool
 HybridCPU::isYRegPairDep (const RegIndex_t& regIndex) const
 {
-    return YRegDepTable.isRegPairDep (regIndex);
+    return yRegDepTable.isRegPairDep (regIndex);
 }
 
 bool
 HybridCPU::isYRegPairPairDep (const RegIndex_t& regIndex) const
 {
-    return YRegDepTable.isRegPairPairDep (regIndex);
+    return yRegDepTable.isRegPairPairDep (regIndex);
 }
 
 bool
 HybridCPU::isGRegDep (const RegIndex_t& regIndex) const
 {
-    return GRegDepTable.isRegDep (regIndex);
+    return gRegDepTable.isRegDep (regIndex);
 }
 
 bool
 HybridCPU::isGRegPairDep (const RegIndex_t& regIndex) const
 {
-    return GRegDepTable.isRegPairDep (regIndex);
+    return gRegDepTable.isRegPairDep (regIndex);
 }
 
 bool
 HybridCPU::isGRegPairPairDep (const RegIndex_t& regIndex) const
 {
-    return GRegDepTable.isRegPairPairDep (regIndex);
+    return gRegDepTable.isRegPairPairDep (regIndex);
 }
 
 bool
 HybridCPU::isMRegDep (const RegIndex_t& regIndex) const
 {
-    return MRegDepTable.isRegDep (regIndex);
+    return mRegDepTable.isRegDep (regIndex);
 }
 
 bool
 HybridCPU::isMRegPairDep (const RegIndex_t& regIndex) const
 {
-    return MRegDepTable.isRegPairDep (regIndex);
+    return mRegDepTable.isRegPairDep (regIndex);
 }
 
 bool
 HybridCPU::isMRegPairPairDep (const RegIndex_t& regIndex) const
 {
-    return MRegDepTable.isRegPairPairDep (regIndex);
+    return mRegDepTable.isRegPairPairDep (regIndex);
 }
 
 void
@@ -1060,103 +1120,112 @@ HybridCPU::writeOpRegDep (Op_t *op)
 void
 HybridCPU::writeXRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    XRegDepTable.insertReg (regIndex, regBackCycle);
+    xRegDepTable.insertReg (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeXRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    XRegDepTable.insertRegPair (regIndex, regBackCycle);
+    xRegDepTable.insertRegPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeXRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    XRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+    xRegDepTable.insertRegPairPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeYRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    YRegDepTable.insertReg (regIndex, regBackCycle);
+    yRegDepTable.insertReg (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeYRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    YRegDepTable.insertRegPair (regIndex, regBackCycle);
+    yRegDepTable.insertRegPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeYRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    YRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+    yRegDepTable.insertRegPairPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeGRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    GRegDepTable.insertReg (regIndex, regBackCycle);
+    gRegDepTable.insertReg (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeGRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    GRegDepTable.insertRegPair (regIndex, regBackCycle);
+    gRegDepTable.insertRegPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeGRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    GRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+    gRegDepTable.insertRegPairPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeMRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    MRegDepTable.insertReg (regIndex, regBackCycle);
+    mRegDepTable.insertReg (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeMRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    MRegDepTable.insertRegPair (regIndex, regBackCycle);
+    mRegDepTable.insertRegPair (regIndex, regBackCycle);
 }
 
 void
 HybridCPU::writeMRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    MRegDepTable.insertRegPairPair (regIndex, regBackCycle);
-}
-
-
-void
-HybridCPU::update (void)
-{
-#if DEBUG
-    std::cout << "<----------" << std::endl;
-#endif
-
-    ;
-
-#if DEBUG
-    std::cout << "----------> update" << std::endl << std::endl;
-#endif
+    mRegDepTable.insertRegPairPair (regIndex, regBackCycle);
 }
 
 void
-HybridCPU::updateRegDepTable (void)
+HybridCPU::debugPipeline (std::ostream& os) const
 {
+    std::string pipelineStateStr = PipelineStateStr[curPipelineState];
+    os << "pipeline state = " << pipelineStateStr << std::endl;
 }
 
 void
-HybridCPU::updateRegFileBuf (void)
+HybridCPU::renewIssued (void)
 {
+    issued = 0;
 }
 
 void
-HybridCPU::updateCycle (void)
+HybridCPU::renewRegDep (const Cycles& decrRegBackCycleDelta)
 {
+    xRegDepTable.update (decrRegBackCycleDelta);
+    yRegDepTable.update (decrRegBackCycleDelta);
+    gRegDepTable.update (decrRegBackCycleDelta);
+    mRegDepTable.update (decrRegBackCycleDelta);
+}
+
+void
+HybridCPU::renewRegFileBuf (const Cycles& decrRegBackCycleDelta)
+{
+}
+
+//void
+//HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
+//{
+//
+//}
+
+void
+HybridCPU::renewCycle (const Cycles& incrCycleDelta)
+{
+    cycle = cycle + incrCycleDelta;
 }
 
 void
@@ -1240,7 +1309,7 @@ HybridCPU::initPipelineMacho (void)
     // Tries to issue inst in R_Idle state.
     pipelineMacho.regStateEvent (R_Idle, Issue, R_Run);
     // Stays R_Idle if issue is failure.
-    pipelineMacho.regStateEvent (R_Idle, NoIssue, R_Idle);
+    pipelineMacho.regStateEvent (R_Idle, NoIssue, R_Advance);
     // Turns to R_Advance or R_Flush if branch inst is met.
     pipelineMacho.regStateEvent (R_Idle, BPreded, R_Advance);
     pipelineMacho.regStateEvent (R_Idle, MisBPred, R_Flush);
@@ -1311,9 +1380,9 @@ HybridCPU::callPostPipelineCallback (void)
 }
 
 void
-HybridCPU::setCallback (PipelineState state)
+HybridCPU::setCallback (void)
 {
-    switch (state) {
+    switch (curPipelineState) {
         case R_InstWait:
             prePipelineCallback = &HybridCPU::callback_R_InstWait;
             postPipelineCallback = NULL;

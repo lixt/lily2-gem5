@@ -68,7 +68,7 @@ class Lily2StaticInst : public StaticInst
     {
         return numDestOps;
     }
-    void setNumDestOps (OpCount_t _numDestOps)
+    void setNumDestOps (OpCount_t numDestOps)
     {
         this->numDestOps = numDestOps;
     }

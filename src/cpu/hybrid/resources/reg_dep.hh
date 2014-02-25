@@ -66,10 +66,10 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
         bool operator() (key_type& key, mapped_type& mapped)
         {
             if (mapped <= regBackCycleDelta) {
-                mapped = 0;
+                mapped = Cycles ();
                 return true;
             } else {
-                mapped -= regBackCycleDelta;
+                mapped = mapped - regBackCycleDelta;
                 return false;
             }
         }
@@ -153,7 +153,7 @@ std::vector<typename RegDepTable<FileName, RegNum>::Position>
 RegDepTable<FileName, RegNum>::decrRegBackCycle (const Cycles& regBackCycleDelta)
 {
     DecrRegBackCycleFunctor decrRegBackCycleFunctor (regBackCycleDelta);
-    Base::traverseAndReturn (decrRegBackCycleFunctor);
+    return Base::traverseAndReturn (decrRegBackCycleFunctor);
 }
 
 template <TheISA::RegFile_t FileName, size_t RegNum>

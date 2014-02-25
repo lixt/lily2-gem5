@@ -295,24 +295,7 @@ class HybridCPU : public BaseSimpleCPU
         R_InstWait     , // Waits for iterative inst.
         R_Advance      , // Quits this iteration.
 
-        NumRStates     ,
-
         V_Idle         ,
-        V_Run          ,
-        V_Flush        ,
-        V_FlushRun     ,
-        V_Stall        ,
-        V_StallRun     ,
-        V_InstWait     ,
-        V_InstWaitRun  ,
-        V_ICacheWait   ,
-        V_ICacheWaitRun,
-        V_DCacheWait   ,
-        V_DCacheWaitRun,
-        V_Advance      ,
-
-        NumVStates     ,
-
         R_2_R          ,
         R_2_V          ,
         V_2_R          ,
@@ -320,6 +303,8 @@ class HybridCPU : public BaseSimpleCPU
 
         NumStates      ,
     };
+
+    static const std::string PipelineStateStr[NumStates];
 
     // Types for pipeline events.
     enum PipelineEvent {
@@ -356,6 +341,8 @@ class HybridCPU : public BaseSimpleCPU
     PipelineCallback prePipelineCallback;
     PipelineCallback postPipelineCallback;
 
+    Cycles cycle;
+
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
 
@@ -363,10 +350,10 @@ class HybridCPU : public BaseSimpleCPU
     int issued;
 
     // Register dependence tables.
-    RegDepTable<TheISA::REG_X, TheISA::NumXRegs> XRegDepTable;
-    RegDepTable<TheISA::REG_Y, TheISA::NumYRegs> YRegDepTable;
-    RegDepTable<TheISA::REG_G, TheISA::NumGRegs> GRegDepTable;
-    RegDepTable<TheISA::REG_M, TheISA::NumMRegs> MRegDepTable;
+    RegDepTable<TheISA::REG_X, TheISA::NumXRegs> xRegDepTable;
+    RegDepTable<TheISA::REG_Y, TheISA::NumYRegs> yRegDepTable;
+    RegDepTable<TheISA::REG_G, TheISA::NumGRegs> gRegDepTable;
+    RegDepTable<TheISA::REG_M, TheISA::NumMRegs> mRegDepTable;
 
   private:
     // Initializes the pipeline state machine.
@@ -375,7 +362,7 @@ class HybridCPU : public BaseSimpleCPU
     void callPrePipelineCallback (void);
     void callPostPipelineCallback (void);
     // Sets the pre/post callbacks.
-    void setCallback (PipelineState);
+    void setCallback (void);
 
     // Fetches the instruction from icache and returns the fetch cycles.
     // The fetched instruction machine code is stored in the member
@@ -409,11 +396,7 @@ class HybridCPU : public BaseSimpleCPU
     void postExecute (void);
 
     // Updates the cycle-related modules.
-    void update (void);
-    // COMMIT auxiliary function.
-    void updateRegDepTable (void);
-    void updateRegFileBuf (void);
-    void updateCycle (void);
+    void renew (void);
 
   private:
     // Interfaces for member functions.
@@ -447,6 +430,14 @@ class HybridCPU : public BaseSimpleCPU
     void writeMRegDep         (const RegIndex_t&, const Cycles& cycle);
     void writeMRegPairDep     (const RegIndex_t&, const Cycles& cycle);
     void writeMRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
+    void renewIssued          (void);
+    void renewRegDep          (const Cycles&);
+    void renewRegFileBuf      (const Cycles&);
+    void renewCycle           (const Cycles&);
+
+  private:
+    // Interfaces for debugging.
+    void debugPipeline (std::ostream&) const;
 
   private:
     // Factory of dispatch modes.

@@ -643,8 +643,14 @@ TEMPLATE_CLASS::print (std::ostream &os, PrintFunctor pfunc) const
 
         for (int j = 0; j != Way; ++j) {
             Position curPos (i, j);
-            pfunc (os, entryKey (curPos), entryMapped (curPos));
-            os << std::endl;
+
+            if (isPosValid (curPos)) {
+                pfunc (os, entryKey (curPos), entryMapped (curPos));
+            } else {
+                os << "(nil)";
+            }
+
+            os << " | ";
         }
 
         os << std::endl;
