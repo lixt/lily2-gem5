@@ -277,12 +277,25 @@ class HybridCPU : public BaseSimpleCPU
     typedef TheISA::RegCount_t RegCount_t;
     typedef TheISA::RegFile_t RegFile_t;
     typedef TheISA::RegIndex_t RegIndex_t;
+    typedef TheISA::XRegValue_t XRegValue_t;
+    typedef TheISA::YRegValue_t YRegValue_t;
+    typedef TheISA::GRegValue_t GRegValue_t;
+    typedef TheISA::MRegValue_t MRegValue_t;
     // arch/lily2/operands.hh
     typedef TheISA::OpCount_t OpCount_t;
     typedef TheISA::OpLabel_t OpLabel_t;
     typedef TheISA::Op_t Op_t;
     // arch/lily2/static_inst.hh
     typedef Lily2ISAInst::Lily2StaticInstPtr Lily2StaticInstPtr;
+    // cpu/simple_thread.hh
+    typedef SimpleThread::XRegFile XRegFile;
+    typedef SimpleThread::YRegFile YRegFile;
+    typedef SimpleThread::GRegFile GRegFile;
+    typedef SimpleThread::MRegFile MRegFile;
+    typedef SimpleThread::XRegFileBuf XRegFileBuf;
+    typedef SimpleThread::YRegFileBuf YRegFileBuf;
+    typedef SimpleThread::GRegFileBuf GRegFileBuf;
+    typedef SimpleThread::MRegFileBuf MRegFileBuf;
 
   private:
     // Types for pipeline states.
@@ -433,6 +446,7 @@ class HybridCPU : public BaseSimpleCPU
     void renewIssued          (void);
     void renewRegDep          (const Cycles&);
     void renewRegFileBuf      (const Cycles&);
+    void renewXRegFileBuf     (const Cycles&);
     void renewCycle           (const Cycles&);
 
   private:

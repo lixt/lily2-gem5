@@ -102,20 +102,22 @@ class SimpleThread : public ThreadState
     typedef TheISA::MiscReg MiscReg;
     typedef TheISA::FloatReg FloatReg;
     typedef TheISA::FloatRegBits FloatRegBits;
+
+  public:
     typedef TheISA::RegCount_t RegCount_t;
     typedef TheISA::RegIndex_t RegIndex_t;
     typedef TheISA::XRegValue_t XRegValue_t;
     typedef TheISA::YRegValue_t YRegValue_t;
     typedef TheISA::GRegValue_t GRegValue_t;
     typedef TheISA::MRegValue_t MRegValue_t;
-    typedef TheISA::RegFile<TheISA::REG_X, TheISA::NumXRegs, XRegValue_t> XRegFile;
-    typedef TheISA::RegFile<TheISA::REG_Y, TheISA::NumYRegs, YRegValue_t> YRegFile;
-    typedef TheISA::RegFile<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> GRegFile;
-    typedef TheISA::RegFile<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> MRegFile;
-    typedef TheISA::RegFileBuf<TheISA::REG_X, TheISA::NumXRegs, XRegValue_t> XRegFileBuf;
-    typedef TheISA::RegFileBuf<TheISA::REG_Y, TheISA::NumYRegs, YRegValue_t> YRegFileBuf;
-    typedef TheISA::RegFileBuf<TheISA::REG_G, TheISA::NumGRegs, GRegValue_t> GRegFileBuf;
-    typedef TheISA::RegFileBuf<TheISA::REG_M, TheISA::NumMRegs, MRegValue_t> MRegFileBuf;
+    typedef TheISA::RegFile<TheISA::NumXRegs, XRegValue_t> XRegFile;
+    typedef TheISA::RegFile<TheISA::NumYRegs, YRegValue_t> YRegFile;
+    typedef TheISA::RegFile<TheISA::NumGRegs, GRegValue_t> GRegFile;
+    typedef TheISA::RegFile<TheISA::NumGRegs, GRegValue_t> MRegFile;
+    typedef TheISA::RegFileBuf<TheISA::NumXRegs, XRegValue_t> XRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::NumYRegs, YRegValue_t> YRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::NumGRegs, GRegValue_t> GRegFileBuf;
+    typedef TheISA::RegFileBuf<TheISA::NumMRegs, MRegValue_t> MRegFileBuf;
 
   public:
     typedef ThreadContext::Status Status;
@@ -364,53 +366,29 @@ class SimpleThread : public ThreadState
         mRegBufs.insert (regIndex, regValue, regMask, regBackCycle);
     }
 
-    XRegFile&
-    getXRegs (void)
-    {
-        return xRegs;
-    }
+    XRegFile* getXRegs (void) { return &xRegs; }
+    const XRegFile* getXRegs (void) const { return &xRegs; }
 
-    YRegFile&
-    getYRegs (void)
-    {
-        return yRegs;
-    }
+    YRegFile* getYRegs (void) { return &yRegs; }
+    const YRegFile* getYRegs (void) const { return &yRegs; }
 
-    GRegFile&
-    getGRegs (void)
-    {
-        return gRegs;
-    }
+    GRegFile* getGRegs (void) { return &gRegs; }
+    const GRegFile* getGRegs (void) const { return &gRegs; }
 
-    MRegFile&
-    getMRegs (void)
-    {
-        return mRegs;
-    }
+    MRegFile* getMRegs (void) { return &mRegs; }
+    const MRegFile* getMRegs (void) const { return &mRegs; }
 
-    XRegFileBuf&
-    getXRegBufs (void)
-    {
-        return xRegBufs;
-    }
+    XRegFileBuf* getXRegBufs (void) { return &xRegBufs; }
+    const XRegFileBuf* getXRegBufs (void) const { return &xRegBufs; }
 
-    YRegFileBuf&
-    getYRegBufs (void)
-    {
-        return yRegBufs;
-    }
+    YRegFileBuf* getYRegBufs (void) { return &yRegBufs; }
+    const YRegFileBuf* getYRegBufs (void) const { return &yRegBufs; }
 
-    GRegFileBuf&
-    getGRegBufs (void)
-    {
-        return gRegBufs;
-    }
+    GRegFileBuf* getGRegBufs (void) { return &gRegBufs; }
+    const GRegFileBuf* getGRegBufs (void) const { return &gRegBufs; }
 
-    MRegFileBuf&
-    getMRegBufs (void)
-    {
-        return mRegBufs;
-    }
+    MRegFileBuf* getMRegBufs (void) { return &mRegBufs; }
+    const MRegFileBuf* getMRegBufs (void) const { return &mRegBufs; }
 
     TheISA::PCState
     pcState()

@@ -53,8 +53,8 @@ class OpClass(Enum):
             'SimdFloatCvt', 'SimdFloatDiv', 'SimdFloatMisc', 'SimdFloatMult',
             'SimdFloatMultAcc', 'SimdFloatSqrt',
             'MemRead', 'MemWrite', 'IprAccess', 'InstPrefetch',
-            'IntArith', 'IntMove',
-            'SimdIntArith']
+            'IntArith', 'IntMove', 'IntLogic', 'IntTest', 'IntShift',
+            'SimdIntArith', 'SimdIntLogic', 'SimdIntTest', 'SimdIntShift']
 
 class OpDesc(SimObject):
     type = 'OpDesc'

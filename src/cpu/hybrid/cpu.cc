@@ -1214,13 +1214,34 @@ HybridCPU::renewRegDep (const Cycles& decrRegBackCycleDelta)
 void
 HybridCPU::renewRegFileBuf (const Cycles& decrRegBackCycleDelta)
 {
+    renewXRegFileBuf (decrRegBackCycleDelta);
+    //renewYRegFileBuf (decrRegBackCycleDelta);
+    //renewGRegFileBuf (decrRegBackCycleDelta);
+    //renewMRegFileBuf (decrRegBackCycleDelta);
 }
 
-//void
-//HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
-//{
-//
-//}
+void
+HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
+{
+    XRegFile *xRegFile = thread->getXRegs ();
+    XRegFileBuf *xRegFileBuf = thread->getXRegBufs ();
+
+    std::vector<XRegFileBuf::Position> vecRemovePos =
+        xRegFileBuf->decrRegBackCycle (decrRegBackCycleDelta);
+
+    for (std::vector<XRegFileBuf::Position>::iterator it = vecRemovePos.begin ();
+         it != vecRemovePos.end (); ++it) {
+        RegIndex_t regIndex  = xRegFileBuf->getRegIndex (*it);
+        XRegValue_t regValue = xRegFileBuf->getRegValue (*it);
+        XRegValue_t regMask  = xRegFileBuf->getRegMask  (*it);
+
+        // The real register writing.
+        xRegFile->setRegValue (regIndex, regValue & regMask);
+
+        // Removes the due registers.
+        xRegFileBuf->remove (*it);
+    }
+}
 
 void
 HybridCPU::renewCycle (const Cycles& incrCycleDelta)
@@ -1504,32 +1525,32 @@ HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
     Op32f_t *op = dynamic_cast<Op32f_t *> (si->getSrcOp (idx));
     assert (op);
 
-    if (op->immFlag ()) {
-        // The Immediate value is already stored in OP.
-        ;
-    } else {
-        uint32_t val;
-        switch (op->regFile ()) {
-            case TheISA::REG_X:
-                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
-                op->setFval (*(reinterpret_cast<float *> (&val)));
-                break;
-            case TheISA::REG_Y:
-                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
-                op->setFval (*(reinterpret_cast<float *> (&val)));
-                break;
-            case TheISA::REG_G:
-                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
-                op->setFval (*(reinterpret_cast<float *> (&val)));
-                break;
-            case TheISA::REG_M:
-                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
-                op->setFval (*(reinterpret_cast<float *> (&val)));
-                break;
-            default:
-                assert (0);
-        }
-    }
+//    if (op->immFlag ()) {
+//        // The Immediate value is already stored in OP.
+//        ;
+//    } else {
+//        uint32_t val;
+//        switch (op->regFile ()) {
+//            case TheISA::REG_X:
+//                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
+//                op->setFval (*(reinterpret_cast<float *> (&val)));
+//                break;
+//            case TheISA::REG_Y:
+//                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
+//                op->setFval (*(reinterpret_cast<float *> (&val)));
+//                break;
+//            case TheISA::REG_G:
+//                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
+//                op->setFval (*(reinterpret_cast<float *> (&val)));
+//                break;
+//            case TheISA::REG_M:
+//                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
+//                op->setFval (*(reinterpret_cast<float *> (&val)));
+//                break;
+//            default:
+//                assert (0);
+//        }
+//    }
 
     return *op;
 }
@@ -1574,39 +1595,39 @@ void
 HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
                      const Op32f_t& val, const Op32f_t& mask)
 {
-    Op32f_t *op;
-    assert (op = dynamic_cast<Op32f_t *> (si->getDestOp (idx)));
-
-    uint32_t regValue = val.bval ();
-    uint32_t regMask = mask.bval ();
-    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
-
-    op->setBval (regValue);
-
-    switch (op->regFile ()) {
-        case TheISA::REG_X:
-            (thread->getXRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
-            break;
-
-        case TheISA::REG_Y:
-            (thread->getYRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
-            break;
-
-        case TheISA::REG_G:
-            (thread->getGRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
-            break;
-
-        case TheISA::REG_M:
-            (thread->getMRegBufs ()).insert (op->regIndex (),
-                    regValue, regMask, regBackCycle);
-            break;
-
-        default:
-            assert (0);
-    }
+//    Op32f_t *op;
+//    assert (op = dynamic_cast<Op32f_t *> (si->getDestOp (idx)));
+//
+//    uint32_t regValue = val.bval ();
+//    uint32_t regMask = mask.bval ();
+//    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
+//
+//    op->setBval (regValue);
+//
+//    switch (op->regFile ()) {
+//        case TheISA::REG_X:
+//            (thread->getXRegBufs ()).insert (op->regIndex (),
+//                    regValue, regMask, regBackCycle);
+//            break;
+//
+//        case TheISA::REG_Y:
+//            (thread->getYRegBufs ()).insert (op->regIndex (),
+//                    regValue, regMask, regBackCycle);
+//            break;
+//
+//        case TheISA::REG_G:
+//            (thread->getGRegBufs ()).insert (op->regIndex (),
+//                    regValue, regMask, regBackCycle);
+//            break;
+//
+//        case TheISA::REG_M:
+//            (thread->getMRegBufs ()).insert (op->regIndex (),
+//                    regValue, regMask, regBackCycle);
+//            break;
+//
+//        default:
+//            assert (0);
+//    }
 }
 
 DispMode_t

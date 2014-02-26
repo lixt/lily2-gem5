@@ -67,12 +67,6 @@ typedef enum RegFile_t
     NUM_REG_FILE // Number of register labels.
 } RegFile_t;
 
-// Characters for register files.
-static const char *RegFileStr[NUM_REG_FILE] =
-{
-    "nil", "x", "y", "g", "m",
-};
-
 // Types for three general register file.
 typedef uint32_t XRegValue_t;
 typedef uint32_t YRegValue_t;
@@ -80,18 +74,17 @@ typedef uint32_t GRegValue_t;
 typedef uint32_t MRegValue_t;
 
 // Types for register files.
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
 {
   public:
+    // Base class.
     typedef Table<RegNum, 1, RegIndex_t, RegValue_t> Base;
 
-    // Typedef for the types in base class.
+    // Base class types.
     typedef typename Base::key_type key_type;
     typedef typename Base::mapped_type mapped_type;
     typedef typename Base::value_type value_type;
-
-    // Typedef for the POSITION.
     typedef typename Base::Position Position;
 
   public:
@@ -106,63 +99,65 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
     // Sets the register value according to the given REGINDEX and new REGVALUE.
     void setRegValue (const RegIndex_t &regIndex, const RegValue_t &regValue);
 
-  public:
-    // Prints out debug information of the register file.
-    void print (std::ostream &os) const;
-    void printReg (std::ostream &os, const RegIndex_t &regIndex) const;
+    // Prints out readable debug information of the register file.
+    template <size_t ShadowRegNum, class ShadowRegValue_t>
+    friend std::ostream& operator<< (std::ostream&, const RegFile<ShadowRegNum, ShadowRegValue_t>&);
 
   private:
-    class PrintFunctor
+    // Bottom function called by output operator "<<".
+    void print (std::ostream &os) const;
+
+  private:
+    struct PrintFunctor
     {
-      public:
         void operator() (std::ostream &os, const RegIndex_t &regIndex, const RegValue_t &regValue)
         {
-            os << RegFileStr[FileName]
-               << "RegIndex = " << IO_REGINDEX << regIndex
-               << ", "
-               << "RegValue = " << IO_REGVALUE << regValue;
+            os << "("
+               << IO_REGINDEX << regIndex
+               << ","
+               << IO_REGVALUE << regValue
+               << ")";
         }
     };
 };
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 RegValue_t
-RegFile<FileName, RegNum, RegValue_t>::getRegValue (const RegIndex_t &regIndex) const
+RegFile<RegNum, RegValue_t>::getRegValue (const RegIndex_t &regIndex) const
 {
     Position accessPos (regIndex, 1);
     return Base::access (accessPos);
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 void
-RegFile<FileName, RegNum, RegValue_t>::setRegValue (const RegIndex_t &regIndex,
-                                                    const RegValue_t &regValue)
+RegFile<RegNum, RegValue_t>::setRegValue (const RegIndex_t &regIndex,
+                                          const RegValue_t &regValue)
 {
     Position mutatePos (regIndex, 1);
 
-    if (isPosValid (mutatePos)) {
+    if (Base::isPosValid (mutatePos)) {
         Base::mutate (mutatePos, regValue);
     } else {
         Base::insert (regIndex, regValue);
     }
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 void
-RegFile<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
+RegFile<RegNum, RegValue_t>::print (std::ostream &os) const
 {
-    PrintFunctor pfunc;
-    Base::print (os, pfunc);
+    Base::print (os, PrintFunctor ());
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
-void
-RegFile<FileName, RegNum, RegValue_t>::printReg (std::ostream &os,
-                                                 const RegIndex_t &regIndex) const
+template <size_t ShadowRegNum, class ShadowRegValue_t>
+std::ostream&
+operator<< (std::ostream& os, const RegFile<ShadowRegNum, ShadowRegValue_t>& regFile)
 {
-    PrintFunctor pfunc;
-    pfunc (os, regIndex, getRegValue (regIndex));
+    regFile.print (os);
+    return os;
 }
+
 
 
 // Types for the mapped type of the register buffer.
@@ -172,135 +167,157 @@ struct RegFileBufMapped_t
     RegValue_t regValue;
     RegValue_t regMask;
     Cycles regBackCycle;
+
+    RegFileBufMapped_t (void) :
+        regValue (), regMask (), regBackCycle () {}
+
+    RegFileBufMapped_t (const RegValue_t& regValue,
+            const RegValue_t& regMask, const Cycles& regBackCycle) :
+        regValue (regValue), regMask (regMask), regBackCycle (regBackCycle) {}
 };
 
 // Each register has ten register buffers. This seems to be big enough.
 const size_t BufNum = 2;
 
 // Types for register file buffers.
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<RegValue_t>>
 {
   public:
-    // Typedef for the base class.
+    // Base class.
     typedef Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<RegValue_t>> Base;
-
-    // Typedef for the types in base class.
+    // Base class type.
     typedef typename Base::key_type key_type;
     typedef typename Base::mapped_type mapped_type;
     typedef typename Base::value_type value_type;
-
-    // Typedef for the POSITION.
     typedef typename Base::Position Position;
 
   public:
-    // Sets the register buffer.
+    // Inserts the new value into register file buffer.
     void insert (const RegIndex_t &regIndex, const RegValue_t &regValue,
                  const RegValue_t &regMask, const Cycles &regBackCycle);
 
-    // Gets the register value and register mask according to the given position.
+    // Decreases the register back cycles in the register dependence table.
+    std::vector<Position> decrRegBackCycle (const Cycles& regBackCycleDelta);
+
+    // Removes out the due registers.
+    void remove (const Position& removePos);
+
+    // Gets the index, value and mask of the due registers.
+    RegIndex_t getRegIndex (const Position &accessPos) const;
     RegValue_t getRegValue (const Position &accessPos) const;
-    RegValue_t getRegMask (const Position &accessPos) const;
+    RegValue_t getRegMask  (const Position &accessPos) const;
 
-    // Updates the register back cycles per cycle and returns a vector of position
-    // whose register back cycle is equal to zero.
-    std::vector<Position> updateRegBackCycle (Cycles regBackCycleDelta);
+    // Output operator of the register file buffer.
+    template <size_t ShadowRegNum, class ShadowRegValue_t>
+    friend std::ostream& operator<< (std::ostream& os, const RegFileBuf<ShadowRegNum, ShadowRegValue_t>&);
 
-  public:
+  private:
     // Prints the debug information of register file buffer.
     void print (std::ostream &os) const;
 
   private:
-    // Functor used in UPDATEREGBACKCYCLE.
-    class UpdateRegBackCycleFunctor
+    // Functor used in function "decrRegBackCycle".
+    struct DecrRegBackCycleFunctor
     {
       public:
-        explicit UpdateRegBackCycleFunctor (Cycles regBackCycleDelta) :
+        explicit
+        DecrRegBackCycleFunctor (const Cycles& regBackCycleDelta) :
             regBackCycleDelta (regBackCycleDelta) {}
 
       public:
         bool operator() (key_type &key, mapped_type &mapped)
         {
-            bool retval;
-
-            if (mapped.regBackCycle >= regBackCycleDelta) {
-                retval = false;
-                mapped.regBackCycle = mapped.regBackCycle - regBackCycleDelta;
+            if (mapped.regBackCycle <= regBackCycleDelta) {
+                mapped.regBackCycle = Cycles ();
+                return true;
             } else {
-                retval = true;
-                mapped.regBackCycle = 0;
+                mapped.regBackCycle = mapped.regBackCycle - regBackCycleDelta;
+                return false;
             }
-
-            return retval;
         }
 
       private:
         Cycles regBackCycleDelta;
     };
 
-    // Functor used in PRINT.
-    class PrintFunctor
+    // Functor used in function "print".
+    struct PrintFunctor
     {
-      public:
         void operator() (std::ostream &os, const key_type &key, const mapped_type &mapped)
         {
-            os << RegFileStr[FileName]
-               << "RegIndex = " << IO_REGINDEX << key
-               << ", "
-               << "RegValue = " << IO_REGVALUE << mapped.regValue
-               << ", "
-               << "RegMask = " << IO_REGVALUE << mapped.regMask
-               << ", "
-               << "RegBackCycle = " << IO_CYCLE << mapped.regBackCycle;
+            os << "("
+               << IO_REGINDEX << key << ","
+               << IO_REGVALUE << mapped.regValue << ","
+               << IO_REGVALUE << mapped.regMask << ","
+               << IO_CYCLE    << mapped.regBackCycle
+               << ")";
         }
     };
 };
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 void
-RegFileBuf<FileName, RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
-                                                  const RegValue_t &regValue,
-                                                  const RegValue_t &regMask,
-                                                  const Cycles &regBackCycle)
+RegFileBuf<RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
+                                        const RegValue_t &regValue,
+                                        const RegValue_t &regMask,
+                                        const Cycles &regBackCycle)
 {
-    mapped_type mapped;
-    mapped.regValue = regValue;
-    mapped.regMask = regMask;
-    mapped.regBackCycle = regBackCycle;
-
+    mapped_type mapped (regValue, regMask, regBackCycle);
     Base::insert (regIndex, mapped);
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
+RegIndex_t
+RegFileBuf<RegNum, RegValue_t>::getRegIndex (const Position& accessPos) const
+{
+    return Base::entryKey (accessPos);
+}
+
+template <size_t RegNum, class RegValue_t>
 RegValue_t
-RegFileBuf<FileName, RegNum, RegValue_t>::getRegValue (const Position &accessPos) const
+RegFileBuf<RegNum, RegValue_t>::getRegValue (const Position& accessPos) const
 {
     return (Base::access (accessPos)).regValue;
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 RegValue_t
-RegFileBuf<FileName, RegNum, RegValue_t>::getRegMask (const Position &accessPos) const
+RegFileBuf<RegNum, RegValue_t>::getRegMask (const Position& accessPos) const
 {
     return (Base::access (accessPos)).regMask;
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
-std::vector<typename RegFileBuf<FileName, RegNum, RegValue_t>::Position>
-RegFileBuf<FileName, RegNum, RegValue_t>::updateRegBackCycle (Cycles regBackCycleDelta)
+template <size_t RegNum, class RegValue_t>
+std::vector<typename RegFileBuf<RegNum, RegValue_t>::Position>
+RegFileBuf<RegNum, RegValue_t>::decrRegBackCycle (const Cycles& regBackCycleDelta)
 {
-    UpdateRegBackCycleFunctor func (regBackCycleDelta);
-    return Base::traverseAndReturn (func);
+    DecrRegBackCycleFunctor decrRegBackCycleFunctor (regBackCycleDelta);
+    return Base::traverseAndReturn (decrRegBackCycleFunctor);
 }
 
-template <RegFile_t FileName, size_t RegNum, class RegValue_t>
+template <size_t RegNum, class RegValue_t>
 void
-RegFileBuf<FileName, RegNum, RegValue_t>::print (std::ostream &os) const
+RegFileBuf<RegNum, RegValue_t>::remove (const Position& removePos)
+{
+    Base::remove (removePos);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFileBuf<RegNum, RegValue_t>::print (std::ostream& os) const
 {
     PrintFunctor pfunc;
     Base::print (os, pfunc);
 }
 
+template <size_t ShadowRegNum, class ShadowRegValue_t>
+std::ostream&
+operator<< (std::ostream& os, const RegFileBuf<ShadowRegNum, ShadowRegValue_t>& regFileBuf)
+{
+    regFileBuf.print (os);
+    return os;
+}
 
 using Lily2ISAInst::MaxInstSrcRegs;
 using Lily2ISAInst::MaxInstDestRegs;

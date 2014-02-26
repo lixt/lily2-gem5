@@ -48,13 +48,13 @@
 ##include "move.isa"
 
 //Include the logic formats
-//##include "logic.isa"
+##include "logic.isa"
 
 //Include the test formats
-//##include "test.isa"
+##include "test.isa"
 
 //Include the shift formats
-//##include "shift.isa"
+##include "shift.isa"
 
 //Include the move formats
 //##include "move.isa"
