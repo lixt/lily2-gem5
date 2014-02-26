@@ -56,6 +56,147 @@ decode FU default Unknown::unknown () {
                         } // ADD-relative.
                 }
 
+            0x1: //< FU(0b'00) + HI(0b'001)
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< AND.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::and_a ({{ wd = bitAnd (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::and_b_4_a ({{ qbd = bitAnd_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::and_h_2_a ({{ dhd = bitAnd_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::and_h_4_a ({{ qhd = bitAnd_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::and_w_2_a ({{ dwd = bitAnd_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::and_i_a ({{ wd = bitAnd (wa, i8); }});
+
+                        } //> AND.
+
+                    0x1: //< NAD.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::nad_a ({{ wd = bitNad (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::nad_b_4_a ({{ qbd = bitNad_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::nad_h_2_a ({{ dhd = bitNad_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::nad_h_4_a ({{ qhd = bitNad_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::nad_w_2_a ({{ dwd = bitNad_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::nad_i_a ({{ wd = bitNad (wa, i8); }});
+
+                        } //> NAD.
+
+                    0x2: //< ORR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::orr_a ({{ wd = bitOrr (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::orr_b_4_a ({{ qbd = bitOrr_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::orr_h_2_a ({{ dhd = bitOrr_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::orr_h_4_a ({{ qhd = bitOrr_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::orr_w_2_a ({{ dwd = bitOrr_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::orr_i_a ({{ wd = bitOrr (wa, i8); }});
+
+                        } //> ORR.
+
+                    0x3: //< NOR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::nor_a ({{ wd = bitNor (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::nor_b_4_a ({{ qbd = bitNor_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::nor_h_2_a ({{ dhd = bitNor_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::nor_h_4_a ({{ qhd = bitNor_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::nor_w_2_a ({{ dwd = bitNor_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::nor_i_a ({{ wd = bitNor (wa, i8); }});
+
+                        } //> NOR.
+
+                    0x4: //< XOR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::xor_a ({{ wd = bitXor (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::xor_b_4_a ({{ qbd = bitXor_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::xor_h_2_a ({{ dhd = bitXor_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::xor_h_4_a ({{ qhd = bitXor_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::xor_w_2_a ({{ dwd = bitXor_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::xor_i_a ({{ wd = bitXor (wa, i8); }});
+
+                        } //> XOR.
+
+                    0x5: //< NXR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: LogicOp::nxr_a ({{ wd = bitNxr (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: LogicVecOp::nxr_b_4_a ({{ qbd = bitNxr_b_4 (qba, qbb); }});
+                                            0x1: LogicVecOp::nxr_h_2_a ({{ dhd = bitNxr_h_2 (dha, dhb); }});
+                                            0x2: LogicVecOp::nxr_h_4_a ({{ qhd = bitNxr_h_4 (qha, qhb); }});
+                                            0x3: LogicVecOp::nxr_w_2_a ({{ dwd = bitNxr_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: LogicImmOp::nxr_i_a ({{ wd = bitNxr (wa, i8); }});
+
+                        } //> NXR.
+
+                    0x7: //< NOT.
+                        decode OPCODE_LO default Unknown::unknown () {
+
+                            0x0: //< NOT.
+                                decode FLAG_IMM default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FLAG_VEC default Unknown::unknown () {
+                                            0x0: LogicOp::not_a ({{ wd = bitNot (wa); }});
+                                            0x1:
+                                                decode VEC default Unknown::unknown () {
+                                                    0x0: LogicVecOp::not_b_4_a ({{ qbd = bitNot_b_4 (qba); }});
+                                                    0x1: LogicVecOp::not_h_2_a ({{ dhd = bitNot_h_2 (dha); }});
+                                                    0x2: LogicVecOp::not_h_4_a ({{ qhd = bitNot_h_4 (qha); }});
+                                                    0x3: LogicVecOp::not_w_2_a ({{ dwd = bitNot_w_2 (dwa); }});
+                                                }
+                                        }
+
+                                } //> NOT.
+
+                        } //> NOT.
+
+                } //> FU(0b'00) + HI(0b'001)
+
             0x5: // FU(0b'00) + HI(0b'101).
                 decode OPCODE_ME default Unknown::unknown () {
 

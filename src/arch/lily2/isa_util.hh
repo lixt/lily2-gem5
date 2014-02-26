@@ -16,6 +16,49 @@ T _add (T opa, T opb)
     return opa + opb;
 }
 
+// Logic instructions.
+template <class T>
+T _bitAnd (T opa, T opb)
+{
+    return opa & opb;
+}
+
+template <class T>
+T _bitNad (T opa, T opb)
+{
+    return ~(opa & opb);
+}
+
+template <class T>
+T _bitOrr (T opa, T opb)
+{
+    return opa | opb;
+}
+
+template <class T>
+T _bitNor (T opa, T opb)
+{
+    return ~(opa | opb);
+}
+
+template <class T>
+T _bitXor (T opa, T opb)
+{
+    return opa ^ opb;
+}
+
+template <class T>
+T _bitNxr (T opa, T opb)
+{
+    return ~(opa ^ opb);
+}
+
+template <class T>
+T _bitNot (T op)
+{
+    return ~op;
+}
+
 inline
 uint32_t _mkl (uint32_t op)
 {
