@@ -59,6 +59,42 @@ T _bitNot (T op)
     return ~op;
 }
 
+template <class T>
+T _tgt (T opa, T opb)
+{
+    return (opa > opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
+template <class T>
+T _tge (T opa, T opb)
+{
+    return (opa >= opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
+template <class T>
+T _tlt (T opa, T opb)
+{
+    return (opa < opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
+template <class T>
+T _tle (T opa, T opb)
+{
+    return (opa <= opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
+template <class T>
+T _teq (T opa, T opb)
+{
+    return (opa == opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
+template <class T>
+T _tne (T opa, T opb)
+{
+    return (opa != opb) ? static_cast<T> (1) : static_cast<T> (0);
+}
+
 inline
 uint32_t _mkl (uint32_t op)
 {

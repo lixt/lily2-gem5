@@ -251,6 +251,53 @@ inline Opd32i_t bitNot_w_2 (Opd32i_t op)
                      _bitNot (op.uvlo ()));
 }
 
+// Test instructions.
+inline Op32i_t tgt (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tgt (opa.sval (), opb.sval ()));
+}
+inline Op32i_t tgt_u (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tgt (opa.uval (), opb.uval ()));
+}
+
+inline Op32i_t tge (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tge (opa.sval (), opb.sval ()));
+}
+inline Op32i_t tge_u (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tge (opa.uval (), opb.uval ()));
+}
+
+inline Op32i_t tlt (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tlt (opa.sval (), opb.sval ()));
+}
+inline Op32i_t tlt_u (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tlt (opa.uval (), opb.uval ()));
+}
+
+inline Op32i_t tle (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tle (opa.sval (), opb.sval ()));
+}
+inline Op32i_t tle_u (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tle (opa.uval (), opb.uval ()));
+}
+
+inline Op32i_t teq (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_teq (opa.uval (), opb.uval ()));
+}
+inline Op32i_t tne (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_tne (opa.uval (), opb.uval ()));
+}
+
+
 inline Op32i_t mkl (Op32i_t op)
 {
     return Op32i_t (_mkl (op.uval ()));

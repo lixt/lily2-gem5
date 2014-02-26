@@ -56,7 +56,7 @@ decode FU default Unknown::unknown () {
                         } // ADD-relative.
                 }
 
-            0x1: //< FU(0b'00) + HI(0b'001)
+            0x1: //< FU(0b'00) + HI(0b'001).
                 decode OPCODE_ME default Unknown::unknown () {
 
                     0x0: //< AND.
@@ -195,7 +195,96 @@ decode FU default Unknown::unknown () {
 
                         } //> NOT.
 
-                } //> FU(0b'00) + HI(0b'001)
+                } //> FU(0b'00) + HI(0b'001).
+
+            0x2: //< FU(0b'00) + HI(0b'010).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< TGT.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestOp::tgt_u_a ({{ wa = tgt_u (wa, wb); }});
+                                    0x1: TestOp::tgt_a   ({{ wa = tgt   (wa, wb); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestImmOp::tgt_u_i_a ({{ wa = tgt_u (wa, i8); }});
+                                    0x1: TestImmOp::tgt_i_a   ({{ wa = tgt   (wa, i8); }});
+                                }
+
+                        } //> TGT.
+
+                    0x1: //< TGE.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestOp::tge_u_a ({{ wa = tge_u (wa, wb); }});
+                                    0x1: TestOp::tge_a   ({{ wa = tge   (wa, wb); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestImmOp::tge_u_i_a ({{ wa = tge_u (wa, i8); }});
+                                    0x1: TestImmOp::tge_i_a   ({{ wa = tge   (wa, i8); }});
+                                }
+
+                        } //> TGE.
+
+                    0x2: //< TLT.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestOp::tlt_u_a ({{ wa = tlt_u (wa, wb); }});
+                                    0x1: TestOp::tlt_a   ({{ wa = tlt   (wa, wb); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestImmOp::tlt_u_i_a ({{ wa = tlt_u (wa, i8); }});
+                                    0x1: TestImmOp::tlt_i_a   ({{ wa = tlt   (wa, i8); }});
+                                }
+
+                        } //> TLT.
+
+                    0x3: //< TLE.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestOp::tle_u_a ({{ wa = tle_u (wa, wb); }});
+                                    0x1: TestOp::tle_a   ({{ wa = tle   (wa, wb); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: TestImmOp::tle_u_i_a ({{ wa = tle_u (wa, i8); }});
+                                    0x1: TestImmOp::tle_i_a   ({{ wa = tle   (wa, i8); }});
+                                }
+
+                        } //> TLE.
+
+                    0x4: //< TEQ.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: TestOp::teq_a      ({{ wa = teq (wa, wb); }});
+                            0x1: TestImmOp::teq_i_a ({{ wa = teq (wa, i8); }});
+
+                        } //> TEQ.
+
+                    0x5: //< TNE.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: TestOp::tne_a      ({{ wa = tne (wa, wb); }});
+                            0x1: TestImmOp::tne_i_a ({{ wa = tne (wa, i8); }});
+
+                        } //> TNE.
+
+                } //> FU(0b'00) + HI(0b'001).
 
             0x5: // FU(0b'00) + HI(0b'101).
                 decode OPCODE_ME default Unknown::unknown () {
