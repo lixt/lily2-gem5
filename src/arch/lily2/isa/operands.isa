@@ -89,6 +89,7 @@ def operands {{
     'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
     # Immediate operands.
+    'i5' : ('I5_Op32i' , 'uw', 'IMM5' , '', 1),
     'i8' : ('I8_Op32i' , 'uw', 'IMM8' , '', 1),
     'i16': ('I16_Op32i', 'uw', 'IMM16', '', 1),
 }};

@@ -95,6 +95,30 @@ T _tne (T opa, T opb)
     return (opa != opb) ? static_cast<T> (1) : static_cast<T> (0);
 }
 
+template <class T>
+T _lsl (T opa, uint32_t shiftAmt)
+{
+    return opa << shiftAmt;
+}
+
+template <class T>
+T _lsr (T opa, uint32_t shiftAmt)
+{
+    return opa >> shiftAmt;
+}
+
+template <class T>
+T _asr (T opa, uint32_t shiftAmt)
+{
+    return opa >> shiftAmt;
+}
+
+template <class T>
+T _rsr (T opa, uint32_t shiftAmt)
+{
+    return (opa >> shiftAmt) | (opa << (8 * sizeof (T) - shiftAmt));
+}
+
 inline
 uint32_t _mkl (uint32_t op)
 {

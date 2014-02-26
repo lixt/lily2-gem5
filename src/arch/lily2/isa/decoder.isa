@@ -286,6 +286,87 @@ decode FU default Unknown::unknown () {
 
                 } //> FU(0b'00) + HI(0b'001).
 
+            0x4: //< FU(0b'00) + HI(0b'100).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< LSL.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ShiftOp::lsl_a ({{ wd = lsl (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ShiftVecOp::lsl_b_4_a ({{ qbd = lsl_b_4 (qba, wb); }});
+                                            0x1: ShiftVecOp::lsl_h_2_a ({{ dhd = lsl_h_2 (dha, wb); }});
+                                            0x2: ShiftVecOp::lsl_h_4_a ({{ qhd = lsl_h_4 (qha, wb); }});
+                                            0x3: ShiftVecOp::lsl_w_2_a ({{ dwd = lsl_w_2 (dwa, wb); }});
+                                        }
+                                }
+
+                            0x1: ShiftImmOp::lsl_i_a ({{ wd = lsl (wa, i5); }});
+
+                        } //> LSL.
+
+                    0x1: //< LSR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ShiftOp::lsr_a ({{ wd = lsr (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ShiftVecOp::lsr_b_4_a ({{ qbd = lsr_b_4 (qba, wb); }});
+                                            0x1: ShiftVecOp::lsr_h_2_a ({{ dhd = lsr_h_2 (dha, wb); }});
+                                            0x2: ShiftVecOp::lsr_h_4_a ({{ qhd = lsr_h_4 (qha, wb); }});
+                                            0x3: ShiftVecOp::lsr_w_2_a ({{ dwd = lsr_w_2 (dwa, wb); }});
+                                        }
+                                }
+
+                            0x1: ShiftImmOp::lsr_i_a ({{ wd = lsr (wa, i5); }});
+
+                        } //> LSR.
+
+                    0x2: //< ASR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ShiftOp::asr_a ({{ wd = asr (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ShiftVecOp::asr_b_4_a ({{ qbd = asr_b_4 (qba, wb); }});
+                                            0x1: ShiftVecOp::asr_h_2_a ({{ dhd = asr_h_2 (dha, wb); }});
+                                            0x2: ShiftVecOp::asr_h_4_a ({{ qhd = asr_h_4 (qha, wb); }});
+                                            0x3: ShiftVecOp::asr_w_2_a ({{ dwd = asr_w_2 (dwa, wb); }});
+                                        }
+                                }
+
+                            0x1: ShiftImmOp::asr_i_a ({{ wd = asr (wa, i5); }});
+
+                        } //> ASR.
+
+                    0x3: //< RSR.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ShiftOp::rsr_a ({{ wd = rsr (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ShiftVecOp::rsr_b_4_a ({{ qbd = rsr_b_4 (qba, wb); }});
+                                            0x1: ShiftVecOp::rsr_h_2_a ({{ dhd = rsr_h_2 (dha, wb); }});
+                                            0x2: ShiftVecOp::rsr_h_4_a ({{ qhd = rsr_h_4 (qha, wb); }});
+                                            0x3: ShiftVecOp::rsr_w_2_a ({{ dwd = rsr_w_2 (dwa, wb); }});
+                                        }
+                                }
+
+                            0x1: ShiftImmOp::rsr_i_a ({{ wd = rsr (wa, i5); }});
+
+                        } //> RSR.
+
+                } //> FU(0b'00) + HI(0b'100).
+
             0x5: // FU(0b'00) + HI(0b'101).
                 decode OPCODE_ME default Unknown::unknown () {
 

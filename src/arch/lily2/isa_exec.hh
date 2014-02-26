@@ -297,6 +297,122 @@ inline Op32i_t tne (Op32i_t opa, Op32i_t opb)
     return Op32i_t (_tne (opa.uval (), opb.uval ()));
 }
 
+// Shift instructions.
+inline Op32i_t lsl (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_lsl (opa.uval (), opb.uval ()));
+}
+inline Opq8i_t lsl_b_4 (Opq8i_t opa, Op32i_t opb)
+{
+    return Opq8i_t (_lsl (opa.uvvh (), opb.uval ()),
+                    _lsl (opa.uvhi (), opb.uval ()),
+                    _lsl (opa.uvlo (), opb.uval ()),
+                    _lsl (opa.uvvl (), opb.uval ()));
+}
+inline Opd16i_t lsl_h_2 (Opd16i_t opa, Op32i_t opb)
+{
+    return Opd16i_t (_lsl (opa.uvhi (), opb.uval ()),
+                     _lsl (opa.uvlo (), opb.uval ()));
+}
+inline Opq16i_t lsl_h_4 (Opq16i_t opa, Op32i_t opb)
+{
+    return Opq16i_t (_lsl (opa.uvvh (), opb.uval ()),
+                     _lsl (opa.uvhi (), opb.uval ()),
+                     _lsl (opa.uvlo (), opb.uval ()),
+                     _lsl (opa.uvvl (), opb.uval ()));
+}
+inline Opd32i_t lsl_w_2 (Opd32i_t opa, Op32i_t opb)
+{
+    return Opd32i_t (_lsl (opa.uvhi (), opb.uval ()),
+                     _lsl (opa.uvlo (), opb.uval ()));
+}
+
+inline Op32i_t lsr (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_lsr (opa.uval (), opb.uval ()));
+}
+inline Opq8i_t lsr_b_4 (Opq8i_t opa, Op32i_t opb)
+{
+    return Opq8i_t (_lsr (opa.uvvh (), opb.uval ()),
+                    _lsr (opa.uvhi (), opb.uval ()),
+                    _lsr (opa.uvlo (), opb.uval ()),
+                    _lsr (opa.uvvl (), opb.uval ()));
+}
+inline Opd16i_t lsr_h_2 (Opd16i_t opa, Op32i_t opb)
+{
+    return Opd16i_t (_lsr (opa.uvhi (), opb.uval ()),
+                     _lsr (opa.uvlo (), opb.uval ()));
+}
+inline Opq16i_t lsr_h_4 (Opq16i_t opa, Op32i_t opb)
+{
+    return Opq16i_t (_lsr (opa.uvvh (), opb.uval ()),
+                     _lsr (opa.uvhi (), opb.uval ()),
+                     _lsr (opa.uvlo (), opb.uval ()),
+                     _lsr (opa.uvvl (), opb.uval ()));
+}
+inline Opd32i_t lsr_w_2 (Opd32i_t opa, Op32i_t opb)
+{
+    return Opd32i_t (_lsr (opa.uvhi (), opb.uval ()),
+                     _lsr (opa.uvlo (), opb.uval ()));
+}
+
+inline Op32i_t asr (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_asr (opa.sval (), opb.uval ()));
+}
+inline Opq8i_t asr_b_4 (Opq8i_t opa, Op32i_t opb)
+{
+    return Opq8i_t (_asr (opa.uvvh (), opb.uval ()),
+                    _asr (opa.uvhi (), opb.uval ()),
+                    _asr (opa.uvlo (), opb.uval ()),
+                    _asr (opa.uvvl (), opb.uval ()));
+}
+inline Opd16i_t asr_h_2 (Opd16i_t opa, Op32i_t opb)
+{
+    return Opd16i_t (_asr (opa.uvhi (), opb.uval ()),
+                     _asr (opa.uvlo (), opb.uval ()));
+}
+inline Opq16i_t asr_h_4 (Opq16i_t opa, Op32i_t opb)
+{
+    return Opq16i_t (_asr (opa.uvvh (), opb.uval ()),
+                     _asr (opa.uvhi (), opb.uval ()),
+                     _asr (opa.uvlo (), opb.uval ()),
+                     _asr (opa.uvvl (), opb.uval ()));
+}
+inline Opd32i_t asr_w_2 (Opd32i_t opa, Op32i_t opb)
+{
+    return Opd32i_t (_asr (opa.uvhi (), opb.uval ()),
+                     _asr (opa.uvlo (), opb.uval ()));
+}
+
+inline Op32i_t rsr (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t (_rsr (opa.uval (), opb.uval ()));
+}
+inline Opq8i_t rsr_b_4 (Opq8i_t opa, Op32i_t opb)
+{
+    return Opq8i_t (_rsr (opa.uvvh (), opb.uval ()),
+                    _rsr (opa.uvhi (), opb.uval ()),
+                    _rsr (opa.uvlo (), opb.uval ()),
+                    _rsr (opa.uvvl (), opb.uval ()));
+}
+inline Opd16i_t rsr_h_2 (Opd16i_t opa, Op32i_t opb)
+{
+    return Opd16i_t (_rsr (opa.uvhi (), opb.uval ()),
+                     _rsr (opa.uvlo (), opb.uval ()));
+}
+inline Opq16i_t rsr_h_4 (Opq16i_t opa, Op32i_t opb)
+{
+    return Opq16i_t (_rsr (opa.uvvh (), opb.uval ()),
+                     _rsr (opa.uvhi (), opb.uval ()),
+                     _rsr (opa.uvlo (), opb.uval ()),
+                     _rsr (opa.uvvl (), opb.uval ()));
+}
+inline Opd32i_t rsr_w_2 (Opd32i_t opa, Op32i_t opb)
+{
+    return Opd32i_t (_rsr (opa.uvhi (), opb.uval ()),
+                     _rsr (opa.uvlo (), opb.uval ()));
+}
 
 inline Op32i_t mkl (Op32i_t op)
 {
