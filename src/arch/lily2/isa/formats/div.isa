@@ -7,34 +7,34 @@
 output header {{
 #include <iostream>
 
-    // Base class for arithmetic instructions.
-    class ArithOp : public Lily2StaticInst
+    // Base class for division instructions.
+    class DivOp : public Lily2StaticInst
     {
       protected:
-        ArithOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntArithOp) {}
+        DivOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, IntIterOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
 
-    // Base class for arithmetic vector instructions.
-    class ArithVecOp : public Lily2StaticInst
+    // Base class for division vector instructions.
+    class DivVecOp : public Lily2StaticInst
     {
       protected:
-        ArithVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntArithOp) {}
+        DivVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, SimdIntIterOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
 
-    // Base class for arithmetic immediate instructions.
-    class ArithImmOp : public Lily2StaticInst
+    // Base class for division immediate instructions.
+    class DivImmOp : public Lily2StaticInst
     {
       protected:
-        ArithImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntArithOp) {}
+        DivImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, IntIterOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -43,8 +43,8 @@ output header {{
 
 // Outputs to decoder.cc
 output decoder {{
-    // Arithmetic instructions.
-    std::string ArithOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Div instructions.
+    std::string DivOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -61,7 +61,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string ArithOp::generateOperation (void) const
+    std::string DivOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -74,8 +74,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Arithmetic vector instructions.
-    std::string ArithVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Div vector instructions.
+    std::string DivVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -92,7 +92,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string ArithVecOp::generateOperation (void) const
+    std::string DivVecOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -105,8 +105,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Arithmetic immediate instructions.
-    std::string ArithImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Div immediate instructions.
+    std::string DivImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -123,7 +123,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string ArithImmOp::generateOperation (void) const
+    std::string DivImmOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -137,24 +137,24 @@ output decoder {{
     }
 }};
 
-def format ArithOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'ArithOp', code, opt_flags)
+def format DivOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'DivOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format ArithVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'ArithVecOp', code, opt_flags)
+def format DivVecOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'DivVecOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format ArithImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'ArithImmOp', code, opt_flags)
+def format DivImmOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'DivImmOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

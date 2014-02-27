@@ -43,6 +43,7 @@ def bitfield OPCODE_LO  <17:13>;
 def bitfield FLAG_SIG   <22:22>;
 def bitfield FLAG_IMM   <21:21>;
 def bitfield FLAG_VEC   <20:20>;
+def bitfield FLAG_OA    <20:20>;
 
 def bitfield VEC        <19:18>;
 
@@ -56,6 +57,8 @@ def bitfield QB         <17:13>;
 def bitfield QA         <12: 8>;
 def bitfield QD         < 7: 3>;
 
+def bitfield IMM1       <13:13>;
+def bitfield IMM2       <14:13>;
 def bitfield IMM5       <17:13>;
 def bitfield IMM8       <20:13>;
 def bitfield IMM16      <23: 8>;

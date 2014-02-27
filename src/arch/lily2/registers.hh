@@ -54,6 +54,9 @@ const RegIndex_t NumYRegs = 24;
 const RegIndex_t NumGRegs = 8;
 const RegIndex_t NumMRegs = 8;
 
+// Semantically meaningful register indexes.
+const RegIndex_t CarryReg = 1;
+
 // Types for register files.
 typedef enum RegFile_t
 {

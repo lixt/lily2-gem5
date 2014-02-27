@@ -44,9 +44,6 @@
 //Include the arithmetic formats
 ##include "arith.isa"
 
-//Include the move formats
-##include "move.isa"
-
 //Include the logic formats
 ##include "logic.isa"
 
@@ -57,7 +54,19 @@
 ##include "shift.isa"
 
 //Include the move formats
-//##include "move.isa"
+##include "move.isa"
+
+//Include the bit operation formats
+##include "bit.isa"
+
+//Include the multiply formats
+##include "mul.isa"
+
+//Include the mac formats
+##include "mac.isa"
+
+//Include the division formats
+##include "div.isa"
 
 //Include the floating-point arithmetic formats
 //##include "arith_fp.isa"

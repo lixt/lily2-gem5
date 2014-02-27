@@ -96,10 +96,17 @@ const OpClass IntMoveOp = Enums::IntMove;
 const OpClass IntLogicOp = Enums::IntLogic;
 const OpClass IntTestOp = Enums::IntTest;
 const OpClass IntShiftOp = Enums::IntShift;
+const OpClass IntBitOp = Enums::IntBit;
+const OpClass IntMulOp = Enums::IntMul;
+const OpClass IntMacOp = Enums::IntMac;
+const OpClass IntIterOp = Enums::IntIter;
 const OpClass SimdIntArithOp = Enums::SimdIntArith;
 const OpClass SimdIntLogicOp = Enums::SimdIntLogic;
 const OpClass SimdIntTestOp = Enums::SimdIntTest;
 const OpClass SimdIntShiftOp = Enums::SimdIntShift;
+const OpClass SimdIntMulOp = Enums::SimdIntMul;
+const OpClass SimdIntMacOp = Enums::SimdIntMac;
+const OpClass SimdIntIterOp = Enums::SimdIntIter;
 
 const OpClass Num_OpClasses = Num_OpClass;
 
