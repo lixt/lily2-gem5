@@ -363,10 +363,10 @@ class HybridCPU : public BaseSimpleCPU
     int issued;
 
     // Register dependence tables.
-    RegDepTable<TheISA::REG_X, TheISA::NumXRegs> xRegDepTable;
-    RegDepTable<TheISA::REG_Y, TheISA::NumYRegs> yRegDepTable;
-    RegDepTable<TheISA::REG_G, TheISA::NumGRegs> gRegDepTable;
-    RegDepTable<TheISA::REG_M, TheISA::NumMRegs> mRegDepTable;
+    RegDepTable<TheISA::NumXRegs> xRegDepTable;
+    RegDepTable<TheISA::NumYRegs> yRegDepTable;
+    RegDepTable<TheISA::NumGRegs> gRegDepTable;
+    RegDepTable<TheISA::NumMRegs> mRegDepTable;
 
   private:
     // Initializes the pipeline state machine.
@@ -443,11 +443,30 @@ class HybridCPU : public BaseSimpleCPU
     void writeMRegDep         (const RegIndex_t&, const Cycles& cycle);
     void writeMRegPairDep     (const RegIndex_t&, const Cycles& cycle);
     void writeMRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
-    void renewIssued          (void);
-    void renewRegDep          (const Cycles&);
-    void renewRegFileBuf      (const Cycles&);
-    void renewXRegFileBuf     (const Cycles&);
-    void renewCycle           (const Cycles&);
+    //void renewIssued          (void);
+    //void renewRegDep          (const Cycles&);
+    //void renewRegFileBuf      (const Cycles&);
+    //template <size_t RegNum, class RegValue_t>
+    //void renewRegFileBuf (TheISA::RegFile<RegNum, RegValue_t> *, TheISA::RegFileBuf<RegNum, RegValue_t> *, const Cycles&);
+    //void renewCycle           (const Cycles&);
+
+    // Refresh.
+    // Refreshes the issued instructions.
+    void refreshIssued (void);
+
+    // Refreshes the register dependence table.
+    void refreshRegDepTable (const Cycles& decrRegBackCycleDelta);
+    template <size_t RegNum>
+    void refreshRegDepTable (RegDepTable<RegNum>&, const Cycles& decrRegBackCycleDelta);
+
+    // Refreshes the register file buffers and writes value back to the register file.
+    void refreshRegs (const Cycles& decrRegBackCycleDelta);
+    template <size_t RegNum, class RegValue_t>
+    void refreshRegs (TheISA::RegFile<RegNum, RegValue_t>&,
+            TheISA::RegFileBuf<RegNum, RegValue_t>&, const Cycles& decrRegBackCycleDelta);
+
+    // Refreshes the cycles.
+    void refreshCycle (const Cycles& decrRegBackCycleDelta);
 
   private:
     // Interfaces for debugging.
@@ -546,10 +565,23 @@ class HybridCPU : public BaseSimpleCPU
     // Issue width.
     int IssueWidth;
 
-    // Functional unit delay slots.
-    int IntArithDS;
-    int IntMoveDS;
-    int SimdIntArithDS;
+    // Functional unit latency.
+    int IntArithLatency;
+    int IntLogicLatency;
+    int IntTestLatency;
+    int IntShiftLatency;
+    int IntBitLatency;
+    int IntMoveLatency;
+    int IntMulLatency;
+    int IntMacLatency;
+    int IntIterLatency;
+    int SimdIntArithLatency;
+    int SimdIntLogicLatency;
+    int SimdIntTestLatency;
+    int SimdIntShiftLatency;
+    int SimdIntMulLatency;
+    int SimdIntMacLatency;
+    int SimdIntIterLatency;
 };
 
 #endif // __CPU_HYBRID_CPU_HH__

@@ -93,7 +93,7 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
   public:
     // Constructor.
     // This constructor sets all the registers to zero.
-    RegFile (void) {}
+    RegFile (void);
 
   public:
     // Gets the register value according to the given REGINDEX.
@@ -125,10 +125,19 @@ class RegFile : public Table<RegNum, 1, RegIndex_t, RegValue_t>
 };
 
 template <size_t RegNum, class RegValue_t>
+RegFile<RegNum, RegValue_t>::RegFile (void)
+{
+    RegValue_t initRegValue (0);
+    for (RegIndex_t regIndex = 0; regIndex != RegNum; ++regIndex) {
+        setRegValue (regIndex, initRegValue);
+    }
+}
+
+template <size_t RegNum, class RegValue_t>
 RegValue_t
 RegFile<RegNum, RegValue_t>::getRegValue (const RegIndex_t &regIndex) const
 {
-    Position accessPos (regIndex, 1);
+    Position accessPos (regIndex, 0);
     return Base::access (accessPos);
 }
 
@@ -137,7 +146,7 @@ void
 RegFile<RegNum, RegValue_t>::setRegValue (const RegIndex_t &regIndex,
                                           const RegValue_t &regValue)
 {
-    Position mutatePos (regIndex, 1);
+    Position mutatePos (regIndex, 0);
 
     if (Base::isPosValid (mutatePos)) {
         Base::mutate (mutatePos, regValue);

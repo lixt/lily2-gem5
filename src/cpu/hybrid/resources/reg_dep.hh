@@ -10,7 +10,7 @@
 #include "arch/types.hh"
 #include "arch/lily2/registers.hh"
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
 {
   public:
@@ -43,10 +43,14 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     // and removes out the due registers.
     void update (const Cycles& regBackCycleDelta);
 
-    // Prints readable debug infos about the register dependence table.
-    void print (std::ostream&) const;
+    // Prints readable debug infos of the register dependence table.
+    template <size_t ShadowRegNum>
+    friend std::ostream& operator<< (std::ostream&, const RegDepTable<ShadowRegNum>&);
 
   private:
+    // Bottom implementation of the output operator.
+    void print (std::ostream&) const;
+
     // Decreases the register back cycles in the register dependence table.
     std::vector<Position> decrRegBackCycle (const Cycles& regBackCycleDelta);
 
@@ -60,7 +64,7 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
         Cycles regBackCycleDelta;
 
         // Constructor.
-        explicit DecrRegBackCycleFunctor (const Cycles& regbackCycleDelta)
+        explicit DecrRegBackCycleFunctor (const Cycles& regBackCycleDelta)
             : regBackCycleDelta (regBackCycleDelta) {}
 
         bool operator() (key_type& key, mapped_type& mapped)
@@ -85,24 +89,24 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     };
 };
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+RegDepTable<RegNum>::insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     Base::insert (regIndex, regBackCycle);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+RegDepTable<RegNum>::insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     insertReg (regIndex, regBackCycle);
     insertReg (regIndex + 1, regBackCycle);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+RegDepTable<RegNum>::insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     insertReg (regIndex, regBackCycle);
     insertReg (regIndex + 1, regBackCycle);
@@ -110,25 +114,25 @@ RegDepTable<FileName, RegNum>::insertRegPairPair (const RegIndex_t& regIndex, co
     insertReg (regIndex + 3, regBackCycle);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 bool
-RegDepTable<FileName, RegNum>::isRegDep (const RegIndex_t& regIndex) const
+RegDepTable<RegNum>::isRegDep (const RegIndex_t& regIndex) const
 {
     Position searchPos = Base::search (regIndex);
     return (searchPos == Base::nil ()) ? false : true;
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 bool
-RegDepTable<FileName, RegNum>::isRegPairDep (const RegIndex_t& regIndex) const
+RegDepTable<RegNum>::isRegPairDep (const RegIndex_t& regIndex) const
 {
     return isRegDep (regIndex) ||
            isRegDep (regIndex + 1);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 bool
-RegDepTable<FileName, RegNum>::isRegPairPairDep (const RegIndex_t& regIndex) const
+RegDepTable<RegNum>::isRegPairPairDep (const RegIndex_t& regIndex) const
 {
     return isRegDep (regIndex) ||
            isRegDep (regIndex + 1) ||
@@ -136,9 +140,9 @@ RegDepTable<FileName, RegNum>::isRegPairPairDep (const RegIndex_t& regIndex) con
            isRegDep (regIndex + 3);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::update (const Cycles& regBackCycleDelta)
+RegDepTable<RegNum>::update (const Cycles& regBackCycleDelta)
 {
     std::vector<Position> removePosVec = decrRegBackCycle (regBackCycleDelta);
 
@@ -148,27 +152,35 @@ RegDepTable<FileName, RegNum>::update (const Cycles& regBackCycleDelta)
     }
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
-std::vector<typename RegDepTable<FileName, RegNum>::Position>
-RegDepTable<FileName, RegNum>::decrRegBackCycle (const Cycles& regBackCycleDelta)
+template <size_t RegNum>
+std::vector<typename RegDepTable<RegNum>::Position>
+RegDepTable<RegNum>::decrRegBackCycle (const Cycles& regBackCycleDelta)
 {
     DecrRegBackCycleFunctor decrRegBackCycleFunctor (regBackCycleDelta);
     return Base::traverseAndReturn (decrRegBackCycleFunctor);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::remove (const Position& removePos)
+RegDepTable<RegNum>::remove (const Position& removePos)
 {
     Base::remove (removePos);
 }
 
-template <TheISA::RegFile_t FileName, size_t RegNum>
+template <size_t RegNum>
 void
-RegDepTable<FileName, RegNum>::print (std::ostream& os) const
+RegDepTable<RegNum>::print (std::ostream& os) const
 {
     PrintFunctor pfunc;
     Base::print (os, pfunc);
+}
+
+template <size_t ShadowRegNum>
+std::ostream&
+operator<< (std::ostream& os, const RegDepTable<ShadowRegNum>& regDepTable)
+{
+    regDepTable.print (os);
+    return os;
 }
 
 #endif // __CPU_HYBRID_RESOURCES_REG_DEP_HH__

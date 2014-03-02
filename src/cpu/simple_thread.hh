@@ -322,6 +322,102 @@ class SimpleThread : public ThreadState
                 reg_idx, flatIndex, val, floatRegs.f[flatIndex]);
     }
 
+    XRegFile&
+    getXRegFile (void)
+    {
+        return xRegs;
+    }
+
+    const XRegFile&
+    getXRegFile (void) const
+    {
+        return xRegs;
+    }
+
+    YRegFile&
+    getYRegFile (void)
+    {
+        return yRegs;
+    }
+
+    const YRegFile&
+    getYRegFile (void) const
+    {
+        return yRegs;
+    }
+
+    GRegFile&
+    getGRegFile (void)
+    {
+        return gRegs;
+    }
+
+    const GRegFile&
+    getGRegFile (void) const
+    {
+        return gRegs;
+    }
+
+    MRegFile&
+    getMRegFile (void)
+    {
+        return mRegs;
+    }
+
+    const MRegFile&
+    getMRegFile (void) const
+    {
+        return mRegs;
+    }
+
+    XRegFileBuf&
+    getXRegFileBuf (void)
+    {
+        return xRegBufs;
+    }
+
+    const XRegFileBuf&
+    getXRegFileBuf (void) const
+    {
+        return xRegBufs;
+    }
+
+    YRegFileBuf&
+    getYRegFileBuf (void)
+    {
+        return yRegBufs;
+    }
+
+    const YRegFileBuf&
+    getYRegFileBuf (void) const
+    {
+        return yRegBufs;
+    }
+
+    GRegFileBuf&
+    getGRegFileBuf (void)
+    {
+        return gRegBufs;
+    }
+
+    const GRegFileBuf&
+    getGRegFileBuf (void) const
+    {
+        return gRegBufs;
+    }
+
+    MRegFileBuf&
+    getMRegFileBuf (void)
+    {
+        return mRegBufs;
+    }
+
+    const MRegFileBuf&
+    getMRegFileBuf (void) const
+    {
+        return mRegBufs;
+    }
+
     XRegValue_t readXReg (RegIndex_t regIndex)
     {
         return xRegs.getRegValue (regIndex);

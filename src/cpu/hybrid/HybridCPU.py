@@ -69,9 +69,24 @@ class HybridCPU(BaseSimpleCPU):
     simpoint_profile_file = Param.String("simpoint.bb.gz", "SimPoint BBV file")
 
     # Issue width.
-    IssueWidth = Param.Int (1, "Issue width.")
+    IssueWidth = Param.Int (2, "Issue width.")
 
     # Functional unit delay slots.
-    IntArithDS = Param.Int (0, "Integer arithmetic instruction delay slots")
-    IntMoveDS = Param.Int (0, "Integer movement instruction delay slots")
-    SimdIntArithDS = Param.Int (0, "Simd integer arithmetic instruction delay slots")
+    IntArithLatency = Param.Int (1, "Integer arithmetic instruction latency")
+    IntMoveLatency  = Param.Int (1, "Integer movement instruction latency")
+    IntLogicLatency = Param.Int (1, "Integer logic instruction latency")
+    IntTestLatency  = Param.Int (1, "Integer test instruction latency")
+    IntShiftLatency = Param.Int (1, "Integer shift instruction latency")
+    IntBitLatency   = Param.Int (1, "Integer bit operation instruction latency")
+    IntMulLatency   = Param.Int (2, "Integer multiplication instruction latency")
+    IntMacLatency   = Param.Int (2, "Integer multiplication and addition instruction latency")
+    IntIterLatency  = Param.Int (1, "Integer iteration instruction latency")
+    SimdIntArithLatency = Param.Int (1, "Simd integer arithmetic instruction latency")
+    SimdIntLogicLatency = Param.Int (1, "Simd integer logic instruction latency")
+    SimdIntTestLatency  = Param.Int (1, "Simd integer test instruction latency")
+    SimdIntShiftLatency = Param.Int (1, "Simd integer shift instruction latency")
+    SimdIntMulLatency   = Param.Int (2, "Simd integer multiplication instruction latency")
+    SimdIntMacLatency   = Param.Int (2, "Simd integer multiplication and addition instruction latency")
+    SimdIntIterLatency  = Param.Int (1, "Simd integer iteration instruction latency")
+
+

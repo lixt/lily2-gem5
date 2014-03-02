@@ -144,9 +144,22 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       pipelineMacho (R_Idle),
       xRegDepTable (), yRegDepTable (), gRegDepTable (), mRegDepTable (),
       IssueWidth (p->IssueWidth),
-      IntArithDS (p->IntArithDS),
-      IntMoveDS (p->IntMoveDS),
-      SimdIntArithDS (p->SimdIntArithDS)
+      IntArithLatency (p->IntArithLatency),
+      IntLogicLatency (p->IntLogicLatency),
+      IntTestLatency  (p->IntTestLatency),
+      IntShiftLatency (p->IntShiftLatency),
+      IntBitLatency   (p->IntBitLatency),
+      IntMoveLatency  (p->IntMoveLatency),
+      IntMulLatency   (p->IntMulLatency),
+      IntMacLatency   (p->IntMacLatency),
+      IntIterLatency  (p->IntIterLatency),
+      SimdIntArithLatency (p->SimdIntArithLatency),
+      SimdIntLogicLatency (p->SimdIntLogicLatency),
+      SimdIntTestLatency  (p->SimdIntTestLatency),
+      SimdIntShiftLatency (p->SimdIntShiftLatency),
+      SimdIntMulLatency   (p->SimdIntMulLatency),
+      SimdIntMacLatency   (p->SimdIntMacLatency),
+      SimdIntIterLatency  (p->SimdIntIterLatency)
 {
     _status = Idle;
 
@@ -821,11 +834,9 @@ HybridCPU::rPreExecute (void)
 #if DEBUG
     std::cout << "issued insts: " << issued << std::endl;
     std::cout << "x register dependence table:" << std::endl;
-    xRegDepTable.print (std::cout);
-    std::cout << "y register dependence table:" << std::endl;
-    yRegDepTable.print (std::cout);
+    std::cout << xRegDepTable << std::endl;
     std::cout << "g register dependence table:" << std::endl;
-    gRegDepTable.print (std::cout);
+    std::cout << gRegDepTable << std::endl;
     std::cout << "----------> rPreExecute" << std::endl << std::endl;
 #endif
 }
@@ -884,25 +895,29 @@ HybridCPU::renew (void)
 {
 #if DEBUG
     std::cout << "<---------- renew" << std::endl;
+    std::cout << "x register file:" << std::endl;
+    std::cout << *(thread->getXRegs ()) << std::endl;
 #endif
 
     Cycles decrRegBackCycleDelta (1);
 
     // Renew the dispatch infos.
-    renewIssued ();
+    refreshIssued ();
 
-    renewRegDep (decrRegBackCycleDelta);
+    refreshRegDepTable (decrRegBackCycleDelta);
 
     // Writes the register file buffers back to register files.
-    renewRegFileBuf (decrRegBackCycleDelta);
+    refreshRegs (decrRegBackCycleDelta);
 
     // Increase the cycles.
-    renewCycle (decrRegBackCycleDelta);
+    refreshCycle (decrRegBackCycleDelta);
 
     // Resets the pipeline state to idle.
     pipelineMacho.transfer (curPipelineEvent);
 
 #if DEBUG
+    std::cout << "x register dependence table:" << std::endl;
+    std::cout << xRegDepTable << std::endl;
     std::cout << "----------> renew" << std::endl << std::endl;
 #endif
 }
@@ -1196,30 +1211,141 @@ HybridCPU::debugPipeline (std::ostream& os) const
     os << "pipeline state = " << pipelineStateStr << std::endl;
 }
 
+//void
+//HybridCPU::renewIssued (void)
+//{
+//    issued = 0;
+//}
+//
+
 void
-HybridCPU::renewIssued (void)
+HybridCPU::refreshCycle (const Cycles& cycleDelta)
+{
+    cycle += cycleDelta;
+}
+
+void
+HybridCPU::refreshIssued (void)
 {
     issued = 0;
 }
 
+//void
+//HybridCPU::renewRegDep (const Cycles& decrRegBackCycleDelta)
+//{
+//    xRegDepTable.update (decrRegBackCycleDelta);
+//    yRegDepTable.update (decrRegBackCycleDelta);
+//    gRegDepTable.update (decrRegBackCycleDelta);
+//    mRegDepTable.update (decrRegBackCycleDelta);
+//}
+
 void
-HybridCPU::renewRegDep (const Cycles& decrRegBackCycleDelta)
+HybridCPU::refreshRegDepTable (const Cycles& decrRegBackCycleDelta)
 {
-    xRegDepTable.update (decrRegBackCycleDelta);
-    yRegDepTable.update (decrRegBackCycleDelta);
-    gRegDepTable.update (decrRegBackCycleDelta);
-    mRegDepTable.update (decrRegBackCycleDelta);
+    // X.
+    refreshRegDepTable (xRegDepTable, decrRegBackCycleDelta);
+
+    // Y.
+    refreshRegDepTable (yRegDepTable, decrRegBackCycleDelta);
+
+    // G.
+    refreshRegDepTable (gRegDepTable, decrRegBackCycleDelta);
+
+    // M.
+    refreshRegDepTable (mRegDepTable, decrRegBackCycleDelta);
+}
+
+template <size_t RegNum>
+void
+HybridCPU::refreshRegDepTable (RegDepTable<RegNum>& regDepTable, const Cycles& decrRegBackCycleDelta)
+{
+    regDepTable.update (decrRegBackCycleDelta);
 }
 
 void
-HybridCPU::renewRegFileBuf (const Cycles& decrRegBackCycleDelta)
+HybridCPU::refreshRegs (const Cycles& decrRegBackCycleDelta)
 {
-    renewXRegFileBuf (decrRegBackCycleDelta);
-    //renewYRegFileBuf (decrRegBackCycleDelta);
-    //renewGRegFileBuf (decrRegBackCycleDelta);
-    //renewMRegFileBuf (decrRegBackCycleDelta);
+    // X.
+    refreshRegs (thread->getXRegFile (), thread->getXRegFileBuf (),
+            decrRegBackCycleDelta);
+
+    // Y.
+    refreshRegs (thread->getYRegFile (), thread->getYRegFileBuf (),
+            decrRegBackCycleDelta);
+
+    // G.
+    refreshRegs (thread->getGRegFile (), thread->getGRegFileBuf (),
+            decrRegBackCycleDelta);
+
+    // M.
+    refreshRegs (thread->getMRegFile (), thread->getMRegFileBuf (),
+            decrRegBackCycleDelta);
 }
 
+template <size_t RegNum, class RegValue_t>
+void
+HybridCPU::refreshRegs (RegFile<RegNum, RegValue_t>& regFile,
+                        RegFileBuf<RegNum, RegValue_t>& regFileBuf,
+                        const Cycles& decrRegBackCycleDelta)
+{
+    // Vector to store the due registers.
+    std::vector<typename RegFileBuf<RegNum, RegValue_t>::Position> vecRemovePos =
+        regFileBuf.decrRegBackCycle (decrRegBackCycleDelta);
+
+    for (typename std::vector<typename RegFileBuf<RegNum, RegValue_t>::Position>::iterator it
+            = vecRemovePos.begin (); it != vecRemovePos.end (); ++it) {
+
+        RegIndex_t regIndex = regFileBuf.getRegIndex (*it);
+
+        RegValue_t regMask = regFileBuf.getRegMask (*it);
+        RegValue_t regNewValue = regFileBuf.getRegValue (*it);
+        RegValue_t regOldValue = regFile.getRegValue (regIndex);
+
+        // Writes the buffered value back to the register.
+        regFile.setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
+
+        // Removes the due registers in the register file buffer.
+        regFileBuf.remove (*it);
+    }
+}
+//
+//void
+//HybridCPU::renewRegFileBuf (const Cycles& decrRegBackCycleDelta)
+//{
+//    renewRegFileBuf (thread->getXRegs (), thread->getXRegBufs (), decrRegBackCycleDelta);
+//    //renewXRegFileBuf (decrRegBackCycleDelta);
+//    //renewYRegFileBuf (decrRegBackCycleDelta);
+//    //renewGRegFileBuf (decrRegBackCycleDelta);
+//    //renewMRegFileBuf (decrRegBackCycleDelta);
+//}
+//
+//template <size_t RegNum, class RegValue_t>
+//void
+//HybridCPU::renewRegFileBuf (RegFile<RegNum, RegValue_t> *regFile,
+//                            RegFileBuf<RegNum, RegValue_t> *regFileBuf,
+//                            const Cycles& decrRegBackCycleDelta)
+//{
+//    typedef RegFile<RegNum, RegValue_t> RegFile;
+//    typedef RegFileBuf<RegNum, RegValue_t> RegFileBuf;
+//
+//    std::vector<typename RegFileBuf::Position> vecRemovePos =
+//        regFileBuf->decrRegBackCycle (decrRegBackCycleDelta);
+//
+//    for (typename std::vector<typename RegFileBuf::Position>::iterator it = vecRemovePos.begin ();
+//         it != vecRemovePos.end (); ++it) {
+//        RegIndex_t regIndex = regFileBuf->getRegIndex (*it);
+//
+//        RegValue_t regMask = regFileBuf->getRegMask (*it);
+//        RegValue_t regNewValue = regFileBuf->getRegValue (*it);
+//        RegValue_t regOldValue = regFile->getRegValue (regIndex);
+//
+//        regFile->setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
+//
+//        // Removes the due register.
+//        regFileBuf->remove (*it);
+//    }
+//}
+/*
 void
 HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
 {
@@ -1232,22 +1358,17 @@ HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
     for (std::vector<XRegFileBuf::Position>::iterator it = vecRemovePos.begin ();
          it != vecRemovePos.end (); ++it) {
         RegIndex_t regIndex  = xRegFileBuf->getRegIndex (*it);
-        XRegValue_t regValue = xRegFileBuf->getRegValue (*it);
         XRegValue_t regMask  = xRegFileBuf->getRegMask  (*it);
 
         // The real register writing.
-        xRegFile->setRegValue (regIndex, regValue & regMask);
+        XRegValue_t regNewValue = xRegFileBuf->getRegValue (*it);
+        XRegValue_t regOldValue = xRegFile->getRegValue (regIndex);
+        xRegFile->setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
 
         // Removes the due registers.
         xRegFileBuf->remove (*it);
     }
-}
-
-void
-HybridCPU::renewCycle (const Cycles& incrCycleDelta)
-{
-    cycle = cycle + incrCycleDelta;
-}
+}*/
 
 void
 HybridCPU::printAddr(Addr a)
@@ -1640,10 +1761,23 @@ Cycles
 HybridCPU::funcUnitLatencyFactory (const OpClass& opClass) const
 {
     switch (opClass) {
-        case IntArithOp: return Cycles (IntArithDS);
-        case IntMoveOp: return Cycles (IntMoveDS);
-        case SimdIntArithOp: return Cycles (SimdIntArithDS);
-        default: assert (0);
+        case IntArithOp    : return Cycles (IntArithLatency);
+        case IntLogicOp    : return Cycles (IntLogicLatency);
+        case IntTestOp     : return Cycles (IntTestLatency);
+        case IntShiftOp    : return Cycles (IntShiftLatency);
+        case IntBitOp      : return Cycles (IntBitLatency);
+        case IntMoveOp     : return Cycles (IntMoveLatency);
+        case IntMulOp      : return Cycles (IntMulLatency);
+        case IntMacOp      : return Cycles (IntMacLatency);
+        case IntIterOp     : return Cycles (IntIterLatency);
+        case SimdIntArithOp: return Cycles (SimdIntArithLatency);
+        case SimdIntLogicOp: return Cycles (SimdIntLogicLatency);
+        case SimdIntTestOp : return Cycles (SimdIntTestLatency);
+        case SimdIntShiftOp: return Cycles (SimdIntShiftLatency);
+        case SimdIntMulOp  : return Cycles (SimdIntMulLatency);
+        case SimdIntMacOp  : return Cycles (SimdIntMacLatency);
+        case SimdIntIterOp : return Cycles (SimdIntIterLatency);
+        default            : assert (0);
     }
 }
 
