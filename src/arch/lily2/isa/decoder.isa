@@ -1156,5 +1156,17 @@ decode FU default Unknown::unknown () {
 
                 } //> FU(0b'11) + HI(0b'000).
 
+            0x4: //< FU(0b'11) + HI(0b'100).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x7: //< NOP, SMR, SMV, SYS.
+                        decode OPCODE_LO default Unknown::unknown () {
+
+                            0x3: MiscOp::sys_d ({{ xc->syscall (i10.uval ()); }});
+
+                        } //> NOP, SMR, SMV, SYS.
+
+                } //> FU(0b'11) + HI(0b'100).
+
         } //> FU(0b'11).
 }

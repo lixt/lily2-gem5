@@ -103,6 +103,7 @@ const OpClass IntIterOp = Enums::IntIter;
 const OpClass IntMemOp = Enums::IntMem;
 const OpClass IntMemLoadOp = Enums::IntMemLoad;
 const OpClass IntMemStoreOp = Enums::IntMemStore;
+const OpClass IntMiscOp = Enums::IntMisc;
 const OpClass SimdIntArithOp = Enums::SimdIntArith;
 const OpClass SimdIntLogicOp = Enums::SimdIntLogic;
 const OpClass SimdIntTestOp = Enums::SimdIntTest;

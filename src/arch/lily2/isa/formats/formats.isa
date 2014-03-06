@@ -71,6 +71,9 @@
 //Include the memory access formats
 ##include "mem.isa"
 
+//Include the miscellaneous formats
+##include "misc.isa"
+
 //Include the floating-point arithmetic formats
 //##include "arith_fp.isa"
 

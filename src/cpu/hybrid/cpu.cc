@@ -155,6 +155,7 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       IntIterLatency      (p->IntIterLatency),
       IntMemAccessLatency (p->IntMemAccessLatency),
       IntMemOffsetLatency (p->IntMemOffsetLatency),
+      IntMiscLatency      (p->IntMiscLatency),
       SimdIntArithLatency (p->SimdIntArithLatency),
       SimdIntLogicLatency (p->SimdIntLogicLatency),
       SimdIntTestLatency  (p->SimdIntTestLatency),

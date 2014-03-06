@@ -1171,6 +1171,24 @@ class I8_Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
+class I10_Op32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM10);'
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
 class I16_Op32iOperand(Operand):
     def isOp(self):
         return 1

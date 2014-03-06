@@ -550,6 +550,7 @@ class HybridCPU : public BaseSimpleCPU
     int IntIterLatency;
     int IntMemAccessLatency;
     int IntMemOffsetLatency;
+    int IntMiscLatency;
     int SimdIntArithLatency;
     int SimdIntLogicLatency;
     int SimdIntTestLatency;

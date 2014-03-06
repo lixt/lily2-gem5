@@ -83,6 +83,7 @@ class HybridCPU(BaseSimpleCPU):
     IntIterLatency      = Param.Int (1, "Integer iteration instruction latency")
     IntMemAccessLatency = Param.Int (4, "Integer memory access instruction latency")
     IntMemOffsetLatency = Param.Int (1, "Integer memory offset self-modify instruction latency")
+    IntMiscLatency      = Param.Int (1, "Integer miscellaneous instruction latency")
     SimdIntArithLatency = Param.Int (1, "Simd integer arithmetic instruction latency")
     SimdIntLogicLatency = Param.Int (1, "Simd integer logic instruction latency")
     SimdIntTestLatency  = Param.Int (1, "Simd integer test instruction latency")

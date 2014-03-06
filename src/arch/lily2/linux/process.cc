@@ -77,7 +77,7 @@ sys_getsysinfoFunc(SyscallDesc *desc, int callnum, LiveProcess *process,
 
     switch (op) {
       case 45:
-        { 
+        {
             // GSI_IEEE_FP_CONTROL
             TypedBufferArg<uint64_t> fpcr(bufPtr);
             // I don't think this exactly matches the HW FPCR
@@ -468,7 +468,7 @@ SyscallDesc*
 Lily2LinuxProcess::getDesc(int callnum)
 {
     //LILY232 syscalls are in the range of 4000 - 4999
-    int m5_sys_idx = callnum - 4000;
+    int m5_sys_idx = callnum;
 
     if (m5_sys_idx < 0 || m5_sys_idx >= Num_Syscall_Descs)
         return NULL;

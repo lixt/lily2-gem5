@@ -61,6 +61,7 @@ def bitfield IMM1       <13:13>;
 def bitfield IMM2       <14:13>;
 def bitfield IMM5       <17:13>;
 def bitfield IMM8       <20:13>;
+def bitfield IMM10      <12: 3>;
 def bitfield IMM16      <23: 8>;
 
 def bitfield COND       < 2: 0>;
