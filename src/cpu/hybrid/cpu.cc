@@ -144,15 +144,17 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       pipelineMacho (R_Idle),
       xRegDepTable (), yRegDepTable (), gRegDepTable (), mRegDepTable (),
       IssueWidth (p->IssueWidth),
-      IntArithLatency (p->IntArithLatency),
-      IntLogicLatency (p->IntLogicLatency),
-      IntTestLatency  (p->IntTestLatency),
-      IntShiftLatency (p->IntShiftLatency),
-      IntBitLatency   (p->IntBitLatency),
-      IntMoveLatency  (p->IntMoveLatency),
-      IntMulLatency   (p->IntMulLatency),
-      IntMacLatency   (p->IntMacLatency),
-      IntIterLatency  (p->IntIterLatency),
+      IntArithLatency     (p->IntArithLatency),
+      IntLogicLatency     (p->IntLogicLatency),
+      IntTestLatency      (p->IntTestLatency),
+      IntShiftLatency     (p->IntShiftLatency),
+      IntBitLatency       (p->IntBitLatency),
+      IntMoveLatency      (p->IntMoveLatency),
+      IntMulLatency       (p->IntMulLatency),
+      IntMacLatency       (p->IntMacLatency),
+      IntIterLatency      (p->IntIterLatency),
+      IntMemAccessLatency (p->IntMemAccessLatency),
+      IntMemOffsetLatency (p->IntMemOffsetLatency),
       SimdIntArithLatency (p->SimdIntArithLatency),
       SimdIntLogicLatency (p->SimdIntLogicLatency),
       SimdIntTestLatency  (p->SimdIntTestLatency),
@@ -1092,7 +1094,7 @@ HybridCPU::writeOpRegDep (Op_t *op)
         RegFile_t regFile = op->regFile ();
         RegIndex_t regIndex = op->regIndex ();
         RegCount_t regCount = op->numRegs ();
-        Cycles regBackCycle = funcUnitLatencyFactory (curStaticInst->opClass ());
+        Cycles regBackCycle = funcUnitLatencyFactory (curStaticInst->opClass (), op->memFlag ());
 
         switch (regFile) {
             case TheISA::REG_X:
@@ -1640,6 +1642,125 @@ HybridCPU::readOp32i (Lily2StaticInst *si, const OpCount_t& idx)
     return *op;
 }
 
+const Opd32i_t&
+HybridCPU::readOpd32i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Opd32i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd32i_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        // OP_D32I is stored in a register-pair.
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+
+        RegFile_t fileName = op->regFile ();
+
+        uint32_t vlo, vhi;
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                vlo = getRegValue (thread->getXRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_Y:
+                vlo = getRegValue (thread->getYRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getYRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_G:
+                vlo = getRegValue (thread->getGRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getGRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_M:
+                vlo = getRegValue (thread->getMRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getMRegFile (), regIndexHi);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUvlo (vlo);
+        op->setUvhi (vhi);
+    }
+
+    return *op;
+}
+
+void
+HybridCPU::setOpd32i (Lily2StaticInst *si, const OpCount_t& idx,
+                      const Opd32i_t& val, const Opd32i_t& mask)
+{
+    Opd32i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd32i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        // OP_32DI is stored in a register-pair.
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        uint32_t regValueLo = val.uvlo ();
+        uint32_t regValueHi = val.uvhi ();
+        uint32_t regMaskLo = mask.uvlo ();
+        uint32_t regMaskHi = mask.uvhi ();
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getXRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getYRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getGRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getMRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUvlo (regValueLo);
+        op->setUvhi (regValueHi);
+    }
+
+    return;
+}
+
 const Op32f_t&
 HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
 {
@@ -1686,7 +1807,7 @@ HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
     RegIndex_t regIndex = op->regIndex ();
     uint32_t regValue = val.uval ();
     uint32_t regMask = mask.uval ();
-    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
+    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
 
     op->setUval (regValue);
 
@@ -1758,7 +1879,7 @@ HybridCPU::dispModeFactory (const PipelineState& pipelineState) const
 }
 
 Cycles
-HybridCPU::funcUnitLatencyFactory (const OpClass& opClass) const
+HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
 {
     switch (opClass) {
         case IntArithOp    : return Cycles (IntArithLatency);
@@ -1777,6 +1898,18 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass) const
         case SimdIntMulOp  : return Cycles (SimdIntMulLatency);
         case SimdIntMacOp  : return Cycles (SimdIntMacLatency);
         case SimdIntIterOp : return Cycles (SimdIntIterLatency);
+        case IntMemLoadOp  : // Load instructions.
+                             if (memFlag) {
+                                 return Cycles (IntMemAccessLatency);
+                             } else {
+                                 return Cycles (IntMemOffsetLatency);
+                             }
+        case IntMemStoreOp : // Store instructions.
+                             if (memFlag) {
+                                 assert (0);
+                             } else {
+                                 return Cycles (IntMemOffsetLatency);
+                             }
         default            : assert (0);
     }
 }

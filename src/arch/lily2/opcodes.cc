@@ -46,10 +46,10 @@ const OpcReg_t OpcXRegs[] =
     {18, REG_X, 18, "x18"}, {19, REG_X, 19, "x19"},
     {20, REG_X, 20, "x20"}, {21, REG_X, 21, "x21"},
     {22, REG_X, 22, "x22"}, {23, REG_X, 23, "x23"},
-    {24, REG_G, 24, "g0" }, {25, REG_G, 25, "g1" },
-    {26, REG_G, 26, "g2" }, {27, REG_G, 27, "g3" },
-    {28, REG_G, 28, "g4" }, {29, REG_G, 29, "g5" },
-    {30, REG_G, 30, "g6" }, {31, REG_G, 31, "g7" },
+    {24, REG_G,  0, "g0" }, {25, REG_G,  1, "g1" },
+    {26, REG_G,  2, "g2" }, {27, REG_G,  3, "g3" },
+    {28, REG_G,  4, "g4" }, {29, REG_G,  5, "g5" },
+    {30, REG_G,  6, "g6" }, {31, REG_G,  7, "g7" },
 };
 const size_t NumOpcXRegs = ARRAY_SIZE (OpcXRegs);
 
@@ -61,8 +61,8 @@ const OpcReg_t OpcXRegPairs[] =
     {12, REG_X, 12, "x13:x12"}, {14, REG_X, 14, "x15:x14"},
     {16, REG_X, 16, "x17:x16"}, {18, REG_X, 16, "x19:x18"},
     {20, REG_X, 20, "x21:x20"}, {22, REG_X, 22, "x23:x22"},
-    {24, REG_G, 24, "g1:g0"  }, {26, REG_G, 26, "g3:g2"  },
-    {28, REG_G, 28, "g5:g4"  }, {30, REG_G, 30, "g7:g6"  },
+    {24, REG_G,  0, "g1:g0"  }, {26, REG_G,  2, "g3:g2"  },
+    {28, REG_G,  4, "g5:g4"  }, {30, REG_G,  6, "g7:g6"  },
 };
 const size_t NumOpcXRegPairs = ARRAY_SIZE (OpcXRegPairs);
 
@@ -74,8 +74,8 @@ const OpcReg_t OpcXRegPairPairs[] =
     {12, REG_X, 12, "x15:x14:x13:x12"},
     {16, REG_X, 16, "x19:x18:x17:x16"},
     {20, REG_X, 20, "x23:x22:x21:x20"},
-    {24, REG_G, 24, "g3:g2:g1:g0"    },
-    {28, REG_G, 28, "g7:g6:g5:g4"    },
+    {24, REG_G,  0, "g3:g2:g1:g0"    },
+    {28, REG_G,  4, "g7:g6:g5:g4"    },
 };
 const size_t NumOpcXRegPairPairs = ARRAY_SIZE (OpcXRegPairPairs);
 
@@ -93,10 +93,10 @@ const OpcReg_t OpcYRegs[] =
     {18, REG_Y, 18, "y18"}, {19, REG_Y, 19, "y19"},
     {20, REG_Y, 20, "y20"}, {21, REG_Y, 21, "y21"},
     {22, REG_Y, 22, "y22"}, {23, REG_Y, 23, "y23"},
-    {24, REG_G, 24, "g0" }, {25, REG_G, 25, "g1" },
-    {26, REG_G, 26, "g2" }, {27, REG_G, 27, "g3" },
-    {28, REG_G, 28, "g4" }, {29, REG_G, 29, "g5" },
-    {30, REG_G, 30, "g6" }, {31, REG_G, 31, "g7" },
+    {24, REG_G,  0, "g0" }, {25, REG_G,  1, "g1" },
+    {26, REG_G,  2, "g2" }, {27, REG_G,  3, "g3" },
+    {28, REG_G,  4, "g4" }, {29, REG_G,  5, "g5" },
+    {30, REG_G,  6, "g6" }, {31, REG_G,  7, "g7" },
 };
 const size_t NumOpcYRegs = ARRAY_SIZE (OpcYRegs);
 
@@ -108,8 +108,8 @@ const OpcReg_t OpcYRegPairs[] =
     {12, REG_Y, 12, "y13:y12"}, {14, REG_Y, 14, "y15:y14"},
     {16, REG_Y, 16, "y17:y16"}, {18, REG_Y, 16, "y19:y18"},
     {20, REG_Y, 20, "y21:y20"}, {22, REG_Y, 22, "y23:y22"},
-    {24, REG_G, 24, "g1:g0"  }, {26, REG_G, 26, "g3:g2"  },
-    {28, REG_G, 28, "g5:g4"  }, {30, REG_G, 30, "g7:g6"  },
+    {24, REG_G,  0, "g1:g0"  }, {26, REG_G,  2, "g3:g2"  },
+    {28, REG_G,  4, "g5:g4"  }, {30, REG_G,  6, "g7:g6"  },
 };
 const size_t NumOpcYRegPairs = ARRAY_SIZE (OpcYRegPairs);
 
@@ -121,8 +121,8 @@ const OpcReg_t OpcYRegPairPairs[] =
     {12, REG_Y, 12, "y15:y14:y13:y12"},
     {16, REG_Y, 16, "y19:y18:y17:y16"},
     {20, REG_Y, 20, "y23:y22:y21:y20"},
-    {24, REG_G, 24, "g3:g2:g1:g0"    },
-    {28, REG_G, 28, "g7:g6:g5:g4"    },
+    {24, REG_G,  0, "g3:g2:g1:g0"    },
+    {28, REG_G,  4, "g7:g6:g5:g4"    },
 };
 const size_t NumOpcYRegPairPairs = ARRAY_SIZE (OpcYRegPairPairs);
 

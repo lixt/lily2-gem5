@@ -104,53 +104,77 @@ class Table
 
   protected:
     // NULL functor that do nothing.
-    class NullFunctor
-    {
-      public:
-        bool operator() (key_type &key, mapped_type &mapped)
-        {
-            return false;
-        }
-    };
+    //class NullFunctor
+    //{
+    //  public:
+    //    bool operator() (key_type &key, mapped_type &mapped)
+    //    {
+    //        return false;
+    //    }
+    //};
 
-    static NullFunctor nfunc;
+    //static NullFunctor nfunc;
 
     // Traverses the table, calls VFUNC on every valid entry and IFUNC on every
     // invalid entry, returns nothing.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters.
-    template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    void traverse (ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
+    template <class ValidFunctor>
+    void traverse (ValidFunctor& vfunc);
+    template <class ValidFunctor>
+    void traverse (ValidFunctor& vfunc) const;
+    template <class ValidFunctor, class InvalidFunctor>
+    void traverse (ValidFunctor& vfunc, InvalidFunctor& ifunc);
+    template <class ValidFunctor, class InvalidFunctor>
+    void traverse (ValidFunctor& vfunc, InvalidFunctor& ifunc) const;
 
     // Traverses the table, calls VFUNC on every valid entry and IFUNC on every
     // invalid entry, returns a vector of positions.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters and returns a bool variable. TRUE indicates the current
     // position will be returned and vice versa.
-    template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    std::vector<Position> traverseAndReturn (ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
+    template <class ValidFunctor>
+    std::vector<Position> traverseAndReturn (ValidFunctor& vfunc);
+    template <class ValidFunctor>
+    std::vector<Position> traverseAndReturn (ValidFunctor& vfunc) const;
+    template <class ValidFunctor, class InvalidFunctor>
+    std::vector<Position> traverseAndReturn (ValidFunctor& vfunc, InvalidFunctor& ifunc);
+    template <class ValidFunctor, class InvalidFunctor>
+    std::vector<Position> traverseAndReturn (ValidFunctor& vfunc, InvalidFunctor& ifunc) const;
 
     // Traverses a set of the table, calls VFUNC on every valid entry and IFUNC on
     // every invalid entry, returns nothing.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters.
-    template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    void traverseSet (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
+    template <class ValidFunctor>
+    void traverseSet (size_t set, ValidFunctor& vfunc);
+    template <class ValidFunctor>
+    void traverseSet (size_t set, ValidFunctor& vfunc) const;
+    template <class ValidFunctor, class InvalidFunctor>
+    void traverseSet (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc);
+    template <class ValidFunctor, class InvalidFunctor>
+    void traverseSet (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc) const;
 
     // Traverses a set of the table, calls VFUNC on every valid entry and IFUNC on
     // every invalid entry, returns a vector of positions.
     // VFUNC and IFUNC should take key_type& and mapped_type& as the types of the
     // two parameters and returns a bool variable. TRUE indicates the current
     // position will be returned and vice versa.
-    template <class ValidFunctor, class InvalidFunctor = NullFunctor>
-    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc = nfunc);
+    template <class ValidFunctor>
+    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor& vfunc);
+    template <class ValidFunctor>
+    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor& vfunc) const;
+    template <class ValidFunctor, class InvalidFunctor>
+    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc);
+    template <class ValidFunctor, class InvalidFunctor>
+    std::vector<Position> traverseSetAndReturn (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc) const;
 
     // Prints out readable debug information of the table, calls PFUNC on every
     // entry, returns nothing.
     // PFUNC should take std::ostream&, const key_type& and const mapped_type& as the
     // types of the three paramters and returns nothing.
     template <class PrintFunctor>
-    void print (std::ostream &os, PrintFunctor pfunc) const;
+    void print (std::ostream &os, PrintFunctor& pfunc) const;
 
   protected:
     // Informs an invalid position range fault and force quits the program.
@@ -401,6 +425,7 @@ class Table
                              Compare, \
                              Hash,    \
                              Replace>
+
 TEMPLATE_LIST
 typename TEMPLATE_CLASS::mapped_type
 TEMPLATE_CLASS::access (const Position &position) const
@@ -550,9 +575,45 @@ TEMPLATE_CLASS::clear (void)
 }
 
 TEMPLATE_LIST
+template <class ValidFunctor>
+void
+TEMPLATE_CLASS::traverse (ValidFunctor& vfunc)
+{
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                vfunc (entryKey (curPos), entryMapped (curPos));
+            } else {
+                ;
+            }
+        }
+    }
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
+void
+TEMPLATE_CLASS::traverse (ValidFunctor& vfunc) const
+{
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                vfunc (entryKey (curPos), entryMapped (curPos));
+            } else {
+                ;
+            }
+        }
+    }
+}
+
+TEMPLATE_LIST
 template <class ValidFunctor, class InvalidFunctor>
 void
-TEMPLATE_CLASS::traverse (ValidFunctor vfunc, InvalidFunctor ifunc)
+TEMPLATE_CLASS::traverse (ValidFunctor& vfunc, InvalidFunctor& ifunc)
 {
     for (int i = 0; i != Set; ++i) {
         for (int j = 0; j != Way; ++j) {
@@ -569,8 +630,74 @@ TEMPLATE_CLASS::traverse (ValidFunctor vfunc, InvalidFunctor ifunc)
 
 TEMPLATE_LIST
 template <class ValidFunctor, class InvalidFunctor>
+void
+TEMPLATE_CLASS::traverse (ValidFunctor& vfunc, InvalidFunctor& ifunc) const
+{
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                vfunc (entryKey (curPos), entryMapped (curPos));
+            } else {
+                ifunc (entryKey (curPos), entryMapped (curPos));
+            }
+        }
+    }
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
 std::vector<typename TEMPLATE_CLASS::Position>
-TEMPLATE_CLASS::traverseAndReturn (ValidFunctor vfunc, InvalidFunctor ifunc)
+TEMPLATE_CLASS::traverseAndReturn (ValidFunctor& vfunc)
+{
+    std::vector<Position> vecPos;
+
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                    vecPos.push_back (curPos);
+                }
+            } else {
+                ;
+            }
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseAndReturn (ValidFunctor& vfunc) const
+{
+    std::vector<Position> vecPos;
+
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                    vecPos.push_back (curPos);
+                }
+            } else {
+                ;
+            }
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor, class InvalidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseAndReturn (ValidFunctor& vfunc, InvalidFunctor& ifunc)
 {
     std::vector<Position> vecPos;
 
@@ -595,8 +722,66 @@ TEMPLATE_CLASS::traverseAndReturn (ValidFunctor vfunc, InvalidFunctor ifunc)
 
 TEMPLATE_LIST
 template <class ValidFunctor, class InvalidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseAndReturn (ValidFunctor& vfunc, InvalidFunctor& ifunc) const
+{
+    std::vector<Position> vecPos;
+
+    for (int i = 0; i != Set; ++i) {
+        for (int j = 0; j != Way; ++j) {
+            Position curPos (i, j);
+
+            if (isPosValid (curPos)) {
+                if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                    vecPos.push_back (curPos);
+                }
+            } else {
+                if (ifunc (entryKey (curPos), entryMapped (curPos))) {
+                    vecPos.push_back (curPos);
+                }
+            }
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
 void
-TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc)
+TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor& vfunc)
+{
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            vfunc (entryKey (curPos), entryMapped (curPos));
+        } else {
+            ;
+        }
+    }
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
+void
+TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor& vfunc) const
+{
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            vfunc (entryKey (curPos), entryMapped (curPos));
+        } else {
+            ;
+        }
+    }
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor, class InvalidFunctor>
+void
+TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc)
 {
     for (int j = 0; j != Way; ++j) {
         Position curPos (set, j);
@@ -611,8 +796,92 @@ TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor vfunc, InvalidFunctor ifun
 
 TEMPLATE_LIST
 template <class ValidFunctor, class InvalidFunctor>
+void
+TEMPLATE_CLASS::traverseSet (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc) const
+{
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            vfunc (entryKey (curPos), entryMapped (curPos));
+        } else {
+            ifunc (entryKey (curPos), entryMapped (curPos));
+        }
+    }
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
 std::vector<typename TEMPLATE_CLASS::Position>
-TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFunctor ifunc)
+TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor& vfunc)
+{
+    std::vector<Position> vecPos;
+
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                vecPos.push_back (curPos);
+            }
+        } else {
+            ;
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor& vfunc) const
+{
+    std::vector<Position> vecPos;
+
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                vecPos.push_back (curPos);
+            }
+        } else {
+            ;
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor, class InvalidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc)
+{
+    std::vector<Position> vecPos;
+
+    for (int j = 0; j != Way; ++j) {
+        Position curPos (set, j);
+
+        if (isPosValid (curPos)) {
+            if (vfunc (entryKey (curPos), entryMapped (curPos))) {
+                vecPos.push_back (curPos);
+            }
+        } else {
+            if (ifunc (entryKey (curPos), entryMapped (curPos))) {
+                vecPos.push_back (curPos);
+            }
+        }
+    }
+
+    return vecPos;
+}
+
+TEMPLATE_LIST
+template <class ValidFunctor, class InvalidFunctor>
+std::vector<typename TEMPLATE_CLASS::Position>
+TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor& vfunc, InvalidFunctor& ifunc) const
 {
     std::vector<Position> vecPos;
 
@@ -636,7 +905,7 @@ TEMPLATE_CLASS::traverseSetAndReturn (size_t set, ValidFunctor vfunc, InvalidFun
 TEMPLATE_LIST
 template <class PrintFunctor>
 void
-TEMPLATE_CLASS::print (std::ostream &os, PrintFunctor pfunc) const
+TEMPLATE_CLASS::print (std::ostream &os, PrintFunctor& pfunc) const
 {
     for (int i = 0; i != Set; ++i) {
         os << "Set " << DEC << i << ":";

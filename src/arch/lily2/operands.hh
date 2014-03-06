@@ -89,6 +89,17 @@ class Op_t
         this->_immValue = _immValue;
     }
 
+    // Accesses the load identifier.
+    bool memFlag (void) const
+    {
+        return _memFlag;
+    }
+
+    void setMemFlag (bool _memFlag)
+    {
+        this->_memFlag = _memFlag;
+    }
+
   protected:
     // Prints readable operand value.
     virtual void print (std::ostream &os) const = 0;
@@ -100,6 +111,9 @@ class Op_t
     // Immediate operand identifier, 1 indicates an immediate.
     bool _immFlag;
     MachInst _immValue;
+
+    // Memory load operand identifier, 1 indicates a load destination.
+    bool _memFlag;
 
   private:
     // Implements the virtualization of output operator ``<<''.

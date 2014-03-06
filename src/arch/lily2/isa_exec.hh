@@ -1606,6 +1606,27 @@ inline Opd32i_t rem_u_w_2 (Opd32i_t opa, Opd32i_t opb)
                      _rem (opa.uvlo (), opb.uvlo ()));
 }
 
+// Memory access instructions.
+inline Op32i_t ldb (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t ();
+}
+
+inline Op32i_t ldh (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t ();
+}
+
+inline Op32i_t ldw (Op32i_t opa, Op32i_t opb)
+{
+    return Op32i_t ();
+}
+
+inline Opd32i_t ldd (Op32i_t opa, Op32i_t opb)
+{
+    return Opd32i_t ();
+}
+
 } // namespace Lily2ISA
 
 #endif // __ARCH_LILY2_ISA_EXEC_HH__

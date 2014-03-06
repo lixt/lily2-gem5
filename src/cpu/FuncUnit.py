@@ -54,7 +54,7 @@ class OpClass(Enum):
             'SimdFloatMultAcc', 'SimdFloatSqrt',
             'MemRead', 'MemWrite', 'IprAccess', 'InstPrefetch',
             'IntArith', 'IntMove', 'IntLogic', 'IntTest', 'IntShift', 'IntBit',
-            'IntMul', 'IntMac', 'IntIter',
+            'IntMul', 'IntMac', 'IntIter', 'IntMem', 'IntMemLoad', 'IntMemStore',
             'SimdIntArith', 'SimdIntLogic', 'SimdIntTest', 'SimdIntShift',
             'SimdIntMul', 'SimdIntMac', 'SimdIntIter']
 

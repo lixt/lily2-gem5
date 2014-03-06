@@ -396,10 +396,19 @@ class Lily2StaticInst : public StaticInst
     // OPTION = 0: Inner-Cluster.
     // OPTION = 1: Cross-Cluster.
     // OPTION = 2: Miscellaneous.
+    // OPTION = 3: Load destination.
     void decodeDestRegOp (OpLabel_t opLabel, MachInst insnDestRegFile,
                           MachInst insnDestRegIndex, int option = 0)
     {
         Op_t *op = opFactory (opLabel);
+
+        // Load destination.
+        if (option == 3) {
+            op->setMemFlag (true);
+            option = 0;
+        } else {
+            op->setMemFlag (false);
+        }
 
         OpcReg_t opcReg;
         switch (op->numRegs ()) {

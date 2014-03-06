@@ -1101,4 +1101,60 @@ decode FU default Unknown::unknown () {
                 } //> FU(0b'10) + HI(0b'000).
 
         } //> FU(0b'10).
+
+    0x3: //< FU(0b'11).
+        decode OPCODE_HI default Unknown::unknown () {
+
+            0x0: //< FU(0b'11) + HI(0b'000).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< LDB.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: MemLoadOp::ldb_u_d ({{ mem_ub = ldb (addr_rbase, addr_roffset); }});
+                                    0x1: MemLoadOp::ldb_d   ({{ mem_sb = ldb (addr_rbase, addr_roffset); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: MemLoadOp::ldb_u_i_d ({{ mem_ub = ldb (addr_rbase, addr_ioffset); }});
+                                    0x1: MemLoadOp::ldb_d_i   ({{ mem_sb = ldb (addr_rbase, addr_ioffset); }});
+                                }
+
+                        } //> LDB.
+
+                    0x1: //< LDH.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: MemLoadOp::ldh_u_d ({{ mem_ub = ldh (addr_rbase, addr_roffset); }});
+                                    0x1: MemLoadOp::ldh_d   ({{ mem_sb = ldh (addr_rbase, addr_roffset); }});
+                                }
+
+                            0x1:
+                                decode FLAG_SIG default Unknown::unknown () {
+                                    0x0: MemLoadOp::ldh_u_i_d ({{ mem_uh = ldh (addr_rbase, addr_ioffset); }});
+                                    0x1: MemLoadOp::ldh_d_i   ({{ mem_sh = ldh (addr_rbase, addr_ioffset); }});
+                                }
+
+                        } //> LDH.
+
+                    0x2: //< LDW.
+                        decode FLAG_IMM default Unknown::unknown () {
+                            0x0: MemLoadOp::ldw_d   ({{ mem_w = ldw (addr_rbase, addr_roffset); }});
+                            0x1: MemLoadOp::ldw_i_d ({{ mem_w = ldw (addr_rbase, addr_ioffset); }});
+                        } //> LDW.
+
+                    0x3: //< LDD.
+                        decode FLAG_IMM default Unknown::unknown () {
+                            0x0: MemLoadOp::ldd_d   ({{ mem_d = ldd (addr_rbase, addr_roffset); }});
+                            0x1: MemLoadOp::ldd_i_d ({{ mem_d = ldd (addr_rbase, addr_ioffset); }});
+                        } //> LDD.
+
+                } //> FU(0b'11) + HI(0b'000).
+
+        } //> FU(0b'11).
 }

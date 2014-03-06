@@ -159,7 +159,8 @@ template <size_t RegNum, class RegValue_t>
 void
 RegFile<RegNum, RegValue_t>::print (std::ostream &os) const
 {
-    Base::print (os, PrintFunctor ());
+    PrintFunctor printFunctor;
+    Base::print (os, printFunctor);
 }
 
 template <size_t ShadowRegNum, class ShadowRegValue_t>

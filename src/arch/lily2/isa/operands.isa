@@ -88,6 +88,19 @@ def operands {{
     'dsfa': ('Opd32f', 'dsf', 'DA', '', 2),
     'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
+    # Memory operends.
+    'mem_ub' : ('Mem8u' , 'uw' , 'RD', '', 1),
+    'mem_sb' : ('Mem8s' , 'sw' , 'RD', '', 1),
+    'mem_uh' : ('Mem16u' , 'uw' , 'RD', '', 1),
+    'mem_sh' : ('Mem16s' , 'sw' , 'RD', '', 1),
+    'mem_w'  : ('Mem32' , 'uw' , 'RD', '', 1),
+    'mem_d'  : ('Mem64', 'udw', 'RD', '', 1),
+
+    # Memory address.
+    'addr_rbase'   : ('AddrBase'     , 'sw', 'RA'  , '', 1),
+    'addr_roffset' : ('AddrOffset'   , 'sw', 'RB'  , '', 2),
+    'addr_ioffset' : ('I8_AddrOffset', 'sw', 'IMM8', '', 2),
+
     # Semantically meaningful operands.
     'w_carry' : ('Op32i', 'sw', 'CarryReg', '', 1),
 

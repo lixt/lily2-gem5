@@ -469,6 +469,22 @@ class HybridCPU : public BaseSimpleCPU
     void refreshCycle (const Cycles& decrRegBackCycleDelta);
 
   private:
+    // Register file interfaces.
+    template <size_t RegNum, class RegValue_t>
+    RegValue_t getRegValue (const TheISA::RegFile<RegNum, RegValue_t>&, const RegIndex_t&) const;
+
+    template <size_t RegNum, class RegValue_t>
+    void setRegValue (TheISA::RegFile<RegNum, RegValue_t>&, const RegIndex_t&, const RegValue_t&);
+
+    // Register file buffer interfaces.
+    template <size_t RegNum, class RegValue_t>
+    RegValue_t getRegBufValue (const TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&) const;
+
+    template <size_t RegNum, class RegValue_t>
+    void setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&,
+                         const RegValue_t&, const RegValue_t&, const Cycles&);
+
+  private:
     // Interfaces for debugging.
     void debugPipeline (std::ostream&) const;
 
@@ -477,7 +493,7 @@ class HybridCPU : public BaseSimpleCPU
     DispMode_t dispModeFactory (const PipelineState& pipelineState) const;
 
     // Factory of functional unit delay slots.
-    Cycles funcUnitLatencyFactory (const OpClass &opClass) const;
+    Cycles funcUnitLatencyFactory (const OpClass &opClass, bool memFlag) const;
 
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
@@ -519,10 +535,7 @@ class HybridCPU : public BaseSimpleCPU
         return Opq16i_t (static_cast<uint16_t> (0));
     }
 
-    Opd32i_t readOpd32i (const Lily2StaticInst *si, int idx)
-    {
-        return Opd32i_t (static_cast<uint16_t> (0));
-    }
+    const Opd32i_t& readOpd32i (Lily2StaticInst *si, const OpCount_t& idx);
 
     Opd32f_t readOpd32f (const Lily2StaticInst *si, int idx)
     {
@@ -550,9 +563,7 @@ class HybridCPU : public BaseSimpleCPU
                     Opq16i_t &val, Opq16i_t &mask)
     {}
 
-    void setOpd32i (const Lily2StaticInst *si, int idx,
-                    Opd32i_t &val, Opd32i_t &mask)
-    {}
+    void setOpd32i (Lily2StaticInst *, const OpCount_t&, const Opd32i_t&, const Opd32i_t&);
 
     void setOpd32f (const Lily2StaticInst *si, int idx,
                     Opd32f_t &val, Opd32f_t &mask)
@@ -575,6 +586,8 @@ class HybridCPU : public BaseSimpleCPU
     int IntMulLatency;
     int IntMacLatency;
     int IntIterLatency;
+    int IntMemAccessLatency;
+    int IntMemOffsetLatency;
     int SimdIntArithLatency;
     int SimdIntLogicLatency;
     int SimdIntTestLatency;
@@ -583,5 +596,39 @@ class HybridCPU : public BaseSimpleCPU
     int SimdIntMacLatency;
     int SimdIntIterLatency;
 };
+
+template <size_t RegNum, class RegValue_t>
+RegValue_t
+HybridCPU::getRegValue (const TheISA::RegFile<RegNum, RegValue_t>& regFile,
+                        const RegIndex_t& regIndex) const
+{
+    return regFile.getRegValue (regIndex);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+HybridCPU::setRegValue (TheISA::RegFile<RegNum, RegValue_t>& regFile,
+                        const RegIndex_t& regIndex,
+                        const RegValue_t& regValue)
+{
+    return regFile.setRegValue (regIndex, regValue);
+}
+
+template <size_t RegNum, class RegValue_t>
+RegValue_t
+HybridCPU::getRegBufValue (const TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
+                           const RegIndex_t& regIndex) const
+{
+    return regFileBuf.getRegValue (regIndex);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+HybridCPU::setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
+                           const RegIndex_t& regIndex, const RegValue_t& regValue,
+                           const RegValue_t& regMask, const Cycles& regBackCycle)
+{
+    return regFileBuf.insert (regIndex, regValue, regMask, regBackCycle);
+}
 
 #endif // __CPU_HYBRID_CPU_HH__
