@@ -513,62 +513,24 @@ class HybridCPU : public BaseSimpleCPU
         return 0;
     }
 
-    const Op32i_t& readOp32i (Lily2StaticInst *si, const OpCount_t& idx);
-    const Op32f_t& readOp32f (Lily2StaticInst *si, const OpCount_t& idx);
-    Op64f_t readOp64f (const Lily2StaticInst *si, int idx)
-    {
-        return Op64f_t (static_cast<double> (0.0));
-    }
 
-    Opq8i_t readOpq8i (const Lily2StaticInst *si, int idx)
-    {
-        return Opq8i_t (static_cast<uint8_t> (0));
-    }
+    const Op32i_t&  readOp32i  (Lily2StaticInst*, const OpCount_t&);
+    const Op32f_t&  readOp32f  (Lily2StaticInst*, const OpCount_t&);
+    const Op64f_t&  readOp64f  (Lily2StaticInst*, const OpCount_t&);
+    const Opq8i_t&  readOpq8i  (Lily2StaticInst*, const OpCount_t&);
+    const Opd16i_t& readOpd16i (Lily2StaticInst*, const OpCount_t&);
+    const Opq16i_t& readOpq16i (Lily2StaticInst*, const OpCount_t&);
+    const Opd32i_t& readOpd32i (Lily2StaticInst*, const OpCount_t&);
+    const Opd32f_t& readOpd32f (Lily2StaticInst*, const OpCount_t&);
 
-    Opd16i_t readOpd16i (const Lily2StaticInst *si, int idx)
-    {
-        return Opd16i_t (static_cast<uint16_t> (0));
-    }
-
-    Opq16i_t readOpq16i (const Lily2StaticInst *si, int idx)
-    {
-        return Opq16i_t (static_cast<uint16_t> (0));
-    }
-
-    const Opd32i_t& readOpd32i (Lily2StaticInst *si, const OpCount_t& idx);
-
-    Opd32f_t readOpd32f (const Lily2StaticInst *si, int idx)
-    {
-        return Opd32f_t (static_cast<float> (0.0));
-    }
-
-    void setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
-                   const Op32i_t& val, const Op32i_t& mask);
-    void setOp32f (Lily2StaticInst *si, const OpCount_t &idx,
-                   const Op32f_t& val, const Op32f_t& mask);
-
-    void setOp64f (const Lily2StaticInst *si, int idx,
-                   Op64f_t &val, Op64f_t &mask)
-    {}
-
-    void setOpq8i (const Lily2StaticInst *si, int idx,
-                   Opq8i_t &val, Opq8i_t &mask)
-    {}
-
-    void setOpd16i (const Lily2StaticInst *si, int idx,
-                    Opd16i_t &val, Opd16i_t &mask)
-    {}
-
-    void setOpq16i (const Lily2StaticInst *si, int idx,
-                    Opq16i_t &val, Opq16i_t &mask)
-    {}
-
-    void setOpd32i (Lily2StaticInst *, const OpCount_t&, const Opd32i_t&, const Opd32i_t&);
-
-    void setOpd32f (const Lily2StaticInst *si, int idx,
-                    Opd32f_t &val, Opd32f_t &mask)
-    {}
-
+    void setOp32i  (Lily2StaticInst*, const OpCount_t&, const Op32i_t& , const Op32i_t& );
+    void setOp32f  (Lily2StaticInst*, const OpCount_t&, const Op32f_t& , const Op32f_t& );
+    void setOp64f  (Lily2StaticInst*, const OpCount_t&, const Op64f_t& , const Op64f_t& );
+    void setOpq8i  (Lily2StaticInst*, const OpCount_t&, const Opq8i_t& , const Opq8i_t& );
+    void setOpd16i (Lily2StaticInst*, const OpCount_t&, const Opd16i_t&, const Opd16i_t&);
+    void setOpq16i (Lily2StaticInst*, const OpCount_t&, const Opq16i_t&, const Opq16i_t&);
+    void setOpd32i (Lily2StaticInst*, const OpCount_t&, const Opd32i_t&, const Opd32i_t&);
+    void setOpd32f (Lily2StaticInst*, const OpCount_t&, const Opd32f_t&, const Opd32f_t&);
 
   private:
     // Python configuration variables.

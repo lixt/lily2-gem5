@@ -1607,36 +1607,286 @@ HybridCPU::callback_R_2_V (void)
 const Op32i_t&
 HybridCPU::readOp32i (Lily2StaticInst *si, const OpCount_t& idx)
 {
-    Op32i_t *op = dynamic_cast<Op32i_t *> (si->getSrcOp (idx));
-    assert (op);
+    Op32i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op32i_t *> (si->getSrcOp (idx)));
 
     if (op->immFlag ()) {
         // The immediate value is already stored in OP.
-        ;
     } else {
-        uint32_t val = 0;
+        uint32_t val;
         RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
 
-        switch (op->regFile ()) {
+        switch (fileName) {
             case TheISA::REG_X:
-                val = thread->readXReg (regIndex);
-                op->setUval (val);
+                val = getRegValue (thread->getXRegFile (), regIndex);
                 break;
+
             case TheISA::REG_Y:
-                val = thread->readYReg (regIndex);
-                op->setUval (val);
+                val = getRegValue (thread->getYRegFile (), regIndex);
                 break;
+
             case TheISA::REG_G:
-                val = thread->readGReg (regIndex);
-                op->setUval (val);
+                val = getRegValue (thread->getGRegFile (), regIndex);
                 break;
+
             case TheISA::REG_M:
-                val = thread->readMReg (regIndex);
-                op->setUval (val);
+                val = getRegValue (thread->getMRegFile (), regIndex);
                 break;
+
             default:
                 assert (0);
         }
+
+        // Sets the operand value.
+        op->setUval (val);
+    }
+
+    return *op;
+}
+
+const Op32f_t&
+HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Op32f_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op32f_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint32_t val;
+        RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                val = getRegValue (thread->getXRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_Y:
+                val = getRegValue (thread->getYRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_G:
+                val = getRegValue (thread->getGRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_M:
+                val = getRegValue (thread->getMRegFile (), regIndex);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBval (val);
+    }
+
+    return *op;
+}
+
+const Op64f_t&
+HybridCPU::readOp64f (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Op64f_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op64f_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint64_t vlo, vhi;
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                vlo = getRegValue (thread->getXRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_Y:
+                vlo = getRegValue (thread->getYRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getYRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_G:
+                vlo = getRegValue (thread->getGRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getGRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_M:
+                vlo = getRegValue (thread->getMRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getMRegFile (), regIndexHi);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBval (vlo + (vhi << 32));
+    }
+
+    return *op;
+}
+
+const Opq8i_t&
+HybridCPU::readOpq8i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Opq8i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opq8i_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint8_t vvl, vlo, vhi, vvh;
+        uint32_t val;
+        RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                val = getRegValue (thread->getXRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_Y:
+                val = getRegValue (thread->getYRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_G:
+                val = getRegValue (thread->getGRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_M:
+                val = getRegValue (thread->getMRegFile (), regIndex);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        vvl = val;
+        vlo = val >> 8;
+        vhi = val >> 16;
+        vvh = val >> 24;
+        op->setUvvl (vvl);
+        op->setUvlo (vlo);
+        op->setUvhi (vhi);
+        op->setUvvh (vvh);
+    }
+
+    return *op;
+}
+
+const Opd16i_t&
+HybridCPU::readOpd16i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Opd16i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd16i_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint16_t vlo, vhi;
+        uint32_t val;
+        RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                val = getRegValue (thread->getXRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_Y:
+                val = getRegValue (thread->getYRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_G:
+                val = getRegValue (thread->getGRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_M:
+                val = getRegValue (thread->getMRegFile (), regIndex);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        vlo = val;
+        vhi = val >> 16;
+        op->setUvlo (vlo);
+        op->setUvhi (vhi);
+    }
+
+    return *op;
+}
+
+const Opq16i_t&
+HybridCPU::readOpq16i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Opq16i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opq16i_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint16_t vvl, vlo, vhi, vvh;
+        uint32_t valLo, valHi;
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                valLo = getRegValue (thread->getXRegFile (), regIndexLo);
+                valHi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_Y:
+                valLo = getRegValue (thread->getYRegFile (), regIndexLo);
+                valHi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_G:
+                valLo = getRegValue (thread->getGRegFile (), regIndexLo);
+                valHi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_M:
+                valLo = getRegValue (thread->getMRegFile (), regIndexLo);
+                valHi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        vvl = valLo;
+        vlo = valLo >> 16;
+        vhi = valHi;
+        vvh = valHi >> 16;
+        op->setUvvl (vvl);
+        op->setUvlo (vlo);
+        op->setUvhi (vhi);
+        op->setUvvh (vvh);
     }
 
     return *op;
@@ -1653,13 +1903,12 @@ HybridCPU::readOpd32i (Lily2StaticInst *si, const OpCount_t& idx)
     if (op->immFlag ()) {
         // The immediate value is already stored in OP.
     } else {
-        // OP_D32I is stored in a register-pair.
+        uint32_t vlo, vhi;
+
         RegIndex_t regIndexLo = op->regIndex ();
         RegIndex_t regIndexHi = regIndexLo + 1;
 
         RegFile_t fileName = op->regFile ();
-
-        uint32_t vlo, vhi;
 
         switch (fileName) {
             case TheISA::REG_X:
@@ -1694,6 +1943,451 @@ HybridCPU::readOpd32i (Lily2StaticInst *si, const OpCount_t& idx)
     return *op;
 }
 
+const Opd32f_t&
+HybridCPU::readOpd32f (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Opd32f_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd32f_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint32_t vlo, vhi;
+
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                vlo = getRegValue (thread->getXRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getXRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_Y:
+                vlo = getRegValue (thread->getYRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getYRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_G:
+                vlo = getRegValue (thread->getGRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getGRegFile (), regIndexHi);
+                break;
+
+            case TheISA::REG_M:
+                vlo = getRegValue (thread->getMRegFile (), regIndexLo);
+                vhi = getRegValue (thread->getMRegFile (), regIndexHi);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBvlo (vlo);
+        op->setBvhi (vhi);
+    }
+
+    return *op;
+}
+
+void
+HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op32i_t& val, const Op32i_t& mask)
+{
+    Op32i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op32i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndex = op->regIndex ();
+        uint32_t regValue = val.uval ();
+        uint32_t regMask = mask.uval ();
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUval (regValue);
+    }
+
+    return;
+}
+
+void
+HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op32f_t& val, const Op32f_t& mask)
+{
+    Op32f_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op32f_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndex = op->regIndex ();
+        uint32_t regValue = val.bval ();
+        uint32_t regMask = mask.bval ();
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBval (regValue);
+    }
+
+    return;
+}
+
+void
+HybridCPU::setOp64f (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op64f_t& val, const Op64f_t& mask)
+{
+    Op64f_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op64f_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        uint64_t regValue = val.bval ();
+        uint32_t regValueLo = bits (regValue, 31, 0);
+        uint32_t regValueHi = bits (regValue, 63, 32);
+        uint64_t regMask = mask.bval ();
+        uint32_t regMaskLo = bits (regMask, 31, 0);
+        uint32_t regMaskHi = bits (regMask, 63, 32);
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getXRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getYRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getGRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getMRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBval ((uint64_t)regValueLo + (((uint64_t)regValueHi) << 32));
+    }
+
+    return;
+}
+
+void
+HybridCPU::setOpq8i (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Opq8i_t& val, const Opq8i_t& mask)
+{
+    Opq8i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opq8i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndex = op->regIndex ();
+        uint32_t regValue = 0;
+        uint8_t regValueVl = val.uvvl ();
+        uint8_t regValueLo = val.uvlo ();
+        uint8_t regValueHi = val.uvhi ();
+        uint8_t regValueVh = val.uvvh ();
+        replaceBits (regValue, 7 , 0 , regValueVl);
+        replaceBits (regValue, 15, 8 , regValueLo);
+        replaceBits (regValue, 23, 16, regValueHi);
+        replaceBits (regValue, 31, 24, regValueVh);
+        uint32_t regMask = 0;
+        uint8_t regMaskVl = mask.uvvl ();
+        uint8_t regMaskLo = mask.uvlo ();
+        uint8_t regMaskHi = mask.uvhi ();
+        uint8_t regMaskVh = mask.uvvh ();
+        replaceBits (regMask, 7 , 0 , regMaskVl);
+        replaceBits (regMask, 15, 8 , regMaskLo);
+        replaceBits (regMask, 23, 16, regMaskHi);
+        replaceBits (regMask, 31, 24, regMaskVh);
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUvvl (regValueVl);
+        op->setUvlo (regValueLo);
+        op->setUvhi (regValueHi);
+        op->setUvvh (regValueVh);
+    }
+
+    return;
+}
+
+void
+HybridCPU::setOpd16i (Lily2StaticInst *si, const OpCount_t& idx,
+                      const Opd16i_t& val, const Opd16i_t& mask)
+{
+    Opd16i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd16i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndex = op->regIndex ();
+        uint32_t regValue = 0;
+        uint16_t regValueLo = val.uvlo ();
+        uint16_t regValueHi = val.uvhi ();
+        replaceBits (regValue, 15, 0 , regValueLo);
+        replaceBits (regValue, 31, 16, regValueHi);
+        uint32_t regMask = 0;
+        uint16_t regMaskLo = mask.uvlo ();
+        uint16_t regMaskHi = mask.uvhi ();
+        replaceBits (regMask, 15, 0 , regMaskLo);
+        replaceBits (regMask, 31, 16, regMaskHi);
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndex,
+                                regValue, regMask, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUvlo (regValueLo);
+        op->setUvhi (regValueHi);
+    }
+
+    return;
+}
+
+void
+HybridCPU::setOpq16i (Lily2StaticInst *si, const OpCount_t& idx,
+                      const Opq16i_t& val, const Opq16i_t& mask)
+{
+    Opq16i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opq16i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        uint32_t regValue_0 = 0, regValue_1 = 0;
+        uint16_t regValueVl = val.uvvl ();
+        uint16_t regValueLo = val.uvlo ();
+        uint16_t regValueHi = val.uvhi ();
+        uint16_t regValueVh = val.uvvh ();
+        replaceBits (regValue_0, 15, 0 , regValueVl);
+        replaceBits (regValue_0, 31, 16, regValueLo);
+        replaceBits (regValue_1, 15, 0 , regValueHi);
+        replaceBits (regValue_1, 31, 16, regValueVh);
+        uint32_t regMask_0 = 0, regMask_1 = 0;
+        uint16_t regMaskVl = mask.uvvl ();
+        uint16_t regMaskLo = mask.uvlo ();
+        uint16_t regMaskHi = mask.uvhi ();
+        uint16_t regMaskVh = mask.uvvh ();
+        replaceBits (regMask_0, 15, 0 , regMaskVl);
+        replaceBits (regMask_0, 31, 16, regMaskLo);
+        replaceBits (regMask_1, 15, 0 , regMaskHi);
+        replaceBits (regMask_1, 31, 16, regMaskVh);
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndexLo,
+                                regValue_0, regMask_0, regBackCycle);
+                setRegBufValue (thread->getXRegFileBuf (), regIndexHi,
+                                regValue_1, regMask_1, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+
+                setRegBufValue (thread->getYRegFileBuf (), regIndexLo,
+                                regValue_0, regMask_0, regBackCycle);
+                setRegBufValue (thread->getYRegFileBuf (), regIndexHi,
+                                regValue_1, regMask_1, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndexLo,
+                                regValue_0, regMask_0, regBackCycle);
+                setRegBufValue (thread->getGRegFileBuf (), regIndexHi,
+                                regValue_1, regMask_1, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndexLo,
+                                regValue_0, regMask_0, regBackCycle);
+                setRegBufValue (thread->getMRegFileBuf (), regIndexHi,
+                                regValue_1, regMask_1, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUvvl (regValueVl);
+        op->setUvlo (regValueLo);
+        op->setUvhi (regValueHi);
+        op->setUvvh (regValueVh);
+    }
+
+    return;
+}
+
 void
 HybridCPU::setOpd32i (Lily2StaticInst *si, const OpCount_t& idx,
                       const Opd32i_t& val, const Opd32i_t& mask)
@@ -1707,7 +2401,6 @@ HybridCPU::setOpd32i (Lily2StaticInst *si, const OpCount_t& idx,
         // Destination operand can not be an immediate.
         assert (0);
     } else {
-        // OP_32DI is stored in a register-pair.
         RegIndex_t regIndexLo = op->regIndex ();
         RegIndex_t regIndexHi = regIndexLo + 1;
         uint32_t regValueLo = val.uvlo ();
@@ -1761,116 +2454,72 @@ HybridCPU::setOpd32i (Lily2StaticInst *si, const OpCount_t& idx,
     return;
 }
 
-const Op32f_t&
-HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
-{
-    Op32f_t *op = dynamic_cast<Op32f_t *> (si->getSrcOp (idx));
-    assert (op);
-
-//    if (op->immFlag ()) {
-//        // The Immediate value is already stored in OP.
-//        ;
-//    } else {
-//        uint32_t val;
-//        switch (op->regFile ()) {
-//            case TheISA::REG_X:
-//                val = (thread->getXRegs ()).getRegValue (op->regIndex ());
-//                op->setFval (*(reinterpret_cast<float *> (&val)));
-//                break;
-//            case TheISA::REG_Y:
-//                val = (thread->getYRegs ()).getRegValue (op->regIndex ());
-//                op->setFval (*(reinterpret_cast<float *> (&val)));
-//                break;
-//            case TheISA::REG_G:
-//                val = (thread->getGRegs ()).getRegValue (op->regIndex ());
-//                op->setFval (*(reinterpret_cast<float *> (&val)));
-//                break;
-//            case TheISA::REG_M:
-//                val = (thread->getMRegs ()).getRegValue (op->regIndex ());
-//                op->setFval (*(reinterpret_cast<float *> (&val)));
-//                break;
-//            default:
-//                assert (0);
-//        }
-//    }
-
-    return *op;
-}
-
 void
-HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
-                     const Op32i_t& val, const Op32i_t& mask)
+HybridCPU::setOpd32f (Lily2StaticInst *si, const OpCount_t& idx,
+                      const Opd32f_t& val, const Opd32f_t& mask)
 {
-    Op32i_t *op;
-    assert (op = dynamic_cast<Op32i_t *> (si->getDestOp (idx)));
+    Opd32f_t *op;
 
-    RegIndex_t regIndex = op->regIndex ();
-    uint32_t regValue = val.uval ();
-    uint32_t regMask = mask.uval ();
-    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Opd32f_t *> (si->getDestOp (idx)));
 
-    op->setUval (regValue);
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        uint32_t regValueLo = val.bvlo ();
+        uint32_t regValueHi = val.bvhi ();
+        uint32_t regMaskLo = mask.bvlo ();
+        uint32_t regMaskHi = mask.bvhi ();
 
-    switch (op->regFile ()) {
-        case TheISA::REG_X:
-            thread->setXRegBuf (regIndex, regValue, regMask, regBackCycle);
-            break;
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
 
-        case TheISA::REG_Y:
-            thread->setYRegBuf (regIndex, regValue, regMask, regBackCycle);
-            break;
+        RegFile_t fileName = op->regFile ();
 
-        case TheISA::REG_G:
-            thread->setGRegBuf (regIndex, regValue, regMask, regBackCycle);
-            break;
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getXRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
 
-        case TheISA::REG_M:
-            thread->setMRegBuf (regIndex, regValue, regMask, regBackCycle);
-            break;
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getYRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
 
-        default:
-            assert (0);
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getGRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getMRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setBvlo (regValueLo);
+        op->setBvhi (regValueHi);
     }
+
+    return;
 }
 
-void
-HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
-                     const Op32f_t& val, const Op32f_t& mask)
-{
-//    Op32f_t *op;
-//    assert (op = dynamic_cast<Op32f_t *> (si->getDestOp (idx)));
-//
-//    uint32_t regValue = val.bval ();
-//    uint32_t regMask = mask.bval ();
-//    Cycles regBackCycle = funcUnitLatencyFactory (si->opClass ());
-//
-//    op->setBval (regValue);
-//
-//    switch (op->regFile ()) {
-//        case TheISA::REG_X:
-//            (thread->getXRegBufs ()).insert (op->regIndex (),
-//                    regValue, regMask, regBackCycle);
-//            break;
-//
-//        case TheISA::REG_Y:
-//            (thread->getYRegBufs ()).insert (op->regIndex (),
-//                    regValue, regMask, regBackCycle);
-//            break;
-//
-//        case TheISA::REG_G:
-//            (thread->getGRegBufs ()).insert (op->regIndex (),
-//                    regValue, regMask, regBackCycle);
-//            break;
-//
-//        case TheISA::REG_M:
-//            (thread->getMRegBufs ()).insert (op->regIndex (),
-//                    regValue, regMask, regBackCycle);
-//            break;
-//
-//        default:
-//            assert (0);
-//    }
-}
 
 DispMode_t
 HybridCPU::dispModeFactory (const PipelineState& pipelineState) const

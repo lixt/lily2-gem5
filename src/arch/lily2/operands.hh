@@ -266,6 +266,9 @@ class Op64f_t : public Op_t
     // Accessor and mutators of operand value.
     float fval (void) const { return val.fval; }
     void setFval (double val) { this->val.fval = val; }
+    uint64_t bval (void) const { return val.bval; }
+    void setBval (uint64_t val) { this->val.bval = val; }
+
 
   private:
     // Number of registers a word contains.
@@ -274,6 +277,7 @@ class Op64f_t : public Op_t
   private:
     union {
         double fval;
+        uint64_t bval;
     } val;
 };
 
@@ -631,6 +635,10 @@ class Opd32f_t : public Op_t
     float fvlo (void) const { return vlo.fval; }
     void setFvhi (float vhi) { this->vhi.fval = vhi; }
     void setFvlo (float vlo) { this->vlo.fval = vlo; }
+    uint32_t bvhi (void) const { return vhi.bval; }
+    uint32_t bvlo (void) const { return vlo.bval; }
+    void setBvhi (uint32_t vhi) { this->vhi.bval = vhi; }
+    void setBvlo (uint32_t vlo) { this->vlo.bval = vlo; }
 
   private:
     // Number of registers a word contains.
@@ -639,6 +647,7 @@ class Opd32f_t : public Op_t
   private:
     union {
         float fval;
+        uint32_t bval;
     } vhi, vlo;
 };
 
