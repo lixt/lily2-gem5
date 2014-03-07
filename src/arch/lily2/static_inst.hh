@@ -286,6 +286,7 @@ class Lily2StaticInst : public StaticInst
     bool isModeSwitch (void) const { return flags[IsModeSwitch]; }
     bool isToRisc (void) const { return flags[IsToRisc]; }
     bool isToVliw (void) const { return flags[IsToVliw]; }
+    bool isSyscall (void) const { return flags[IsSyscall]; }
 
   public:
     // Machine instruction.
@@ -312,6 +313,8 @@ class Lily2StaticInst : public StaticInst
         IsModeSwitch, // Mode switching.
         IsToRisc, // Switch to Risc.
         IsToVliw, // Switch to Vliw.
+
+        IsSyscall, // Syscall.
 
         NumFlags
     };

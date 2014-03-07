@@ -414,42 +414,7 @@ class HybridCPU : public BaseSimpleCPU
   private:
     // Interfaces for member functions.
     bool isOverIssueWidth     (void) const;
-    bool isRegDep             (void) const;
-    bool isOpRegDep           (Op_t *) const;
-    bool isXRegDep            (const RegIndex_t&) const;
-    bool isXRegPairDep        (const RegIndex_t&) const;
-    bool isXRegPairPairDep    (const RegIndex_t&) const;
-    bool isYRegDep            (const RegIndex_t&) const;
-    bool isYRegPairDep        (const RegIndex_t&) const;
-    bool isYRegPairPairDep    (const RegIndex_t&) const;
-    bool isGRegDep            (const RegIndex_t&) const;
-    bool isGRegPairDep        (const RegIndex_t&) const;
-    bool isGRegPairPairDep    (const RegIndex_t&) const;
-    bool isMRegDep            (const RegIndex_t&) const;
-    bool isMRegPairDep        (const RegIndex_t&) const;
-    bool isMRegPairPairDep    (const RegIndex_t&) const;
     void writeIssued          (void);
-    void writeRegDep          (void);
-    void writeOpRegDep        (Op_t *);
-    void writeXRegDep         (const RegIndex_t&, const Cycles& cycle);
-    void writeXRegPairDep     (const RegIndex_t&, const Cycles& cycle);
-    void writeXRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
-    void writeYRegDep         (const RegIndex_t&, const Cycles& cycle);
-    void writeYRegPairDep     (const RegIndex_t&, const Cycles& cycle);
-    void writeYRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
-    void writeGRegDep         (const RegIndex_t&, const Cycles& cycle);
-    void writeGRegPairDep     (const RegIndex_t&, const Cycles& cycle);
-    void writeGRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
-    void writeMRegDep         (const RegIndex_t&, const Cycles& cycle);
-    void writeMRegPairDep     (const RegIndex_t&, const Cycles& cycle);
-    void writeMRegPairPairDep (const RegIndex_t&, const Cycles& cycle);
-    //void renewIssued          (void);
-    //void renewRegDep          (const Cycles&);
-    //void renewRegFileBuf      (const Cycles&);
-    //template <size_t RegNum, class RegValue_t>
-    //void renewRegFileBuf (TheISA::RegFile<RegNum, RegValue_t> *, TheISA::RegFileBuf<RegNum, RegValue_t> *, const Cycles&);
-    //void renewCycle           (const Cycles&);
-
     // Refresh.
     // Refreshes the issued instructions.
     void refreshIssued (void);
@@ -467,6 +432,31 @@ class HybridCPU : public BaseSimpleCPU
 
     // Refreshes the cycles.
     void refreshCycle (const Cycles& decrRegBackCycleDelta);
+
+  private:
+    // Register dependence table interfaces.
+    bool isRegDepTableEmpty (void) const;
+
+    template <size_t RegNum>
+    bool isRegDepTableEmpty (const RegDepTable<RegNum>&) const;
+
+    bool isRegDep (void) const;
+
+    bool isRegDep (const Op_t& op) const;
+
+    bool isRegDep (const RegFile_t&, const RegIndex_t&) const;
+
+    template <size_t RegNum>
+    bool isRegDep (const RegDepTable<RegNum>&, const RegIndex_t&) const;
+
+    void setRegDep (void);
+
+    void setRegDep (const Op_t& op);
+
+    void setRegDep (const RegFile_t&, const RegIndex_t&, const Cycles&);
+
+    template <size_t RegNum>
+    void setRegDep (RegDepTable<RegNum>&, const RegIndex_t&, const Cycles&);
 
   private:
     // Register file interfaces.
@@ -559,6 +549,29 @@ class HybridCPU : public BaseSimpleCPU
     int SimdIntMacLatency;
     int SimdIntIterLatency;
 };
+
+template <size_t RegNum>
+bool
+HybridCPU::isRegDepTableEmpty (const RegDepTable<RegNum>& regDepTable) const
+{
+    return regDepTable.empty ();
+}
+
+template <size_t RegNum>
+bool
+HybridCPU::isRegDep (const RegDepTable<RegNum>& regDepTable,
+                     const RegIndex_t& regIndex) const
+{
+    return regDepTable.isRegDep (regIndex);
+}
+
+template <size_t RegNum>
+void
+HybridCPU::setRegDep (RegDepTable<RegNum>& regDepTable,
+                      const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    regDepTable.insertReg (regIndex, regBackCycle);
+}
 
 template <size_t RegNum, class RegValue_t>
 RegValue_t

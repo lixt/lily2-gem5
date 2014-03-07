@@ -1162,7 +1162,7 @@ decode FU default Unknown::unknown () {
                     0x7: //< NOP, SMR, SMV, SYS.
                         decode OPCODE_LO default Unknown::unknown () {
 
-                            0x3: MiscOp::sys_d ({{ xc->syscall (i10.uval ()); }});
+                            0x3: MiscOp::sys_d ({{ xc->syscall (i10.uval ()); }}, IsSyscall);
 
                         } //> NOP, SMR, SMV, SYS.
 

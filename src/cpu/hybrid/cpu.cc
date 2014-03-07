@@ -831,7 +831,7 @@ HybridCPU::rPreExecute (void)
         writeIssued ();
 
         // Updates the register dependence table.
-        writeRegDep ();
+        setRegDep ();
     }
 
 #if DEBUG
@@ -931,19 +931,43 @@ HybridCPU::isOverIssueWidth (void) const
     return (issued >= IssueWidth) ? true : false;
 }
 
+void
+HybridCPU::writeIssued (void)
+{
+    ++issued;
+}
+
+bool
+HybridCPU::isRegDepTableEmpty (void) const
+{
+    return isRegDepTableEmpty (xRegDepTable) &&
+           isRegDepTableEmpty (yRegDepTable) &&
+           isRegDepTableEmpty (gRegDepTable) &&
+           isRegDepTableEmpty (mRegDepTable);
+}
+
 bool
 HybridCPU::isRegDep (void) const
 {
+    // Special instruction dealing.
+    if (curStaticInst->isSyscall ()) {
+        if (isRegDepTableEmpty ()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     // Source operands.
     for (OpCount_t i = 0; i != curStaticInst->getNumSrcOps (); ++i) {
-        if (isOpRegDep (curStaticInst->getSrcOp (i))) {
+        if (isRegDep (*(curStaticInst->getSrcOp (i)))) {
             return true;
         }
     }
 
     // Destination operands.
     for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
-        if (isOpRegDep (curStaticInst->getDestOp (i))) {
+        if (isRegDep (*(curStaticInst->getDestOp (i)))) {
             return true;
         }
     }
@@ -952,259 +976,124 @@ HybridCPU::isRegDep (void) const
 }
 
 bool
-HybridCPU::isOpRegDep (Op_t *op) const
+HybridCPU::isRegDep (const Op_t& op) const
 {
-    // Checks operand is immediate or not.
-    if (op->immFlag ()) {
+    if (op.immFlag ()) {
         return false;
+    } else {
+
+        RegFile_t fileName = op.regFile ();
+        RegIndex_t regIndex = op.regIndex ();
+
+        switch (op.numRegs ()) {
+            case 1:
+                return isRegDep (fileName, regIndex    );
+
+            case 2:
+                return isRegDep (fileName, regIndex    ) ||
+                       isRegDep (fileName, regIndex + 1);
+
+            case 4:
+                return isRegDep (fileName, regIndex    ) ||
+                       isRegDep (fileName, regIndex + 1) ||
+                       isRegDep (fileName, regIndex + 2) ||
+                       isRegDep (fileName, regIndex + 3);
+
+            default:
+                assert (0);
+        }
     }
+}
 
-    // Gets the operand register attributes.
-    RegFile_t regFile = op->regFile ();
-    RegIndex_t regIndex = op->regIndex ();
-    RegCount_t regCount = op->numRegs ();
-
-    switch (regFile) {
+bool
+HybridCPU::isRegDep (const RegFile_t& fileName, const RegIndex_t& regIndex) const
+{
+    switch (fileName) {
         case TheISA::REG_X:
-            switch (regCount) {
-                case 1 : return isXRegDep (regIndex);
-                case 2 : return isXRegPairDep (regIndex);
-                case 4 : return isXRegPairPairDep (regIndex);
-                default: assert (0);
-            }
+            return isRegDep (xRegDepTable, regIndex);
 
         case TheISA::REG_Y:
-            switch (regCount) {
-                case 1 : return isYRegDep (regIndex);
-                case 2 : return isYRegPairDep (regIndex);
-                case 4 : return isYRegPairPairDep (regIndex);
-                default: assert (0);
-            }
+            return isRegDep (yRegDepTable, regIndex);
 
-         case TheISA::REG_G:
-            switch (regCount) {
-                case 1 : return isGRegDep (regIndex);
-                case 2 : return isGRegPairDep (regIndex);
-                case 4 : return isGRegPairPairDep (regIndex);
-                default: assert (0);
-            }
+        case TheISA::REG_G:
+            return isRegDep (gRegDepTable, regIndex);
 
         case TheISA::REG_M:
-            switch (regCount) {
-                case 1 : return isMRegDep (regIndex);
-                case 2 : return isMRegPairDep (regIndex);
-                case 4 : return isMRegPairPairDep (regIndex);
-                default: assert (0);
-            }
+            return isRegDep (mRegDepTable, regIndex);
 
-        default: assert (0);
+        default:
+            assert (0);
     }
 }
 
-bool
-HybridCPU::isXRegDep (const RegIndex_t& regIndex) const
-{
-    return xRegDepTable.isRegDep (regIndex);
-}
-
-bool
-HybridCPU::isXRegPairDep (const RegIndex_t& regIndex) const
-{
-    return xRegDepTable.isRegPairDep (regIndex);
-}
-
-bool
-HybridCPU::isXRegPairPairDep (const RegIndex_t& regIndex) const
-{
-    return xRegDepTable.isRegPairPairDep (regIndex);
-}
-
-bool
-HybridCPU::isYRegDep (const RegIndex_t& regIndex) const
-{
-    return yRegDepTable.isRegDep (regIndex);
-}
-
-bool
-HybridCPU::isYRegPairDep (const RegIndex_t& regIndex) const
-{
-    return yRegDepTable.isRegPairDep (regIndex);
-}
-
-bool
-HybridCPU::isYRegPairPairDep (const RegIndex_t& regIndex) const
-{
-    return yRegDepTable.isRegPairPairDep (regIndex);
-}
-
-bool
-HybridCPU::isGRegDep (const RegIndex_t& regIndex) const
-{
-    return gRegDepTable.isRegDep (regIndex);
-}
-
-bool
-HybridCPU::isGRegPairDep (const RegIndex_t& regIndex) const
-{
-    return gRegDepTable.isRegPairDep (regIndex);
-}
-
-bool
-HybridCPU::isGRegPairPairDep (const RegIndex_t& regIndex) const
-{
-    return gRegDepTable.isRegPairPairDep (regIndex);
-}
-
-bool
-HybridCPU::isMRegDep (const RegIndex_t& regIndex) const
-{
-    return mRegDepTable.isRegDep (regIndex);
-}
-
-bool
-HybridCPU::isMRegPairDep (const RegIndex_t& regIndex) const
-{
-    return mRegDepTable.isRegPairDep (regIndex);
-}
-
-bool
-HybridCPU::isMRegPairPairDep (const RegIndex_t& regIndex) const
-{
-    return mRegDepTable.isRegPairPairDep (regIndex);
-}
-
 void
-HybridCPU::writeIssued (void)
-{
-    ++issued;
-}
-
-void
-HybridCPU::writeRegDep (void)
+HybridCPU::setRegDep (void)
 {
     for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
-        writeOpRegDep (curStaticInst->getDestOp (i));
+        setRegDep (*(curStaticInst->getDestOp (i)));
     }
 }
 
 void
-HybridCPU::writeOpRegDep (Op_t *op)
+HybridCPU::setRegDep (const Op_t& op)
 {
-    if (!op->immFlag ()) {
-        // Operand is not an immediate value.
-        RegFile_t regFile = op->regFile ();
-        RegIndex_t regIndex = op->regIndex ();
-        RegCount_t regCount = op->numRegs ();
-        Cycles regBackCycle = funcUnitLatencyFactory (curStaticInst->opClass (), op->memFlag ());
+    if (op.immFlag ()) {
+        assert (0);
+    } else {
 
-        switch (regFile) {
-            case TheISA::REG_X:
-                switch (regCount) {
-                    case 1 : return writeXRegDep         (regIndex, regBackCycle);
-                    case 2 : return writeXRegPairDep     (regIndex, regBackCycle);
-                    case 4 : return writeXRegPairPairDep (regIndex, regBackCycle);
-                    default: assert (0);
-                }
+        RegFile_t fileName = op.regFile ();
+        RegIndex_t regIndex = op.regIndex ();
 
-            case TheISA::REG_Y:
-                switch (regCount) {
-                    case 1 : return writeYRegDep         (regIndex, regBackCycle);
-                    case 2 : return writeYRegPairDep     (regIndex, regBackCycle);
-                    case 4 : return writeYRegPairPairDep (regIndex, regBackCycle);
-                    default: assert (0);
-                }
+        Cycles regBackCycle =
+            funcUnitLatencyFactory (curStaticInst->opClass (), op.memFlag ());
 
-             case TheISA::REG_G:
-                switch (regCount) {
-                    case 1 : return writeGRegDep         (regIndex, regBackCycle);
-                    case 2 : return writeGRegPairDep     (regIndex, regBackCycle);
-                    case 4 : return writeGRegPairPairDep (regIndex, regBackCycle);
-                    default: assert (0);
-                }
+        switch (op.numRegs ()) {
+            case 1:
+                setRegDep (fileName, regIndex    , regBackCycle);
+                break;
 
-            case TheISA::REG_M:
-                switch (regCount) {
-                    case 1 : return writeMRegDep         (regIndex, regBackCycle);
-                    case 2 : return writeMRegPairDep     (regIndex, regBackCycle);
-                    case 4 : return writeMRegPairPairDep (regIndex, regBackCycle);
-                    default: assert (0);
-                }
+            case 2:
+                setRegDep (fileName, regIndex    , regBackCycle);
+                setRegDep (fileName, regIndex + 1, regBackCycle);
+                break;
 
-            default: assert (0);
+            case 4:
+                setRegDep (fileName, regIndex    , regBackCycle);
+                setRegDep (fileName, regIndex + 1, regBackCycle);
+                setRegDep (fileName, regIndex + 2, regBackCycle);
+                setRegDep (fileName, regIndex + 3, regBackCycle);
+                break;
+
+            default:
+                assert (0);
         }
     }
 }
 
 void
-HybridCPU::writeXRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+HybridCPU::setRegDep (const RegFile_t& fileName,
+                      const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
-    xRegDepTable.insertReg (regIndex, regBackCycle);
-}
+    switch (fileName) {
+        case TheISA::REG_X:
+            setRegDep (xRegDepTable, regIndex, regBackCycle);
+            break;
 
-void
-HybridCPU::writeXRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    xRegDepTable.insertRegPair (regIndex, regBackCycle);
-}
+        case TheISA::REG_Y:
+            setRegDep (yRegDepTable, regIndex, regBackCycle);
+            break;
 
-void
-HybridCPU::writeXRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    xRegDepTable.insertRegPairPair (regIndex, regBackCycle);
-}
+        case TheISA::REG_G:
+            setRegDep (gRegDepTable, regIndex, regBackCycle);
+            break;
 
-void
-HybridCPU::writeYRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    yRegDepTable.insertReg (regIndex, regBackCycle);
-}
+        case TheISA::REG_M:
+            setRegDep (mRegDepTable, regIndex, regBackCycle);
+            break;
 
-void
-HybridCPU::writeYRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    yRegDepTable.insertRegPair (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeYRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    yRegDepTable.insertRegPairPair (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeGRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    gRegDepTable.insertReg (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeGRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    gRegDepTable.insertRegPair (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeGRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    gRegDepTable.insertRegPairPair (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeMRegDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    mRegDepTable.insertReg (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeMRegPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    mRegDepTable.insertRegPair (regIndex, regBackCycle);
-}
-
-void
-HybridCPU::writeMRegPairPairDep (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    mRegDepTable.insertRegPairPair (regIndex, regBackCycle);
+        default:
+            assert (0);
+    }
 }
 
 void

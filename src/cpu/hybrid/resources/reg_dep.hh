@@ -30,14 +30,13 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     // Inserts the register, register-pair, register-pair-pair and register back
     // cycle into the register dependence table.
     void insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle);
-    void insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle);
-    void insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle);
 
     // Checks register, register-pair or register-pair-pair dependences. Returns
     // true if dependence exists.
     bool isRegDep (const RegIndex_t& regIndex) const;
-    bool isRegPairDep (const RegIndex_t& regIndex) const;
-    bool isRegPairPairDep (const RegIndex_t& regIndex) const;
+
+    // Checks whether the register dependence table is empty.
+    bool empty (void) const;
 
     // Updates the register dependence table. Decreases the register back cycles
     // and removes out the due registers.
@@ -97,24 +96,6 @@ RegDepTable<RegNum>::insertReg (const RegIndex_t& regIndex, const Cycles& regBac
 }
 
 template <size_t RegNum>
-void
-RegDepTable<RegNum>::insertRegPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    insertReg (regIndex, regBackCycle);
-    insertReg (regIndex + 1, regBackCycle);
-}
-
-template <size_t RegNum>
-void
-RegDepTable<RegNum>::insertRegPairPair (const RegIndex_t& regIndex, const Cycles& regBackCycle)
-{
-    insertReg (regIndex, regBackCycle);
-    insertReg (regIndex + 1, regBackCycle);
-    insertReg (regIndex + 2, regBackCycle);
-    insertReg (regIndex + 3, regBackCycle);
-}
-
-template <size_t RegNum>
 bool
 RegDepTable<RegNum>::isRegDep (const RegIndex_t& regIndex) const
 {
@@ -124,20 +105,15 @@ RegDepTable<RegNum>::isRegDep (const RegIndex_t& regIndex) const
 
 template <size_t RegNum>
 bool
-RegDepTable<RegNum>::isRegPairDep (const RegIndex_t& regIndex) const
+RegDepTable<RegNum>::empty (void) const
 {
-    return isRegDep (regIndex) ||
-           isRegDep (regIndex + 1);
-}
+    for (size_t i = 0; i != RegNum; ++i) {
+        if (isRegDep (i)) {
+            return false;
+        }
+    }
 
-template <size_t RegNum>
-bool
-RegDepTable<RegNum>::isRegPairPairDep (const RegIndex_t& regIndex) const
-{
-    return isRegDep (regIndex) ||
-           isRegDep (regIndex + 1) ||
-           isRegDep (regIndex + 2) ||
-           isRegDep (regIndex + 3);
+    return true;
 }
 
 template <size_t RegNum>
