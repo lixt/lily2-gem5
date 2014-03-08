@@ -457,10 +457,25 @@ class HybridPCState : public SimplePCState<MachInst>
   protected:
     typedef SimplePCState<MachInst> Base;
 
+  protected:
+    Addr branchTarget;
+    bool branchTaken;
+
   public:
     // Constructors.
     HybridPCState (void) {}
     HybridPCState (Addr val) { Base::set (val); }
+
+    void setBranchTaken (bool branchTaken)
+    {
+        this->branchTaken = branchTaken;
+    }
+
+    void setBranchTarget (Addr branchTarget)
+    {
+        this->branchTarget = branchTarget;
+    }
+
 };
 
 }

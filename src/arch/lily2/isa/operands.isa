@@ -88,18 +88,26 @@ def operands {{
     'dsfa': ('Opd32f', 'dsf', 'DA', '', 2),
     'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
-    # Memory operends.
-    'mem_ub' : ('Mem8u' , 'uw' , 'RD', '', 1),
-    'mem_sb' : ('Mem8s' , 'sw' , 'RD', '', 1),
-    'mem_uh' : ('Mem16u' , 'uw' , 'RD', '', 1),
-    'mem_sh' : ('Mem16s' , 'sw' , 'RD', '', 1),
-    'mem_w'  : ('Mem32' , 'uw' , 'RD', '', 1),
-    'mem_d'  : ('Mem64', 'udw', 'RD', '', 1),
+    # Memory operands.
+    'mw': ('Op32i' , 'uw' , 'RD', '', 1),
+    'md': ('Opd32i', 'udw', 'RD', '', 1),
 
-    # Memory address.
-    'addr_rbase'   : ('AddrBase'     , 'sw', 'RA'  , '', 1),
-    'addr_roffset' : ('AddrOffset'   , 'sw', 'RB'  , '', 2),
-    'addr_ioffset' : ('I8_AddrOffset', 'sw', 'IMM8', '', 2),
+    # Memory addres operands.
+    'rBase' : ('Op32i'   , 'sw', 'RA'  , '', 1),
+    'rOfst' : ('Op32i'   , 'sw', 'RB'  , '', 1),
+    'iOfst' : ('I8_Op32i', 'sw', 'IMM8', '', 1),
+
+    # Address operands.
+    'addr_target' : ('AddrTarget'  , 'sw', ''     , '', 1),
+    'addr_rbase'  : ('AddrBase'    , 'sw', 'RA'   , '', 1),
+    'addr_rofst'  : ('AddrOfst'    , 'sw', 'RB'   , '', 2),
+    'addr_isofst' : ('I8_AddrOfst' , 'sw', 'IMM8' , '', 2),
+    'addr_ilofst' : ('I21_AddrOfst', 'sw', 'IMM21', '', 1),
+
+    # Branch operands.
+    #'b_target': ('BTarget', '', '', '', 1),
+    #'b_base'  : ('BBase'  , '', '', '', 1),
+    #'b_offset': ('BOffset', '', '', '', 1),
 
     # Semantically meaningful operands.
     'w_carry' : ('Op32i', 'sw', 'CarryReg', '', 1),

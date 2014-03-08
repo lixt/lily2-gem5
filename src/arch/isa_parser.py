@@ -1056,7 +1056,41 @@ class AddrBaseOperand(Operand):
 
         return rf
 
-class AddrOffsetOperand(Operand):
+class AddrTargetOperand(Operand):
+    def isOp(self):
+        return 0
+
+    def makeConstructor(self, predRead, predWrite):
+        return ''
+
+    def makeRead(self, predRead):
+        if self.reg_spec:
+            # A component of the PC state.
+            return '%s = __parserAutoPCState.%s();\n' % \
+                (self.base_name, self.reg_spec)
+        else:
+            # The whole PC state itself.
+            return '%s = xc->pcState();\n' % self.base_name
+
+    def makeWrite(self, predWrite):
+        if self.reg_spec:
+            # A component of the PC state.
+            return '__parserAutoPCState.%s(%s);\n' % \
+                (self.reg_spec, self.base_name)
+        else:
+            # The whole PC state itself.
+            return 'xc->pcState(%s);\n' % self.base_name
+
+    def makeDecl(self):
+        ctype = 'Addr'
+        if self.isPCPart():
+            ctype = self.ctype
+        return "%s %s;\n" % (ctype, self.base_name)
+
+    def isPCState(self):
+        return 1
+
+class AddrOfstOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1076,7 +1110,7 @@ class AddrOffsetOperand(Operand):
 
         return rf
 
-class I8_AddrOffsetOperand(Operand):
+class I8_AddrOfstOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1085,6 +1119,26 @@ class I8_AddrOffsetOperand(Operand):
 
         if self.is_src:
             c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM8);'
+
+        return c_src
+
+    def makeRead(self, predRead):
+        rf = '''
+            %s = xc->readOp32i (this, %d);\n
+            Addr EA_OFFSET = static_cast<Addr> (%s.sval ());\n
+        ''' % (self.base_name, self.src_op_idx, self.base_name)
+
+        return rf
+
+class I21_AddrOfstOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM21);'
 
         return c_src
 

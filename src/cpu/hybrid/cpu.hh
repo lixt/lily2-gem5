@@ -474,6 +474,10 @@ class HybridCPU : public BaseSimpleCPU
     void setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&,
                          const RegValue_t&, const RegValue_t&, const Cycles&);
 
+  public:
+    // PC state interfaces.
+    void setBranchTarget (Addr);
+
   private:
     // Interfaces for debugging.
     void debugPipeline (std::ostream&) const;

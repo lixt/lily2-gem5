@@ -1607,24 +1607,70 @@ inline Opd32i_t rem_u_w_2 (Opd32i_t opa, Opd32i_t opb)
 }
 
 // Memory access instructions.
-inline Op32i_t ldb (Op32i_t opa, Op32i_t opb)
+inline Addr getEA (Op32i_t base, Op32i_t ofst)
 {
-    return Op32i_t ();
+    return (Addr) (base.sval () + ofst.sval ());
 }
 
-inline Op32i_t ldh (Op32i_t opa, Op32i_t opb)
+inline Op32i_t ldb_u (uint8_t *data)
 {
-    return Op32i_t ();
+    uint8_t *reinterpret_data = reinterpret_cast<uint8_t *> (data);
+    uint8_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t val = static_cast<uint32_t> (mem);
+    return Op32i_t (val);
 }
 
-inline Op32i_t ldw (Op32i_t opa, Op32i_t opb)
+inline Op32i_t ldb (uint8_t *data)
 {
-    return Op32i_t ();
+    uint8_t *reinterpret_data = reinterpret_cast<uint8_t *> (data);
+    uint8_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t val = sext<8> (static_cast<uint32_t> (mem));
+    return Op32i_t (val);
 }
 
-inline Opd32i_t ldd (Op32i_t opa, Op32i_t opb)
+inline Op32i_t ldh_u (uint8_t *data)
 {
-    return Opd32i_t ();
+    uint16_t *reinterpret_data = reinterpret_cast<uint16_t *> (data);
+    uint16_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t val = static_cast<uint32_t> (mem);
+    return Op32i_t (val);
+}
+
+inline Op32i_t ldh (uint8_t *data)
+{
+    uint16_t *reinterpret_data = reinterpret_cast<uint16_t *> (data);
+    uint16_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t val = sext<16> (static_cast<uint32_t> (mem));
+    return Op32i_t (val);
+}
+
+inline Op32i_t ldw (uint8_t *data)
+{
+    uint32_t *reinterpret_data = reinterpret_cast<uint32_t *> (data);
+    uint32_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t val = static_cast<uint32_t> (mem);
+    return Op32i_t (val);
+}
+
+inline Opd32i_t ldd (uint8_t *data)
+{
+    uint64_t *reinterpret_data = reinterpret_cast<uint64_t *> (data);
+    uint64_t mem = *reinterpret_data;
+    mem = gtobe (mem);
+    uint32_t vlo = static_cast<uint32_t> (mem);
+    uint32_t vhi = static_cast<uint32_t> (mem >> 32);
+    return Opd32i_t (vlo, vhi);
+}
+
+// Flow control instructions.
+inline Addr getTA (const Op32i_t& base, const Op32i_t& disp = Op32i_t (0))
+{
+    return (Addr) (base.sval () + disp.sval ());
 }
 
 } // namespace Lily2ISA

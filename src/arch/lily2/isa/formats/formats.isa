@@ -74,6 +74,9 @@
 //Include the miscellaneous formats
 ##include "misc.isa"
 
+//Include the branch formats
+##include "branch.isa"
+
 //Include the floating-point arithmetic formats
 //##include "arith_fp.isa"
 

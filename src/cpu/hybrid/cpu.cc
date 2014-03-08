@@ -864,10 +864,10 @@ HybridCPU::postExecute (void)
             curPipelineEvent = IterInst;
         } else if (curStaticInst->isControl ()) {
             // Flow control inst.
-            curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
+            //curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
         } else if (curStaticInst->isMemRef ()) {
             // Memory reference inst.
-            curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
+            //curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
         } else if (curStaticInst->isModeSwitch ()) {
             // Mode switch inst.
             curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
@@ -1094,6 +1094,15 @@ HybridCPU::setRegDep (const RegFile_t& fileName,
         default:
             assert (0);
     }
+}
+
+void
+HybridCPU::setBranchTarget (Addr branchTarget)
+{
+    TheISA::PCState pcState = thread->pcState ();
+    pcState.setBranchTaken (true);
+    pcState.setBranchTarget (branchTarget);
+    thread->pcState (pcState);
 }
 
 void

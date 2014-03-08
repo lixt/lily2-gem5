@@ -1113,14 +1113,26 @@ decode FU default Unknown::unknown () {
 
                             0x0:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: MemLoadOp::ldb_u_d ({{ mem_ub = ldb (addr_rbase, addr_roffset); }});
-                                    0x1: MemLoadOp::ldb_d   ({{ mem_sb = ldb (addr_rbase, addr_roffset); }});
+                                    0x0: MemLoadOp::ldb_u_d ({{ Addr EA = getEA (rBase, rOfst);
+                                                                uint8_t data[1];
+                                                                xc->readMem (EA, data, 1, memAccessFlags);
+                                                                mw = ldb_u (data); }}, IsMemRef, IsLoad);
+                                    0x1: MemLoadOp::ldb_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                                uint8_t data[1];
+                                                                xc->readMem (EA, data, 1, memAccessFlags);
+                                                                mw = ldb (data); }}, IsMemRef, IsLoad);
                                 }
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: MemLoadOp::ldb_u_i_d ({{ mem_ub = ldb (addr_rbase, addr_ioffset); }});
-                                    0x1: MemLoadOp::ldb_d_i   ({{ mem_sb = ldb (addr_rbase, addr_ioffset); }});
+                                    0x0: MemLoadOp::ldb_u_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                                  uint8_t data[1];
+                                                                  xc->readMem (EA, data, 1, memAccessFlags);
+                                                                  mw = ldb_u (data); }}, IsMemRef, IsLoad);
+                                    0x1: MemLoadOp::ldb_d_i   ({{ Addr EA = getEA (rBase, iOfst);
+                                                                  uint8_t data[1];
+                                                                  xc->readMem (EA, data, 1, memAccessFlags);
+                                                                  mw = ldb (data); }}, IsMemRef, IsLoad);
                                 }
 
                         } //> LDB.
@@ -1130,34 +1142,67 @@ decode FU default Unknown::unknown () {
 
                             0x0:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: MemLoadOp::ldh_u_d ({{ mem_ub = ldh (addr_rbase, addr_roffset); }});
-                                    0x1: MemLoadOp::ldh_d   ({{ mem_sb = ldh (addr_rbase, addr_roffset); }});
+                                    0x0: MemLoadOp::ldh_u_d ({{ Addr EA = getEA (rBase, rOfst);
+                                                                uint8_t data[2];
+                                                                xc->readMem (EA, data, 2, memAccessFlags);
+                                                                mw = ldh_u (data); }}, IsMemRef, IsLoad);
+                                    0x1: MemLoadOp::ldh_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                                uint8_t data[2];
+                                                                xc->readMem (EA, data, 2, memAccessFlags);
+                                                                mw = ldh (data); }}, IsMemRef, IsLoad);
                                 }
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: MemLoadOp::ldh_u_i_d ({{ mem_uh = ldh (addr_rbase, addr_ioffset); }});
-                                    0x1: MemLoadOp::ldh_d_i   ({{ mem_sh = ldh (addr_rbase, addr_ioffset); }});
+                                    0x0: MemLoadOp::ldh_u_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                                  uint8_t data[2];
+                                                                  xc->readMem (EA, data, 2, memAccessFlags);
+                                                                  mw = ldh_u (data); }}, IsMemRef, IsLoad);
+                                    0x1: MemLoadOp::ldh_i_d   ({{ Addr EA = getEA (rBase, iOfst);
+                                                                  uint8_t data[2];
+                                                                  xc->readMem (EA, data, 2, memAccessFlags);
+                                                                  mw = ldh (data); }}, IsMemRef, IsLoad);
                                 }
 
                         } //> LDH.
 
                     0x2: //< LDW.
                         decode FLAG_IMM default Unknown::unknown () {
-                            0x0: MemLoadOp::ldw_d   ({{ mem_w = ldw (addr_rbase, addr_roffset); }});
-                            0x1: MemLoadOp::ldw_i_d ({{ mem_w = ldw (addr_rbase, addr_ioffset); }});
+                            0x0: MemLoadOp::ldw_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                        uint8_t data[4];
+                                                        xc->readMem (EA, data, 4, memAccessFlags);
+                                                        mw = ldw (data); }}, IsMemRef, IsLoad);
+                            0x1: MemLoadOp::ldw_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                        uint8_t data[4];
+                                                        xc->readMem (EA, data, 4, memAccessFlags);
+                                                        mw = ldw (data); }}, IsMemRef, IsLoad);
                         } //> LDW.
 
                     0x3: //< LDD.
                         decode FLAG_IMM default Unknown::unknown () {
-                            0x0: MemLoadOp::ldd_d   ({{ mem_d = ldd (addr_rbase, addr_roffset); }});
-                            0x1: MemLoadOp::ldd_i_d ({{ mem_d = ldd (addr_rbase, addr_ioffset); }});
+                            0x0: MemLoadOp::ldd_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                        uint8_t data[8];
+                                                        xc->readMem (EA, data, 8, memAccessFlags);
+                                                        md = ldd (data); }}, IsMemRef, IsLoad);
+                            0x1: MemLoadOp::ldd_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                        uint8_t data[8];
+                                                        xc->readMem (EA, data, 8, memAccessFlags);
+                                                        md = ldd (data); }}, IsMemRef, IsLoad);
                         } //> LDD.
 
                 } //> FU(0b'11) + HI(0b'000).
 
+            //0x1: //< FU(0b'11) + HI(0b'001).
+            //    decode OPCODE_ME default Unknown::unknown () {
+
+
+            //    } //> FU(0b'11) + HI(0b'010).
+
             0x4: //< FU(0b'11) + HI(0b'100).
                 decode OPCODE_ME default Unknown::unknown () {
+
+                    0x4: BranchOp::brr_d ({{ Addr TA = getTA (rBase);
+                                             xc->setBranchTarget (TA); }}, IsControl, IsBranch);
 
                     0x7: //< NOP, SMR, SMV, SYS.
                         decode OPCODE_LO default Unknown::unknown () {

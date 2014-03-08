@@ -110,14 +110,12 @@ output decoder {{
 def template LoadExecute {{
     Fault %(class_name)s::execute(%(CPU_exec_context)s *xc, Trace::InstRecord *traceData)
     {
-        Addr EA;
         Fault fault = NoFault;
 
         %(op_decl)s;
         %(op_rd)s;
 
         if (fault == NoFault) {
-            EA = EA_BASE + EA_OFFSET;
             %(code)s;
         }
 
