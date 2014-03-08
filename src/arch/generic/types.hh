@@ -458,24 +458,23 @@ class HybridPCState : public SimplePCState<MachInst>
     typedef SimplePCState<MachInst> Base;
 
   protected:
-    Addr branchTarget;
-    bool branchTaken;
+    Addr _bpc;
 
   public:
     // Constructors.
     HybridPCState (void) {}
-    HybridPCState (Addr val) { Base::set (val); }
+    HybridPCState (Addr val) { set (val); }
 
-    void setBranchTaken (bool branchTaken)
+    // Sets the pcs.
+    void set (Addr val)
     {
-        this->branchTaken = branchTaken;
+        Base::set (val);
+        bpc (0);
     }
 
-    void setBranchTarget (Addr branchTarget)
-    {
-        this->branchTarget = branchTarget;
-    }
-
+    // Branch pc.
+    Addr bpc (void) { return _bpc; }
+    void bpc (Addr val) { _bpc = val; }
 };
 
 }

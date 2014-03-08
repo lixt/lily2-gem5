@@ -89,34 +89,22 @@ def operands {{
     'dsfb': ('Opd32f', 'dsf', 'DB', '', 3),
 
     # Memory operands.
-    'mw': ('Op32i' , 'uw' , 'RD', '', 1),
-    'md': ('Opd32i', 'udw', 'RD', '', 1),
+    'mw': ('MemOp32i' , 'uw' , 'RD', '', 1),
+    'md': ('MemOpd32i', 'udw', 'RD', '', 1),
 
     # Memory addres operands.
     'rBase' : ('Op32i'   , 'sw', 'RA'  , '', 1),
     'rOfst' : ('Op32i'   , 'sw', 'RB'  , '', 1),
-    'iOfst' : ('I8_Op32i', 'sw', 'IMM8', '', 1),
-
-    # Address operands.
-    'addr_target' : ('AddrTarget'  , 'sw', ''     , '', 1),
-    'addr_rbase'  : ('AddrBase'    , 'sw', 'RA'   , '', 1),
-    'addr_rofst'  : ('AddrOfst'    , 'sw', 'RB'   , '', 2),
-    'addr_isofst' : ('I8_AddrOfst' , 'sw', 'IMM8' , '', 2),
-    'addr_ilofst' : ('I21_AddrOfst', 'sw', 'IMM21', '', 1),
-
-    # Branch operands.
-    #'b_target': ('BTarget', '', '', '', 1),
-    #'b_base'  : ('BBase'  , '', '', '', 1),
-    #'b_offset': ('BOffset', '', '', '', 1),
+    'iOfst' : ('I8Op32i', 'sw', 'IMM8', '', 1),
 
     # Semantically meaningful operands.
     'w_carry' : ('Op32i', 'sw', 'CarryReg', '', 1),
 
     # Immediate operands.
-    'i1' : ('I1_Op32i' , 'uw', 'IMM1' , '', 1),
-    'i2' : ('I2_Op32i' , 'uw', 'IMM2' , '', 1),
-    'i5' : ('I5_Op32i' , 'uw', 'IMM5' , '', 1),
-    'i8' : ('I8_Op32i' , 'uw', 'IMM8' , '', 1),
-    'i10': ('I10_Op32i', 'uw', 'IMM10', '', 1),
-    'i16': ('I16_Op32i', 'uw', 'IMM16', '', 1),
+    'i1' : ('I1Op32i' , 'uw', 'IMM1' , '', 1),
+    'i2' : ('I2Op32i' , 'uw', 'IMM2' , '', 1),
+    'i5' : ('I5Op32i' , 'uw', 'IMM5' , '', 1),
+    'i8' : ('I8Op32i' , 'uw', 'IMM8' , '', 1),
+    'i10': ('I10Op32i', 'uw', 'IMM10', '', 1),
+    'i16': ('I16Op32i', 'uw', 'IMM16', '', 1),
 }};

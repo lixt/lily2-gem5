@@ -793,7 +793,7 @@ class Opd32fOperand(Operand):
 
         return wb
 
-class Mem8uOperand(Operand):
+class MemOp32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -808,192 +808,23 @@ class Mem8uOperand(Operand):
             c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 3);' % (self.reg_spec)
 
         return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
     def makeWrite(self, predWrite):
         wb = '''
         {
-            size_t mem_size = 1;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            uint8_t mem_val = *(reinterpret_cast<uint32_t*> (data));
-            mem_val = gtobe (mem_val);
-            %s final_val (mem_val);
+            %s final_val = %s;
             xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
-class Mem8sOperand(Operand):
-    def isOp(self):
-        return 1
 
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-        c_dest = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        if self.is_dest:
-            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 3);' % (self.reg_spec)
-
-        return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
-    def makeWrite(self, predWrite):
-        wb = '''
-        {
-            size_t mem_size = 1;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            int8_t mem_val = *(reinterpret_cast<uint32_t*> (data));
-            mem_val = gtobe (mem_val);
-            %s final_val (mem_val);
-            xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
-
-        return wb
-
-class Mem16uOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-        c_dest = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        if self.is_dest:
-            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 3);' % (self.reg_spec)
-
-        return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
-    def makeWrite(self, predWrite):
-        wb = '''
-        {
-            size_t mem_size = 2;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            uint16_t mem_val = *(reinterpret_cast<uint32_t*> (data));
-            mem_val = gtobe (mem_val);
-            %s final_val (mem_val);
-            xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
-
-        return wb
-
-class Mem16sOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-        c_dest = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        if self.is_dest:
-            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 3);' % (self.reg_spec)
-
-        return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
-    def makeWrite(self, predWrite):
-        wb = '''
-        {
-            size_t mem_size = 2;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            int16_t mem_val = *(reinterpret_cast<uint32_t*> (data));
-            mem_val = gtobe (mem_val);
-            %s final_val (mem_val);
-            xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
-
-        return wb
-
-class Mem32Operand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-        c_dest = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        if self.is_dest:
-            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 3);' % (self.reg_spec)
-
-        return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
-    def makeWrite(self, predWrite):
-        wb = '''
-        {
-            size_t mem_size = 4;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            uint32_t mem_val = *(reinterpret_cast<uint32_t*> (data));
-            mem_val = gtobe (mem_val);
-            %s final_val (mem_val);
-            xc->setOp32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
-
-        return wb
-
-class Mem64Operand(Operand):
+class MemOpd32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1008,149 +839,23 @@ class Mem64Operand(Operand):
             c_dest = '\n\t  decodeDestRegOp (OP_D32I, REG_FILE, %s, 3);' % (self.reg_spec)
 
         return c_src + c_dest
-#
-#    def makeRead(self, predRead):
-#        rf = '''
-#        {
-#            %s = xc->readOp32i (this, %d);\n
-#            mem_val = %s.uval ();
-#            uint8_t *data = static_cast<uint8_t*> (&(mem_val));\n
-#        }''' % (self.base_name, self.src_op_idx, self.base_name)
-#
-#        return rf
-#
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOpd32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
     def makeWrite(self, predWrite):
         wb = '''
         {
-            size_t mem_size = 8;
-            uint8_t data[mem_size];
-            xc->readMem (EA, data, mem_size, memAccessFlags);
-            uint64_t mem_val = *(reinterpret_cast<uint64_t*> (data));
-            mem_val = gtobe (mem_val);
-            uint32_t mem_val_lo = static_cast<uint32_t> (mem_val);
-            uint32_t mem_val_hi = static_cast<uint32_t> (mem_val >> 32);
-            %s final_val (mem_val_lo, mem_val_hi);
+            %s final_val = %s;
             xc->setOpd32i (this, %s, final_val, %s);\n
-        }''' % (self.ctype, self.dest_op_idx, self.base_name + '_mask')
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
 
 
-class AddrBaseOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        return c_src
-
-    def makeRead(self, predRead):
-        rf = '''
-            %s = xc->readOp32i (this, %d);\n
-            Addr EA_BASE = static_cast<Addr> (%s.sval ());\n
-        ''' % (self.base_name, self.src_op_idx, self.base_name)
-
-        return rf
-
-class AddrTargetOperand(Operand):
-    def isOp(self):
-        return 0
-
-    def makeConstructor(self, predRead, predWrite):
-        return ''
-
-    def makeRead(self, predRead):
-        if self.reg_spec:
-            # A component of the PC state.
-            return '%s = __parserAutoPCState.%s();\n' % \
-                (self.base_name, self.reg_spec)
-        else:
-            # The whole PC state itself.
-            return '%s = xc->pcState();\n' % self.base_name
-
-    def makeWrite(self, predWrite):
-        if self.reg_spec:
-            # A component of the PC state.
-            return '__parserAutoPCState.%s(%s);\n' % \
-                (self.reg_spec, self.base_name)
-        else:
-            # The whole PC state itself.
-            return 'xc->pcState(%s);\n' % self.base_name
-
-    def makeDecl(self):
-        ctype = 'Addr'
-        if self.isPCPart():
-            ctype = self.ctype
-        return "%s %s;\n" % (ctype, self.base_name)
-
-    def isPCState(self):
-        return 1
-
-class AddrOfstOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s);' % (self.reg_spec)
-
-        return c_src
-
-    def makeRead(self, predRead):
-        rf = '''
-            %s = xc->readOp32i (this, %d);\n
-            Addr EA_OFFSET = static_cast<Addr> (%s.sval ());\n
-        ''' % (self.base_name, self.src_op_idx, self.base_name)
-
-        return rf
-
-class I8_AddrOfstOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM8);'
-
-        return c_src
-
-    def makeRead(self, predRead):
-        rf = '''
-            %s = xc->readOp32i (this, %d);\n
-            Addr EA_OFFSET = static_cast<Addr> (%s.sval ());\n
-        ''' % (self.base_name, self.src_op_idx, self.base_name)
-
-        return rf
-
-class I21_AddrOfstOperand(Operand):
-    def isOp(self):
-        return 1
-
-    def makeConstructor(self, predRead, predWrite):
-        c_src = ''
-
-        if self.is_src:
-            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM21);'
-
-        return c_src
-
-    def makeRead(self, predRead):
-        rf = '''
-            %s = xc->readOp32i (this, %d);\n
-            Addr EA_OFFSET = static_cast<Addr> (%s.sval ());\n
-        ''' % (self.base_name, self.src_op_idx, self.base_name)
-
-        return rf
-
-class I1_Op32iOperand(Operand):
+class I1Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1169,7 +874,7 @@ class I1_Op32iOperand(Operand):
         return '%s = %s;\n' % (self.base_name, word_val)
 
 
-class I2_Op32iOperand(Operand):
+class I2Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1188,7 +893,7 @@ class I2_Op32iOperand(Operand):
         return '%s = %s;\n' % (self.base_name, word_val)
 
 
-class I5_Op32iOperand(Operand):
+class I5Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1207,7 +912,7 @@ class I5_Op32iOperand(Operand):
         return '%s = %s;\n' % (self.base_name, word_val)
 
 
-class I8_Op32iOperand(Operand):
+class I8Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1225,7 +930,7 @@ class I8_Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-class I10_Op32iOperand(Operand):
+class I10Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1243,7 +948,7 @@ class I10_Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-class I16_Op32iOperand(Operand):
+class I16Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1450,28 +1155,28 @@ class ControlRegOperand(Operand):
 
         return wb
 
-#class MemOperand(Operand):
-#    def isMem(self):
-#        return 1
-#
-#    def makeConstructor(self, predRead, predWrite):
-#        return ''
-#
-#    def makeDecl(self):
-#        # Note that initializations in the declarations are solely
-#        # to avoid 'uninitialized variable' errors from the compiler.
-#        # Declare memory data variable.
-#        return '%s %s = 0;\n' % (self.ctype, self.base_name)
-#
-#    def makeRead(self, predRead):
-#        if self.read_code != None:
-#            return self.buildReadCode()
-#        return ''
-#
-#    def makeWrite(self, predWrite):
-#        if self.write_code != None:
-#            return self.buildWriteCode()
-#        return ''
+class MemOperand(Operand):
+    def isMem(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        return ''
+
+    def makeDecl(self):
+        # Note that initializations in the declarations are solely
+        # to avoid 'uninitialized variable' errors from the compiler.
+        # Declare memory data variable.
+        return '%s %s = 0;\n' % (self.ctype, self.base_name)
+
+    def makeRead(self, predRead):
+        if self.read_code != None:
+            return self.buildReadCode()
+        return ''
+
+    def makeWrite(self, predWrite):
+        if self.write_code != None:
+            return self.buildWriteCode()
+        return ''
 
 class PCStateOperand(Operand):
     def makeConstructor(self, predRead, predWrite):

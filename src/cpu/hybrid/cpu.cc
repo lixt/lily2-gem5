@@ -162,7 +162,8 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       SimdIntShiftLatency (p->SimdIntShiftLatency),
       SimdIntMulLatency   (p->SimdIntMulLatency),
       SimdIntMacLatency   (p->SimdIntMacLatency),
-      SimdIntIterLatency  (p->SimdIntIterLatency)
+      SimdIntIterLatency  (p->SimdIntIterLatency),
+      BranchDelaySlot (p->BranchDelaySlot)
 {
     _status = Idle;
 
@@ -543,7 +544,7 @@ HybridCPU::tick()
 
         /************************ Enter LILY2 region **********************/
 
-        curPipelineState = pipelineMacho.getCurState ();
+        beginTick ();
 
         while (curPipelineState == R_Idle || curPipelineState == R_Run) {
             // Fetches the instruction.
@@ -576,6 +577,8 @@ HybridCPU::tick()
 
         // Calls the post-update corresponding callbacks.
         callPostPipelineCallback ();
+
+        endTick ();
 
         /*
         bool needToFetch = !isRomMicroPC(pcState.microPC()) &&
@@ -674,6 +677,27 @@ HybridCPU::tick()
 
     if (_status != Idle)
         schedule(tickEvent, curTick() + latency);
+}
+
+void
+HybridCPU::beginTick (void)
+{
+    // Gets the current pipeline state.
+    curPipelineState = pipelineMacho.getCurState ();
+
+    // Sets the right pc address if a branch is taken.
+    TheISA::PCState pcState = thread->pcState ();
+    if (pcState.bpc () != 0) {
+        pcState.set (pcState.bpc ());
+        thread->pcState (pcState);
+    }
+}
+
+void
+HybridCPU::endTick ()
+{
+    // Sets the current pipeline state to IDLE.
+    curPipelineState = pipelineMacho.transfer (EndTick);
 }
 
 void
@@ -864,9 +888,22 @@ HybridCPU::postExecute (void)
             curPipelineEvent = IterInst;
         } else if (curStaticInst->isControl ()) {
             // Flow control inst.
-            //curPipelineEvent = (curStaticInst->getBPreded ()) ? BPreded : MisBPred;
+            TheISA::PCState pcState = thread->pcState ();
+
+            if (bPredictor.predict (pcState.pc ()) == pcState.bpc ()) {
+                // Branch prediction is right.
+                curPipelineEvent = BPreded;
+            } else {
+                // Branch prediction is wrong.
+                curPipelineEvent = MisBPred;
+            }
+
+            // Feeds back to the branch predictor.
+            bPredictor.feedback (pcState.pc (), pcState.bpc ());
+
         } else if (curStaticInst->isMemRef ()) {
             // Memory reference inst.
+            curPipelineEvent = Issue;
             //curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
         } else if (curStaticInst->isModeSwitch ()) {
             // Mode switch inst.
@@ -915,9 +952,6 @@ HybridCPU::renew (void)
     // Increase the cycles.
     refreshCycle (decrRegBackCycleDelta);
 
-    // Resets the pipeline state to idle.
-    pipelineMacho.transfer (curPipelineEvent);
-
 #if DEBUG
     std::cout << "x register dependence table:" << std::endl;
     std::cout << xRegDepTable << std::endl;
@@ -949,8 +983,8 @@ HybridCPU::isRegDepTableEmpty (void) const
 bool
 HybridCPU::isRegDep (void) const
 {
-    // Special instruction dealing.
-    if (curStaticInst->isSyscall ()) {
+   // Special instruction dealing.
+   if (curStaticInst->isSyscall ()) {
         if (isRegDepTableEmpty ()) {
             return false;
         } else {
@@ -1100,8 +1134,7 @@ void
 HybridCPU::setBranchTarget (Addr branchTarget)
 {
     TheISA::PCState pcState = thread->pcState ();
-    pcState.setBranchTaken (true);
-    pcState.setBranchTarget (branchTarget);
+    pcState.bpc (branchTarget);
     thread->pcState (pcState);
 }
 
@@ -1209,67 +1242,6 @@ HybridCPU::refreshRegs (RegFile<RegNum, RegValue_t>& regFile,
         regFileBuf.remove (*it);
     }
 }
-//
-//void
-//HybridCPU::renewRegFileBuf (const Cycles& decrRegBackCycleDelta)
-//{
-//    renewRegFileBuf (thread->getXRegs (), thread->getXRegBufs (), decrRegBackCycleDelta);
-//    //renewXRegFileBuf (decrRegBackCycleDelta);
-//    //renewYRegFileBuf (decrRegBackCycleDelta);
-//    //renewGRegFileBuf (decrRegBackCycleDelta);
-//    //renewMRegFileBuf (decrRegBackCycleDelta);
-//}
-//
-//template <size_t RegNum, class RegValue_t>
-//void
-//HybridCPU::renewRegFileBuf (RegFile<RegNum, RegValue_t> *regFile,
-//                            RegFileBuf<RegNum, RegValue_t> *regFileBuf,
-//                            const Cycles& decrRegBackCycleDelta)
-//{
-//    typedef RegFile<RegNum, RegValue_t> RegFile;
-//    typedef RegFileBuf<RegNum, RegValue_t> RegFileBuf;
-//
-//    std::vector<typename RegFileBuf::Position> vecRemovePos =
-//        regFileBuf->decrRegBackCycle (decrRegBackCycleDelta);
-//
-//    for (typename std::vector<typename RegFileBuf::Position>::iterator it = vecRemovePos.begin ();
-//         it != vecRemovePos.end (); ++it) {
-//        RegIndex_t regIndex = regFileBuf->getRegIndex (*it);
-//
-//        RegValue_t regMask = regFileBuf->getRegMask (*it);
-//        RegValue_t regNewValue = regFileBuf->getRegValue (*it);
-//        RegValue_t regOldValue = regFile->getRegValue (regIndex);
-//
-//        regFile->setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
-//
-//        // Removes the due register.
-//        regFileBuf->remove (*it);
-//    }
-//}
-/*
-void
-HybridCPU::renewXRegFileBuf (const Cycles& decrRegBackCycleDelta)
-{
-    XRegFile *xRegFile = thread->getXRegs ();
-    XRegFileBuf *xRegFileBuf = thread->getXRegBufs ();
-
-    std::vector<XRegFileBuf::Position> vecRemovePos =
-        xRegFileBuf->decrRegBackCycle (decrRegBackCycleDelta);
-
-    for (std::vector<XRegFileBuf::Position>::iterator it = vecRemovePos.begin ();
-         it != vecRemovePos.end (); ++it) {
-        RegIndex_t regIndex  = xRegFileBuf->getRegIndex (*it);
-        XRegValue_t regMask  = xRegFileBuf->getRegMask  (*it);
-
-        // The real register writing.
-        XRegValue_t regNewValue = xRegFileBuf->getRegValue (*it);
-        XRegValue_t regOldValue = xRegFile->getRegValue (regIndex);
-        xRegFile->setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
-
-        // Removes the due registers.
-        xRegFileBuf->remove (*it);
-    }
-}*/
 
 void
 HybridCPU::printAddr(Addr a)
@@ -1383,7 +1355,8 @@ HybridCPU::initPipelineMacho (void)
     // R_Flush.
     // Caused by branch mispredictions.
     // Break the issue iteration.
-    pipelineMacho.regLocalDefaultState (R_Flush, R_Idle);
+    pipelineMacho.regStateEvent (R_Flush, EndTick, R_Idle);
+    pipelineMacho.regLocalDefaultState (R_Flush, FaultState);
 
     // R_InstWait.
     // Caused by iterative instructions.
@@ -1393,7 +1366,8 @@ HybridCPU::initPipelineMacho (void)
     // R_Advance.
     // Caused by normal dependencies.
     // Break the issue iteration.
-    pipelineMacho.regLocalDefaultState (R_Advance, R_Idle);
+    pipelineMacho.regStateEvent (R_Advance, EndTick, R_Idle);
+    pipelineMacho.regLocalDefaultState (R_Advance, FaultState);
 
     // R_2_R.
     // Caused by SETR instruction.
@@ -1469,10 +1443,10 @@ HybridCPU::callback_R_Run (void)
 void
 HybridCPU::callback_R_Flush (void)
 {
-    // Loops (delay slot).
-    // URDT.
-    // URFB.
-    // UC.
+    Cycles decrRegBackCycleDelta (BranchDelaySlot);
+    refreshRegDepTable (decrRegBackCycleDelta);
+    refreshRegs (decrRegBackCycleDelta);
+    refreshCycle (decrRegBackCycleDelta);
 }
 
 void

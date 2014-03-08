@@ -51,6 +51,8 @@
 #include "base/macho.hh"
 #include "cpu/hybrid/base.hh"
 #include "cpu/hybrid/resources/reg_dep.hh"
+#include "cpu/hybrid/resources/bpred.hh"
+#include "cpu/hybrid/resources/bpred_config.hh"
 #include "params/HybridCPU.hh"
 #include "arch/lily2/operands.hh"
 #include "arch/lily2/static_inst.hh"
@@ -332,6 +334,7 @@ class HybridCPU : public BaseSimpleCPU
         DCacheMiss, // Data cache misses.
         ToRiscInst, // Risc to Risc.
         ToVliwInst, // Vliw to Vliw.
+        EndTick   , // End this tick().
     };
 
     // Types for pipeline callbacks.
@@ -368,6 +371,9 @@ class HybridCPU : public BaseSimpleCPU
     RegDepTable<TheISA::NumGRegs> gRegDepTable;
     RegDepTable<TheISA::NumMRegs> mRegDepTable;
 
+    // Branch predictor.
+    BPredictor<BPredEntries, BPredLocalHistories> bPredictor;
+
   private:
     // Initializes the pipeline state machine.
     void initPipelineMacho (void);
@@ -376,6 +382,13 @@ class HybridCPU : public BaseSimpleCPU
     void callPostPipelineCallback (void);
     // Sets the pre/post callbacks.
     void setCallback (void);
+
+  private:
+    // Things to be done at the beginning of the tick function.
+    void beginTick (void);
+
+    // Things to be done at the end of the tick function.
+    void endTick (void);
 
     // Fetches the instruction from icache and returns the fetch cycles.
     // The fetched instruction machine code is stored in the member
@@ -552,6 +565,9 @@ class HybridCPU : public BaseSimpleCPU
     int SimdIntMulLatency;
     int SimdIntMacLatency;
     int SimdIntIterLatency;
+
+    // Branch delay slot.
+    int BranchDelaySlot;
 };
 
 template <size_t RegNum>

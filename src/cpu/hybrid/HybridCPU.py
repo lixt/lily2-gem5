@@ -92,4 +92,5 @@ class HybridCPU(BaseSimpleCPU):
     SimdIntMacLatency   = Param.Int (2, "Simd integer multiplication and addition instruction latency")
     SimdIntIterLatency  = Param.Int (1, "Simd integer iteration instruction latency")
 
-
+    # Branch delay slots.
+    BranchDelaySlot = Param.Int (6, "Branch delay slot")
