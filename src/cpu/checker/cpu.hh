@@ -462,7 +462,11 @@ class CheckerCPU : public BaseCPU
                     Opd32f_t &val, Opd32f_t &mask)
     {}
 
-    void setBranchTarget (Addr branchTarget) {}
+    void bpc (Addr branchTarget) {}
+
+    void lpc (Addr effAddr) {}
+
+    void spc (Addr effAddr) {}
 
 #endif // THE_ISA == LILY2_ISA
 

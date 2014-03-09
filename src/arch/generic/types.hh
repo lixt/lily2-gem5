@@ -458,7 +458,13 @@ class HybridPCState : public SimplePCState<MachInst>
     typedef SimplePCState<MachInst> Base;
 
   protected:
+    // Branch address.
     Addr _bpc;
+
+    // Memory reference address doesn't fall under the categories of
+    // "pc" concisely. We still put it here for convinience.
+    Addr _lpc;
+    Addr _spc;
 
   public:
     // Constructors.
@@ -475,6 +481,14 @@ class HybridPCState : public SimplePCState<MachInst>
     // Branch pc.
     Addr bpc (void) { return _bpc; }
     void bpc (Addr val) { _bpc = val; }
+
+    // Load pc.
+    Addr lpc (void) { return _lpc; }
+    void lpc (Addr val) { _lpc = val; }
+
+    // Store pc.
+    Addr spc (void) { return _spc; }
+    void spc (Addr val) { _spc = val; }
 };
 
 }

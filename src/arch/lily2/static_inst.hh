@@ -279,9 +279,7 @@ class Lily2StaticInst : public StaticInst
     bool isMemRef (void) const { return flags[IsMemRef]; }
     bool isLoad (void) const { return flags[IsLoad]; }
     bool isStore (void) const { return flags[IsStore]; }
-    bool isMemRefDS (void) const { return flags[IsMemRefDS]; }
-    bool isLoadDS (void) const { return flags[IsLoadDS]; }
-    bool isStoreDS (void) const { return flags[IsStoreDS]; }
+    bool isLoadD (void) const { return flags[IsLoadD]; }
     bool isControl (void) const { return flags[IsControl]; }
     bool isBranch (void) const { return flags[IsBranch]; }
     bool isCall (void) const { return flags[IsCall]; }
@@ -298,21 +296,18 @@ class Lily2StaticInst : public StaticInst
     enum Flags {
         IsNop,
 
-        IsIter,   // Iterative instruction.
-        IsIntDiv, // Integer division instruction.
-        IsIntRem, // Integer remainder instruction.
+        IsIter,       // Iterative instruction.
+        IsIntDiv,     // Integer division instruction.
+        IsIntRem,     // Integer remainder instruction.
 
-        IsMemRef, // Memory reference.
-        IsLoad, // Load.
-        IsStore, // Store.
+        IsMemRef,     // Memory reference instruction.
+        IsLoad,       // Load instruction.
+        IsStore,      // Store instruction.
+        IsLoadD,      // Load instruction with delay slot.
 
-        IsMemRefDS, // Memory reference with delay slot.
-        IsLoadDS, // Load with delay slot.
-        IsStoreDS, // Store with delay slot.
-
-        IsControl, // Flow control.
-        IsBranch,  // Jump.
-        IsCall,    // Jump and link.
+        IsControl,    // Flow control instruction.
+        IsBranch,     // Jump instruction.
+        IsCall,       // Jump and link instruction.
 
         IsModeSwitch, // Mode switching.
         IsToRisc, // Switch to Risc.

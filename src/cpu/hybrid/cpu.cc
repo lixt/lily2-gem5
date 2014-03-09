@@ -781,11 +781,17 @@ HybridCPU::rDispatch (void)
     // Checks the following things in Risc dispatch.
     // 1. Issue width.
     // 2. Register dependences.
+    // 3. Memory references after store.
 
-    bool rIsOverIssueWidth = isOverIssueWidth ();
+    // Checks the issue width.
+    bool rIsOverIssueWidth = (getNumIssued () >= getIssueWidth ());
+
     bool rIsRegDep = isRegDep ();
 
-    bool rIsNoIssue = rIsOverIssueWidth || rIsRegDep;
+    // Checks the memory hazard.
+    bool rIsMemHazard = (getNumStore () > 0) && (curStaticInst->isMemRef ());
+
+    bool rIsNoIssue = rIsOverIssueWidth || rIsRegDep || rIsMemHazard;
 
     if (rIsNoIssue) {
         // Sets the CURSTATICINST null if dispatch is failure.
@@ -859,15 +865,20 @@ HybridCPU::rPreExecute (void)
 #endif
 
     if (curStaticInst) {
-        // Updates the insruction issued.
-        writeIssued ();
+        // Increase the number of issued instructions.
+        setNumIssued (getNumIssued () + 1);
+
+        // Increase the number of store instructions per issue.
+        if (curStaticInst->isStore ()) {
+            setNumStore (getNumStore () + 1);
+        }
 
         // Updates the register dependence table.
         setRegDep ();
     }
 
 #if DEBUG
-    std::cout << "issued insts: " << issued << std::endl;
+    std::cout << "issued insts: " << getNumIssued () << std::endl;
     std::cout << "x register dependence table:" << std::endl;
     std::cout << xRegDepTable << std::endl;
     std::cout << "g register dependence table:" << std::endl;
@@ -911,8 +922,40 @@ HybridCPU::postExecute (void)
 
         } else if (curStaticInst->isMemRef ()) {
             // Memory reference inst.
-            curPipelineEvent = Issue;
-            //curPipelineEvent = (curStaticInst->getVPreded ()) ? VPreded : MisVPred;
+            TheISA::PCState pcState = thread->pcState ();
+
+            if (curStaticInst->isLoad ()) {
+                // Load instruction.
+                if (vPredictor.predict (pcState.pc ()) == pcState.lpc ()) {
+                    // Value prediction is right.
+                    curPipelineEvent = VPreded;
+
+                    // @todo
+                } else {
+                    // Value prediction is wrong.
+                    curPipelineEvent = MisVPred;
+                }
+
+                // Feeds back to the value predictor.
+                vPredictor.feedback (pcState.pc (), pcState.lpc ());
+                vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+
+            } else if (curStaticInst->isLoadD ()) {
+                // Load instruction with delay slot.
+                curPipelineEvent = Issue;
+                // Feeds back to the value predictor.
+                vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+
+            } else if (curStaticInst->isStore ()) {
+                // Store instruction.
+                curPipelineEvent = Issue;
+                // Feeds back to the value predictor.
+                vPredictor.feedbackStoreHistory (pcState.pc (), pcState.spc ());
+
+            } else {
+                assert (0);
+            }
+
         } else if (curStaticInst->isModeSwitch ()) {
             // Mode switch inst.
             curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
@@ -949,8 +992,11 @@ HybridCPU::renew (void)
 
     Cycles decrRegBackCycleDelta (1);
 
-    // Renew the dispatch infos.
-    refreshIssued ();
+    // Clear the number of issued instructions.
+    setNumIssued (0);
+
+    // Clear the number of store instructions.
+    setNumStore (0);
 
     refreshRegDepTable (decrRegBackCycleDelta);
 
@@ -965,18 +1011,6 @@ HybridCPU::renew (void)
     std::cout << xRegDepTable << std::endl;
     std::cout << "----------> renew" << std::endl << std::endl;
 #endif
-}
-
-bool
-HybridCPU::isOverIssueWidth (void) const
-{
-    return (issued >= IssueWidth) ? true : false;
-}
-
-void
-HybridCPU::writeIssued (void)
-{
-    ++issued;
 }
 
 bool
@@ -1163,10 +1197,26 @@ HybridCPU::maxRegDepCycle (void) const
 }
 
 void
-HybridCPU::setBranchTarget (Addr branchTarget)
+HybridCPU::bpc (Addr branchTarget)
 {
     TheISA::PCState pcState = thread->pcState ();
     pcState.bpc (branchTarget);
+    thread->pcState (pcState);
+}
+
+void
+HybridCPU::lpc (Addr effAddr)
+{
+    TheISA::PCState pcState = thread->pcState ();
+    pcState.lpc (effAddr);
+    thread->pcState (pcState);
+}
+
+void
+HybridCPU::spc (Addr effAddr)
+{
+    TheISA::PCState pcState = thread->pcState ();
+    pcState.spc (effAddr);
     thread->pcState (pcState);
 }
 
@@ -1181,12 +1231,6 @@ void
 HybridCPU::refreshCycle (const Cycles& cycleDelta)
 {
     cycle += cycleDelta;
-}
-
-void
-HybridCPU::refreshIssued (void)
-{
-    issued = 0;
 }
 
 void
@@ -1312,6 +1356,8 @@ HybridCPU::initPipelineMacho (void)
     // Turns to R_Advance or R_Flush if branch inst is met.
     pipelineMacho.regStateEvent (R_Idle, BPreded, R_Advance);
     pipelineMacho.regStateEvent (R_Idle, MisBPred, R_Flush);
+    pipelineMacho.regStateEvent (R_Idle, VPreded, R_Run);
+    pipelineMacho.regStateEvent (R_Idle, MisVPred, R_Run);
     // Turns to R_InstWait if iterative inst is met.
     pipelineMacho.regStateEvent (R_Idle, IterInst, R_InstWait);
     // Turns to R_2_R or R_2_V if mode switching inst is met.
@@ -1328,6 +1374,8 @@ HybridCPU::initPipelineMacho (void)
     // Turns to R_Advance or R_Flush if branch inst is met.
     pipelineMacho.regStateEvent (R_Run, BPreded, R_Advance);
     pipelineMacho.regStateEvent (R_Run, MisBPred, R_Flush);
+    pipelineMacho.regStateEvent (R_Run, VPreded, R_Run);
+    pipelineMacho.regStateEvent (R_Run, MisVPred, R_Run);
     // Turns to R_InstWait if iterative inst is met.
     pipelineMacho.regStateEvent (R_Run, IterInst, R_InstWait);
     // Turns to R_2_R or R_2_V if mode switching inst is met.

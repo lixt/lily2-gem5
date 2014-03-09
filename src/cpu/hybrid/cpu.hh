@@ -53,6 +53,8 @@
 #include "cpu/hybrid/resources/reg_dep.hh"
 #include "cpu/hybrid/resources/bpred.hh"
 #include "cpu/hybrid/resources/bpred_config.hh"
+#include "cpu/hybrid/resources/vpred.hh"
+#include "cpu/hybrid/resources/vpred_config.hh"
 #include "params/HybridCPU.hh"
 #include "arch/lily2/operands.hh"
 #include "arch/lily2/static_inst.hh"
@@ -362,9 +364,6 @@ class HybridCPU : public BaseSimpleCPU
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
 
-    // Issued instructions.
-    int issued;
-
     // Register dependence tables.
     RegDepTable<TheISA::NumXRegs> xRegDepTable;
     RegDepTable<TheISA::NumYRegs> yRegDepTable;
@@ -373,6 +372,9 @@ class HybridCPU : public BaseSimpleCPU
 
     // Branch predictor.
     BPredictor<BPredEntries, BPredLocalHistories> bPredictor;
+
+    // Value predictor.
+    VPredictor<VPredEntries> vPredictor;
 
   private:
     // Initializes the pipeline state machine.
@@ -437,6 +439,55 @@ class HybridCPU : public BaseSimpleCPU
     void refreshCycle (const Cycles& decrRegBackCycleDelta);
 
   private:
+    //
+    // Issue width and issued instructions interfaces.
+    //
+
+    // Number of issued instruction.
+    size_t numIssued;
+
+    // Issue width.
+    size_t IssueWidth;
+
+    // Gets the number of issued instructions.
+    size_t getNumIssued (void) const
+    {
+        return numIssued;
+    }
+
+    // Sets the number of issued instructions.
+    void setNumIssued (size_t numIssued)
+    {
+        this->numIssued = numIssued;
+    }
+
+    // Gets the issue width.
+    size_t getIssueWidth (void) const
+    {
+        return IssueWidth;
+    }
+
+  private:
+    //
+    // Number of the store instructions per issue interfaces.
+    //
+
+    // Number of the store instruction per issue.
+    size_t numStore;
+
+    // Gets the number of the store instruction per issue.
+    size_t getNumStore (void) const
+    {
+        return numStore;
+    }
+
+    // Sets the number of the store instruction per issue.
+    void setNumStore (size_t numStore)
+    {
+        this->numStore = numStore;
+    }
+
+  private:
     // Register dependence table interfaces.
     bool isRegDepTableEmpty (void) const;
 
@@ -494,8 +545,18 @@ class HybridCPU : public BaseSimpleCPU
                       TheISA::RegFileBuf<RegNum, RegValue_t>&, const Cycles&);
 
   public:
+    //
     // PC state interfaces.
-    void setBranchTarget (Addr);
+    //
+
+    // Branch target.
+    void bpc (Addr);
+
+    // Load instruction effective address.
+    void lpc (Addr);
+
+    // Store instruction effective address.
+    void spc (Addr);
 
   private:
     // Interfaces for debugging.
@@ -547,9 +608,6 @@ class HybridCPU : public BaseSimpleCPU
 
   private:
     // Python configuration variables.
-
-    // Issue width.
-    int IssueWidth;
 
     // Functional unit latency.
     int IntArithLatency;
