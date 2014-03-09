@@ -1024,17 +1024,17 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode FLAG_VEC default Unknown::unknown () {
-                                            0x0: DivOp::div_u_m ({{ wd = div_u (wa, wb); }});
+                                            0x0: DivOp::div_u_m ({{ wd = div_u (wa, wb); }}, IsIter, IsIntDiv);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::div_u_b_4_m ({{ qbd = div_u_b_4 (qba, qbb); }});
-                                                    0x1: DivVecOp::div_u_h_2_m ({{ dhd = div_u_h_2 (dha, dhb); }});
-                                                    0x2: DivVecOp::div_u_h_4_m ({{ qhd = div_u_h_4 (qha, qhb); }});
-                                                    0x3: DivVecOp::div_u_w_2_m ({{ dwd = div_u_w_2 (dwa, dwb); }});
+                                                    0x0: DivVecOp::div_u_b_4_m ({{ qbd = div_u_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
+                                                    0x1: DivVecOp::div_u_h_2_m ({{ dhd = div_u_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
+                                                    0x2: DivVecOp::div_u_h_4_m ({{ qhd = div_u_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
+                                                    0x3: DivVecOp::div_u_w_2_m ({{ dwd = div_u_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::div_u_i_m ({{ wd = div_u (wa, i8); }});
+                                    0x1: DivImmOp::div_u_i_m ({{ wd = div_u (wa, i8); }}, IsIter, IsIntDiv);
                                 }
 
                             0x1:
@@ -1042,17 +1042,17 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode FLAG_VEC default Unknown::unknown () {
-                                            0x0: DivOp::div_m ({{ wd = div (wa, wb); }});
+                                            0x0: DivOp::div_m ({{ wd = div (wa, wb); }}, IsIter, IsIntDiv);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::div_b_4_m ({{ qbd = div_b_4 (qba, qbb); }});
-                                                    0x1: DivVecOp::div_h_2_m ({{ dhd = div_h_2 (dha, dhb); }});
-                                                    0x2: DivVecOp::div_h_4_m ({{ qhd = div_h_4 (qha, qhb); }});
-                                                    0x3: DivVecOp::div_w_2_m ({{ dwd = div_w_2 (dwa, dwb); }});
+                                                    0x0: DivVecOp::div_b_4_m ({{ qbd = div_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
+                                                    0x1: DivVecOp::div_h_2_m ({{ dhd = div_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
+                                                    0x2: DivVecOp::div_h_4_m ({{ qhd = div_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
+                                                    0x3: DivVecOp::div_w_2_m ({{ dwd = div_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::div_i_m ({{ wd = div (wa, i8); }});
+                                    0x1: DivImmOp::div_i_m ({{ wd = div (wa, i8); }}, IsIter, IsIntDiv);
                                 }
 
                         } //> DIV.
@@ -1065,17 +1065,17 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode FLAG_VEC default Unknown::unknown () {
-                                            0x0: DivOp::rem_u_m ({{ wd = rem_u (wa, wb); }});
+                                            0x0: DivOp::rem_u_m ({{ wd = rem_u (wa, wb); }}, IsIter, IsIntRem);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::rem_u_b_4_m ({{ qbd = rem_u_b_4 (qba, qbb); }});
-                                                    0x1: DivVecOp::rem_u_h_2_m ({{ dhd = rem_u_h_2 (dha, dhb); }});
-                                                    0x2: DivVecOp::rem_u_h_4_m ({{ qhd = rem_u_h_4 (qha, qhb); }});
-                                                    0x3: DivVecOp::rem_u_w_2_m ({{ dwd = rem_u_w_2 (dwa, dwb); }});
+                                                    0x0: DivVecOp::rem_u_b_4_m ({{ qbd = rem_u_b_4 (qba, qbb); }}, IsIter, IsIntRem);
+                                                    0x1: DivVecOp::rem_u_h_2_m ({{ dhd = rem_u_h_2 (dha, dhb); }}, IsIter, IsIntRem);
+                                                    0x2: DivVecOp::rem_u_h_4_m ({{ qhd = rem_u_h_4 (qha, qhb); }}, IsIter, IsIntRem);
+                                                    0x3: DivVecOp::rem_u_w_2_m ({{ dwd = rem_u_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::rem_u_i_m ({{ wd = rem_u (wa, i8); }});
+                                    0x1: DivImmOp::rem_u_i_m ({{ wd = rem_u (wa, i8); }}, IsIter, IsIntRem);
                                 }
 
                             0x1:
@@ -1083,17 +1083,17 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode FLAG_VEC default Unknown::unknown () {
-                                            0x0: DivOp::rem_m ({{ wd = rem (wa, wb); }});
+                                            0x0: DivOp::rem_m ({{ wd = rem (wa, wb); }}, IsIter, IsIntRem);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivOp::rem_b_4_m ({{ qbd = rem_b_4 (qba, qbb); }});
-                                                    0x1: DivOp::rem_h_2_m ({{ dhd = rem_h_2 (dha, dhb); }});
-                                                    0x2: DivOp::rem_h_4_m ({{ qhd = rem_h_4 (qha, qhb); }});
-                                                    0x3: DivOp::rem_w_2_m ({{ dwd = rem_w_2 (dwa, dwb); }});
+                                                    0x0: DivOp::rem_b_4_m ({{ qbd = rem_b_4 (qba, qbb); }}, IsIter, IsIntRem);
+                                                    0x1: DivOp::rem_h_2_m ({{ dhd = rem_h_2 (dha, dhb); }}, IsIter, IsIntRem);
+                                                    0x2: DivOp::rem_h_4_m ({{ qhd = rem_h_4 (qha, qhb); }}, IsIter, IsIntRem);
+                                                    0x3: DivOp::rem_w_2_m ({{ dwd = rem_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::rem_i_m ({{ wd = rem (wa, i8); }});
+                                    0x1: DivImmOp::rem_i_m ({{ wd = rem (wa, i8); }}, IsIter, IsIntRem);
                                 }
 
                         } //> REM.

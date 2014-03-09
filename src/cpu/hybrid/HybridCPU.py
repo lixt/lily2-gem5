@@ -94,3 +94,7 @@ class HybridCPU(BaseSimpleCPU):
 
     # Branch delay slots.
     BranchDelaySlot = Param.Int (6, "Branch delay slot")
+
+    # Interative instruction pipeline stalls.
+    IntDivStall = Param.Int (10, "Integer division instruction iterative stall")
+    IntRemStall = Param.Int (10, "Integer remainder instruction iterative stall")

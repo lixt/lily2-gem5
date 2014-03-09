@@ -163,7 +163,9 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       SimdIntMulLatency   (p->SimdIntMulLatency),
       SimdIntMacLatency   (p->SimdIntMacLatency),
       SimdIntIterLatency  (p->SimdIntIterLatency),
-      BranchDelaySlot (p->BranchDelaySlot)
+      BranchDelaySlot     (p->BranchDelaySlot),
+      IntDivStall         (p->IntDivStall),
+      IntRemStall         (p->IntRemStall)
 {
     _status = Idle;
 
@@ -1452,8 +1454,17 @@ HybridCPU::callback_R_Flush (void)
 void
 HybridCPU::callback_R_InstWait (void)
 {
-    // Loops (execution cycles - 1).
-    // UC.
+    Cycles cycle;
+
+    if (curStaticInst->isIntDiv ()) {
+        cycle = Cycles (IntDivStall);
+    } else if (curStaticInst->isIntRem ()) {
+        cycle = Cycles (IntRemStall);
+    } else {
+        assert (0);
+    }
+
+    refreshCycle (cycle);
 }
 
 void

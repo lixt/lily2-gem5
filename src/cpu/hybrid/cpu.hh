@@ -568,6 +568,10 @@ class HybridCPU : public BaseSimpleCPU
 
     // Branch delay slot.
     int BranchDelaySlot;
+
+    // Iterative instruction stalls.
+    int IntDivStall;
+    int IntRemStall;
 };
 
 template <size_t RegNum>

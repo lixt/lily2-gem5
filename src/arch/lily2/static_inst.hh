@@ -274,6 +274,8 @@ class Lily2StaticInst : public StaticInst
   public:
     bool isNop (void) const { return flags[IsNop]; }
     bool isIter (void) const { return flags[IsIter]; }
+    bool isIntDiv (void) const { return flags[IsIntDiv]; }
+    bool isIntRem (void) const { return flags[IsIntRem]; }
     bool isMemRef (void) const { return flags[IsMemRef]; }
     bool isLoad (void) const { return flags[IsLoad]; }
     bool isStore (void) const { return flags[IsStore]; }
@@ -296,7 +298,9 @@ class Lily2StaticInst : public StaticInst
     enum Flags {
         IsNop,
 
-        IsIter, // Iterative.
+        IsIter,   // Iterative instruction.
+        IsIntDiv, // Integer division instruction.
+        IsIntRem, // Integer remainder instruction.
 
         IsMemRef, // Memory reference.
         IsLoad, // Load.
