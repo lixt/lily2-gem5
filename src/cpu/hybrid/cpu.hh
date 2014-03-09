@@ -432,17 +432,7 @@ class HybridCPU : public BaseSimpleCPU
     // Refreshes the issued instructions.
     void refreshIssued (void);
 
-    // Refreshes the register dependence table.
-    void refreshRegDepTable (const Cycles& decrRegBackCycleDelta);
-    template <size_t RegNum>
-    void refreshRegDepTable (RegDepTable<RegNum>&, const Cycles& decrRegBackCycleDelta);
-
     // Refreshes the register file buffers and writes value back to the register file.
-    void refreshRegs (const Cycles& decrRegBackCycleDelta);
-    template <size_t RegNum, class RegValue_t>
-    void refreshRegs (TheISA::RegFile<RegNum, RegValue_t>&,
-            TheISA::RegFileBuf<RegNum, RegValue_t>&, const Cycles& decrRegBackCycleDelta);
-
     // Refreshes the cycles.
     void refreshCycle (const Cycles& decrRegBackCycleDelta);
 
@@ -471,6 +461,16 @@ class HybridCPU : public BaseSimpleCPU
     template <size_t RegNum>
     void setRegDep (RegDepTable<RegNum>&, const RegIndex_t&, const Cycles&);
 
+    Cycles maxRegDepCycle (void) const;
+
+    template <size_t RegNum>
+    Cycles maxRegDepCycle (const RegDepTable<RegNum>&) const;
+
+    void refreshRegDepTable (const Cycles&);
+
+    template <size_t RegNum>
+    void refreshRegDepTable (RegDepTable<RegNum>&, const Cycles&);
+
   private:
     // Register file interfaces.
     template <size_t RegNum, class RegValue_t>
@@ -486,6 +486,12 @@ class HybridCPU : public BaseSimpleCPU
     template <size_t RegNum, class RegValue_t>
     void setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&,
                          const RegValue_t&, const RegValue_t&, const Cycles&);
+
+    void refreshRegs (const Cycles&);
+
+    template <size_t RegNum, class RegValue_t>
+    void refreshRegs (TheISA::RegFile<RegNum, RegValue_t>&,
+                      TheISA::RegFileBuf<RegNum, RegValue_t>&, const Cycles&);
 
   public:
     // PC state interfaces.
@@ -597,6 +603,20 @@ HybridCPU::setRegDep (RegDepTable<RegNum>& regDepTable,
     regDepTable.insertReg (regIndex, regBackCycle);
 }
 
+template <size_t RegNum>
+Cycles
+HybridCPU::maxRegDepCycle (const RegDepTable<RegNum>& regDepTable) const
+{
+    return regDepTable.maxCycle ();
+}
+
+template <size_t RegNum>
+void
+HybridCPU::refreshRegDepTable (RegDepTable<RegNum>& regDepTable, const Cycles& decrRegBackCycleDelta)
+{
+    regDepTable.update (decrRegBackCycleDelta);
+}
+
 template <size_t RegNum, class RegValue_t>
 RegValue_t
 HybridCPU::getRegValue (const TheISA::RegFile<RegNum, RegValue_t>& regFile,
@@ -629,6 +649,33 @@ HybridCPU::setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
                            const RegValue_t& regMask, const Cycles& regBackCycle)
 {
     return regFileBuf.insert (regIndex, regValue, regMask, regBackCycle);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+HybridCPU::refreshRegs (TheISA::RegFile<RegNum, RegValue_t>& regFile,
+                        TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
+                        const Cycles& decrRegBackCycleDelta)
+{
+    // Vector to store the due registers.
+    std::vector<typename TheISA::RegFileBuf<RegNum, RegValue_t>::Position> vecRemovePos =
+        regFileBuf.decrRegBackCycle (decrRegBackCycleDelta);
+
+    for (typename std::vector<typename TheISA::RegFileBuf<RegNum, RegValue_t>::Position>::iterator it
+            = vecRemovePos.begin (); it != vecRemovePos.end (); ++it) {
+
+        RegIndex_t regIndex = regFileBuf.getRegIndex (*it);
+
+        RegValue_t regMask = regFileBuf.getRegMask (*it);
+        RegValue_t regNewValue = regFileBuf.getRegValue (*it);
+        RegValue_t regOldValue = regFile.getRegValue (regIndex);
+
+        // Writes the buffered value back to the register.
+        regFile.setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
+
+        // Removes the due registers in the register file buffer.
+        regFileBuf.remove (*it);
+    }
 }
 
 #endif // __CPU_HYBRID_CPU_HH__

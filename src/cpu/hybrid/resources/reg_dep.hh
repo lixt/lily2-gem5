@@ -38,6 +38,9 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
     // Checks whether the register dependence table is empty.
     bool empty (void) const;
 
+    // Returns the maximum register back cycle in the register dependence table.
+    Cycles maxCycle (void) const;
+
     // Updates the register dependence table. Decreases the register back cycles
     // and removes out the due registers.
     void update (const Cycles& regBackCycleDelta);
@@ -78,6 +81,20 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
         }
     };
 
+    // Functor used in MAXCYCLE.
+    struct MaxCycleFunctor
+    {
+        Cycles max;
+
+        // Constructor.
+        MaxCycleFunctor (void) : max (0) {}
+
+        void operator() (const key_type& key, const mapped_type& mapped)
+        {
+            max = (max < mapped) ? mapped : max;
+        }
+    };
+
     // Funtor used in PRINT.
     struct PrintFunctor
     {
@@ -114,6 +131,15 @@ RegDepTable<RegNum>::empty (void) const
     }
 
     return true;
+}
+
+template <size_t RegNum>
+Cycles
+RegDepTable<RegNum>::maxCycle (void) const
+{
+    MaxCycleFunctor maxCycleFunctor;
+    Base::traverse (maxCycleFunctor);
+    return maxCycleFunctor.max;
 }
 
 template <size_t RegNum>

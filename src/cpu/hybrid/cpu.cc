@@ -811,6 +811,12 @@ HybridCPU::rDispatch (void)
 void
 HybridCPU::vDispatch (void)
 {
+#if DEBUG
+    std::cout << "<---------- vDispatch" << std::endl;
+#endif
+
+    // Checks the following things in Vliw dispatch.
+    // 1. Functional unit ascending order.
 
 }
 
@@ -1132,6 +1138,30 @@ HybridCPU::setRegDep (const RegFile_t& fileName,
     }
 }
 
+Cycles
+HybridCPU::maxRegDepCycle (void) const
+{
+    // X.
+    Cycles xMax = xRegDepTable.maxCycle ();
+
+    // Y.
+    Cycles yMax = yRegDepTable.maxCycle ();
+
+    // G.
+    Cycles gMax = gRegDepTable.maxCycle ();
+
+    // M.
+    Cycles mMax = mRegDepTable.maxCycle ();
+
+    // Maximum in X,Y,G,M.
+    Cycles max;
+    max = (xMax >= yMax) ? xMax : yMax;
+    max = ( max >= gMax) ?  max : gMax;
+    max = ( max >= mMax) ?  max : mMax;
+
+    return max;
+}
+
 void
 HybridCPU::setBranchTarget (Addr branchTarget)
 {
@@ -1147,13 +1177,6 @@ HybridCPU::debugPipeline (std::ostream& os) const
     os << "pipeline state = " << pipelineStateStr << std::endl;
 }
 
-//void
-//HybridCPU::renewIssued (void)
-//{
-//    issued = 0;
-//}
-//
-
 void
 HybridCPU::refreshCycle (const Cycles& cycleDelta)
 {
@@ -1165,15 +1188,6 @@ HybridCPU::refreshIssued (void)
 {
     issued = 0;
 }
-
-//void
-//HybridCPU::renewRegDep (const Cycles& decrRegBackCycleDelta)
-//{
-//    xRegDepTable.update (decrRegBackCycleDelta);
-//    yRegDepTable.update (decrRegBackCycleDelta);
-//    gRegDepTable.update (decrRegBackCycleDelta);
-//    mRegDepTable.update (decrRegBackCycleDelta);
-//}
 
 void
 HybridCPU::refreshRegDepTable (const Cycles& decrRegBackCycleDelta)
@@ -1191,12 +1205,6 @@ HybridCPU::refreshRegDepTable (const Cycles& decrRegBackCycleDelta)
     refreshRegDepTable (mRegDepTable, decrRegBackCycleDelta);
 }
 
-template <size_t RegNum>
-void
-HybridCPU::refreshRegDepTable (RegDepTable<RegNum>& regDepTable, const Cycles& decrRegBackCycleDelta)
-{
-    regDepTable.update (decrRegBackCycleDelta);
-}
 
 void
 HybridCPU::refreshRegs (const Cycles& decrRegBackCycleDelta)
@@ -1218,32 +1226,6 @@ HybridCPU::refreshRegs (const Cycles& decrRegBackCycleDelta)
             decrRegBackCycleDelta);
 }
 
-template <size_t RegNum, class RegValue_t>
-void
-HybridCPU::refreshRegs (RegFile<RegNum, RegValue_t>& regFile,
-                        RegFileBuf<RegNum, RegValue_t>& regFileBuf,
-                        const Cycles& decrRegBackCycleDelta)
-{
-    // Vector to store the due registers.
-    std::vector<typename RegFileBuf<RegNum, RegValue_t>::Position> vecRemovePos =
-        regFileBuf.decrRegBackCycle (decrRegBackCycleDelta);
-
-    for (typename std::vector<typename RegFileBuf<RegNum, RegValue_t>::Position>::iterator it
-            = vecRemovePos.begin (); it != vecRemovePos.end (); ++it) {
-
-        RegIndex_t regIndex = regFileBuf.getRegIndex (*it);
-
-        RegValue_t regMask = regFileBuf.getRegMask (*it);
-        RegValue_t regNewValue = regFileBuf.getRegValue (*it);
-        RegValue_t regOldValue = regFile.getRegValue (regIndex);
-
-        // Writes the buffered value back to the register.
-        regFile.setRegValue (regIndex, (regNewValue & regMask) | (regOldValue & ~regMask));
-
-        // Removes the due registers in the register file buffer.
-        regFileBuf.remove (*it);
-    }
-}
 
 void
 HybridCPU::printAddr(Addr a)
@@ -1476,12 +1458,13 @@ HybridCPU::callback_R_Advance (void)
 void
 HybridCPU::callback_R_2_R (void)
 {
-    // Loops (0).
+    return;
 }
 
 void
 HybridCPU::callback_R_2_V (void)
 {
+
     // Loops (mode switching cycles).
     // URDT.
     // URFB.
