@@ -2462,15 +2462,8 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
         case SimdIntMulOp  : return Cycles (SimdIntMulLatency);
         case SimdIntMacOp  : return Cycles (SimdIntMacLatency);
         case SimdIntIterOp : return Cycles (SimdIntIterLatency);
-        case IntMemLoadOp  : // Load instructions.
-                             if (memFlag) {
+        case IntMemOp      : if (memFlag) {
                                  return Cycles (IntMemAccessLatency);
-                             } else {
-                                 return Cycles (IntMemOffsetLatency);
-                             }
-        case IntMemStoreOp : // Store instructions.
-                             if (memFlag) {
-                                 assert (0);
                              } else {
                                  return Cycles (IntMemOffsetLatency);
                              }

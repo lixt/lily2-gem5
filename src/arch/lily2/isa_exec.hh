@@ -1667,6 +1667,36 @@ inline Opd32i_t ldd (uint8_t *data)
     return Opd32i_t (vlo, vhi);
 }
 
+inline void stb_ (uint8_t *data, const Op32i_t& op)
+{
+    uint8_t mem = op.uval ();
+    mem = gtobe (mem);
+    memcpy (data, &mem, 1);
+}
+
+inline void sth_ (uint8_t *data, const Op32i_t& op)
+{
+    uint16_t mem = op.uval ();
+    mem = gtobe (mem);
+    memcpy (data, &mem, 2);
+}
+
+inline void stw_ (uint8_t *data, const Op32i_t& op)
+{
+    uint32_t mem = op.uval ();
+    mem = gtobe (mem);
+    memcpy (data, &mem, 4);
+}
+
+inline void std_ (uint8_t *data, const Opd32i_t& op)
+{
+    uint32_t mlo = op.uvlo ();
+    uint32_t mhi = op.uvhi ();
+    uint64_t mem = static_cast<uint64_t> (mlo) + ((static_cast<uint64_t> (mhi)) << 32);
+    mem = gtobe (mem);
+    memcpy (data, &mem, 8);
+}
+
 // Flow control instructions.
 inline Addr getTA (const Op32i_t& base, const Op32i_t& disp = Op32i_t (0))
 {

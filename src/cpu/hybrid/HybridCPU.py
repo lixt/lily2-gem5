@@ -81,7 +81,7 @@ class HybridCPU(BaseSimpleCPU):
     IntMulLatency       = Param.Int (2, "Integer multiplication instruction latency")
     IntMacLatency       = Param.Int (2, "Integer multiplication and addition instruction latency")
     IntIterLatency      = Param.Int (1, "Integer iteration instruction latency")
-    IntMemAccessLatency = Param.Int (4, "Integer memory access instruction latency")
+    IntMemAccessLatency = Param.Int (1, "Integer memory access instruction latency")
     IntMemOffsetLatency = Param.Int (1, "Integer memory offset self-modify instruction latency")
     IntMiscLatency      = Param.Int (1, "Integer miscellaneous instruction latency")
     SimdIntArithLatency = Param.Int (1, "Simd integer arithmetic instruction latency")
@@ -98,3 +98,6 @@ class HybridCPU(BaseSimpleCPU):
     # Interative instruction pipeline stalls.
     IntDivStall = Param.Int (10, "Integer division instruction iterative stall")
     IntRemStall = Param.Int (10, "Integer remainder instruction iterative stall")
+
+    # Load instruction new latency when value prediction is right.
+    IntMemPrededLatency = Param.Int (1, "Integer memory access instruction latency when value prediction is right.")

@@ -23,7 +23,7 @@ output header {{
     {
       protected:
         MemLoadOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            MemOp (mnemonic, machInst, IntMemLoadOp) {}
+            MemOp (mnemonic, machInst, IntMemOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -34,7 +34,7 @@ output header {{
     {
       protected:
         MemStoreOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            MemOp (mnemonic, machInst, IntMemStoreOp) {}
+            MemOp (mnemonic, machInst, IntMemOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -107,7 +107,7 @@ output decoder {{
 }};
 
 
-def template LoadExecute {{
+def template MemExecute {{
     Fault %(class_name)s::execute(%(CPU_exec_context)s *xc, Trace::InstRecord *traceData)
     {
         Fault fault = NoFault;
@@ -140,7 +140,7 @@ def format MemLoadOp(code, *opt_flags) {{
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = LoadExecute.subst(iop)
+    exec_output = MemExecute.subst(iop)
 }};
 
 def format MemStoreOp(code, *opt_flags) {{
@@ -148,5 +148,5 @@ def format MemStoreOp(code, *opt_flags) {{
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
+    exec_output = MemExecute.subst(iop)
 }};

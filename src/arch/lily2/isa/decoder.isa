@@ -1202,6 +1202,82 @@ decode FU default Unknown::unknown () {
                                                         md = ldd (data); }}, IsMemRef, IsLoad);
                         } //> LDD.
 
+                    0x4: //< STB.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: MemStoreOp::stb_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[1];
+                                                         stb_ (data, mw);
+                                                         xc->writeMem (data, 1, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                            0x1: MemStoreOp::stb_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[1];
+                                                         stb_ (data, mw);
+                                                         xc->writeMem (data, 1, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                        } //> STB.
+
+                    0x5: //< STH.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: MemStoreOp::sth_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[2];
+                                                         sth_ (data, mw);
+                                                         xc->writeMem (data, 2, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                            0x1: MemStoreOp::sth_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[2];
+                                                         sth_ (data, mw);
+                                                         xc->writeMem (data, 2, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                        } //> STH.
+
+                    0x6: //< STW.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: MemStoreOp::stw_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[4];
+                                                         stw_ (data, mw);
+                                                         xc->writeMem (data, 4, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                            0x1: MemStoreOp::stw_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[4];
+                                                         stw_ (data, mw);
+                                                         xc->writeMem (data, 4, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                        } //> STW.
+
+                    0x7: //< STD.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: MemStoreOp::std_d   ({{ Addr EA = getEA (rBase, rOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[8];
+                                                         std_ (data, md);
+                                                         xc->writeMem (data, 8, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                            0x1: MemStoreOp::std_i_d ({{ Addr EA = getEA (rBase, iOfst);
+                                                         xc->spc (EA);
+                                                         uint8_t data[8];
+                                                         std_ (data, md);
+                                                         xc->writeMem (data, 8, EA, memAccessFlags, NULL);
+                                                         }}, IsMemRef, IsStore);
+
+                        } //> STD.
+
                 } //> FU(0b'11) + HI(0b'000).
 
             //0x1: //< FU(0b'11) + HI(0b'001).
