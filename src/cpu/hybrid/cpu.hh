@@ -619,8 +619,8 @@ class HybridCPU : public BaseSimpleCPU
     int IntMulLatency;
     int IntMacLatency;
     int IntIterLatency;
-    int IntMemAccessLatency;
-    int IntMemOffsetLatency;
+    int IntMemLatency;
+    int IntMemAddrLatency;
     int IntMiscLatency;
     int SimdIntArithLatency;
     int SimdIntLogicLatency;
@@ -636,6 +636,9 @@ class HybridCPU : public BaseSimpleCPU
     // Iterative instruction stalls.
     int IntDivStall;
     int IntRemStall;
+
+    // Load instruction latency if value preidiction is right.
+    int IntMemPrededLatency;
 };
 
 template <size_t RegNum>

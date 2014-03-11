@@ -1607,12 +1607,17 @@ inline Opd32i_t rem_u_w_2 (Opd32i_t opa, Opd32i_t opb)
 }
 
 // Memory access instructions.
-inline Addr getEA (Op32i_t base, Op32i_t ofst)
+inline Addr getEA (const Op32i_t& base, const Op32i_t& ofst)
 {
     return (Addr) (base.sval () + ofst.sval ());
 }
 
-inline Op32i_t ldb_u (uint8_t *data)
+inline Op32i_t setBA (const Op32i_t& base, const Op32i_t& ofst)
+{
+    return Op32i_t (base.sval () + ofst.sval ());
+}
+
+inline Op32i_t ldb_u_ (uint8_t *data)
 {
     uint8_t *reinterpret_data = reinterpret_cast<uint8_t *> (data);
     uint8_t mem = *reinterpret_data;
@@ -1621,7 +1626,7 @@ inline Op32i_t ldb_u (uint8_t *data)
     return Op32i_t (val);
 }
 
-inline Op32i_t ldb (uint8_t *data)
+inline Op32i_t ldb_ (uint8_t *data)
 {
     uint8_t *reinterpret_data = reinterpret_cast<uint8_t *> (data);
     uint8_t mem = *reinterpret_data;
@@ -1630,7 +1635,7 @@ inline Op32i_t ldb (uint8_t *data)
     return Op32i_t (val);
 }
 
-inline Op32i_t ldh_u (uint8_t *data)
+inline Op32i_t ldh_u_ (uint8_t *data)
 {
     uint16_t *reinterpret_data = reinterpret_cast<uint16_t *> (data);
     uint16_t mem = *reinterpret_data;
@@ -1639,7 +1644,7 @@ inline Op32i_t ldh_u (uint8_t *data)
     return Op32i_t (val);
 }
 
-inline Op32i_t ldh (uint8_t *data)
+inline Op32i_t ldh_ (uint8_t *data)
 {
     uint16_t *reinterpret_data = reinterpret_cast<uint16_t *> (data);
     uint16_t mem = *reinterpret_data;
@@ -1648,7 +1653,7 @@ inline Op32i_t ldh (uint8_t *data)
     return Op32i_t (val);
 }
 
-inline Op32i_t ldw (uint8_t *data)
+inline Op32i_t ldw_ (uint8_t *data)
 {
     uint32_t *reinterpret_data = reinterpret_cast<uint32_t *> (data);
     uint32_t mem = *reinterpret_data;
@@ -1657,7 +1662,7 @@ inline Op32i_t ldw (uint8_t *data)
     return Op32i_t (val);
 }
 
-inline Opd32i_t ldd (uint8_t *data)
+inline Opd32i_t ldd_ (uint8_t *data)
 {
     uint64_t *reinterpret_data = reinterpret_cast<uint64_t *> (data);
     uint64_t mem = *reinterpret_data;

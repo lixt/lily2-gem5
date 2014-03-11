@@ -83,11 +83,11 @@ output decoder {{
         printCond (ss);
         printName (ss);
 
-        printDestOp (ss, 0);
-        ss << ",";
         printSrcOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 1);
+        ss << ",";
+        printSrcOp (ss, 2);
 
         return ss.str ();
     }
@@ -96,11 +96,11 @@ output decoder {{
     {
         std::stringstream ss;
 
-        printDestOpValue (ss, 0);
-        ss << ",";
         printSrcOpValue (ss, 0);
         ss << ",";
         printSrcOpValue (ss, 1);
+        ss << ",";
+        printSrcOpValue (ss, 2);
 
         return ss.str ();
     }

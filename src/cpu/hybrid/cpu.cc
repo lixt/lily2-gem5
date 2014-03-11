@@ -153,8 +153,8 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       IntMulLatency       (p->IntMulLatency),
       IntMacLatency       (p->IntMacLatency),
       IntIterLatency      (p->IntIterLatency),
-      IntMemAccessLatency (p->IntMemAccessLatency),
-      IntMemOffsetLatency (p->IntMemOffsetLatency),
+      IntMemLatency       (p->IntMemLatency),
+      IntMemAddrLatency   (p->IntMemAddrLatency),
       IntMiscLatency      (p->IntMiscLatency),
       SimdIntArithLatency (p->SimdIntArithLatency),
       SimdIntLogicLatency (p->SimdIntLogicLatency),
@@ -165,7 +165,8 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       SimdIntIterLatency  (p->SimdIntIterLatency),
       BranchDelaySlot     (p->BranchDelaySlot),
       IntDivStall         (p->IntDivStall),
-      IntRemStall         (p->IntRemStall)
+      IntRemStall         (p->IntRemStall),
+      IntMemPrededLatency (p->IntMemPrededLatency)
 {
     _status = Idle;
 
@@ -930,7 +931,7 @@ HybridCPU::postExecute (void)
                     // Value prediction is right.
                     curPipelineEvent = VPreded;
 
-                    // @todo
+                    // Modifies the register dependence table and register file buffer.
                 } else {
                     // Value prediction is wrong.
                     curPipelineEvent = MisVPred;
@@ -2463,9 +2464,9 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
         case SimdIntMacOp  : return Cycles (SimdIntMacLatency);
         case SimdIntIterOp : return Cycles (SimdIntIterLatency);
         case IntMemOp      : if (memFlag) {
-                                 return Cycles (IntMemAccessLatency);
+                                 return Cycles (IntMemLatency);
                              } else {
-                                 return Cycles (IntMemOffsetLatency);
+                                 return Cycles (IntMemAddrLatency);
                              }
         default            : assert (0);
     }

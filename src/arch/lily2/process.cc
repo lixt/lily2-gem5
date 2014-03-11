@@ -51,7 +51,7 @@ Lily2LiveProcess::Lily2LiveProcess(LiveProcessParams * params,
 {
     // Set up stack. On LILY2, stack starts at the top of kuseg
     // user address space. LILY2 stack grows down from here
-    stack_base = 0x200000;
+    stack_base = 0x800000;
 
     // Set pointer for next thread stack.  Reserve 8M for main stack.
     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
