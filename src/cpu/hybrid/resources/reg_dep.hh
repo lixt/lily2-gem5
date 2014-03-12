@@ -29,7 +29,10 @@ class RegDepTable : public Table<RegNum, 1, TheISA::RegIndex_t, Cycles>
   public:
     // Inserts the register, register-pair, register-pair-pair and register back
     // cycle into the register dependence table.
-    void insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle);
+    void insertReg (const RegIndex_t&, const Cycles&);
+
+    // Mutates the register back cycle in the register dependence table.
+    void mutateReg (const RegIndex_t&, const Cycles&);
 
     // Checks register, register-pair or register-pair-pair dependences. Returns
     // true if dependence exists.
@@ -110,6 +113,14 @@ void
 RegDepTable<RegNum>::insertReg (const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     Base::insert (regIndex, regBackCycle);
+}
+
+template <size_t RegNum>
+void
+RegDepTable<RegNum>::mutateReg (const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    Position mutatePos = Base::search (regIndex);
+    Base::mutate (mutatePos, regBackCycle);
 }
 
 template <size_t RegNum>

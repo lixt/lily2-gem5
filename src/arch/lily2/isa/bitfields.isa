@@ -46,6 +46,7 @@ def bitfield FLAG_VEC   <20:20>;
 def bitfield FLAG_OA    <20:20>;
 
 def bitfield VEC        <19:18>;
+def bitfield MODE       <19:18>;
 
 def bitfield RB         <17:13>;
 def bitfield RA         <12: 8>;

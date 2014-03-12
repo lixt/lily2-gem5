@@ -1612,9 +1612,26 @@ inline Addr getEA (const Op32i_t& base, const Op32i_t& ofst)
     return (Addr) (base.sval () + ofst.sval ());
 }
 
-inline Op32i_t setBA (const Op32i_t& base, const Op32i_t& ofst)
+inline Op32i_t preSetBA (const Op32i_t& base, const Op32i_t& ofst, int mode)
 {
-    return Op32i_t (base.sval () + ofst.sval ());
+    switch (mode) {
+        case 0x0: return Op32i_t (base.sval () + ofst.sval ());
+        case 0x1: return Op32i_t (base.sval () - ofst.sval ());
+        case 0x2: // Fall through.
+        case 0x3: return base;
+        default : assert (0);
+    }
+}
+
+inline Op32i_t postSetBA (const Op32i_t& base, const Op32i_t& ofst, int mode)
+{
+    switch (mode) {
+        case 0x0: return base;
+        case 0x1: return base;
+        case 0x2: return Op32i_t (base.sval () + ofst.sval ());
+        case 0x3: return Op32i_t (base.sval () - ofst.sval ());
+        default : assert (0);
+    }
 }
 
 inline Op32i_t ldb_u_ (uint8_t *data)
@@ -1703,9 +1720,24 @@ inline void std_ (uint8_t *data, const Opd32i_t& op)
 }
 
 // Flow control instructions.
-inline Addr getTA (const Op32i_t& base, const Op32i_t& disp = Op32i_t (0))
+inline Addr getTA (const Op32i_t& base)
 {
-    return (Addr) (base.sval () + disp.sval ());
+    return (Addr) base.sval ();
+}
+
+inline Addr getTA (Addr base)
+{
+    return (Addr) base;
+}
+
+inline Addr getTA (Addr base, const Op32i_t& disp)
+{
+    return (Addr) (base + disp.sval ());
+}
+
+inline Op32i_t getRA (Addr addr)
+{
+    return Op32i_t (static_cast<uint32_t> (addr));
 }
 
 } // namespace Lily2ISA

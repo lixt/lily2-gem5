@@ -359,17 +359,8 @@ class HybridCPU : public BaseSimpleCPU
     PipelineCallback prePipelineCallback;
     PipelineCallback postPipelineCallback;
 
-    Cycles cycle;
-
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
-
-    // Register dependence tables.
-    RegDepTable<TheISA::NumXRegs> xRegDepTable;
-    RegDepTable<TheISA::NumYRegs> yRegDepTable;
-    RegDepTable<TheISA::NumGRegs> gRegDepTable;
-    RegDepTable<TheISA::NumMRegs> mRegDepTable;
-
     // Branch predictor.
     BPredictor<BPredEntries, BPredLocalHistories> bPredictor;
 
@@ -427,39 +418,49 @@ class HybridCPU : public BaseSimpleCPU
     void renew (void);
 
   private:
-    // Interfaces for member functions.
-    bool isOverIssueWidth     (void) const;
-    void writeIssued          (void);
-    // Refresh.
-    // Refreshes the issued instructions.
-    void refreshIssued (void);
+    //
+    // CPU running cycles.
+    //
 
-    // Refreshes the register file buffers and writes value back to the register file.
-    // Refreshes the cycles.
-    void refreshCycle (const Cycles& decrRegBackCycleDelta);
+    Cycles cycle;
+
+    // Get the cpu running cycles.
+    Cycles getCycle (void) const
+    {
+        return cycle;
+    }
+
+    // Set the cpu running cycles.
+    void setCycle (const Cycles& cycle)
+    {
+        this->cycle = cycle;
+    }
 
   private:
     //
-    // Issue width and issued instructions interfaces.
+    // Number of instruction issued.
     //
 
-    // Number of issued instruction.
     size_t numIssued;
 
-    // Issue width.
-    size_t IssueWidth;
-
-    // Gets the number of issued instructions.
+    // Gets number of the instructions issued.
     size_t getNumIssued (void) const
     {
         return numIssued;
     }
 
-    // Sets the number of issued instructions.
+    // Sets number of the instructions issued.
     void setNumIssued (size_t numIssued)
     {
         this->numIssued = numIssued;
     }
+
+  private:
+    //
+    // Issue width.
+    //
+
+    const size_t IssueWidth;
 
     // Gets the issue width.
     size_t getIssueWidth (void) const
@@ -488,55 +489,102 @@ class HybridCPU : public BaseSimpleCPU
     }
 
   private:
-    // Register dependence table interfaces.
-    bool isRegDepTableEmpty (void) const;
+    //
+    // Register dependence tables.
+    //
 
+    RegDepTable<TheISA::NumXRegs> xRegDepTable; // X.
+    RegDepTable<TheISA::NumYRegs> yRegDepTable; // Y.
+    RegDepTable<TheISA::NumGRegs> gRegDepTable; // G.
+    RegDepTable<TheISA::NumMRegs> mRegDepTable; // M.
+
+    // Mutates the cycle of a given operand in the register dependence table.
+    void mutateRegDep (const Op_t& op, const Cycles&);
+
+    // Mutates the cycle of a given register in the register dependence table.
+    void mutateRegDep (const RegFile_t&, const RegIndex_t&, const Cycles&);
+
+    // Mutates the cycle of a given register in a given register dependence table.
     template <size_t RegNum>
-    bool isRegDepTableEmpty (const RegDepTable<RegNum>&) const;
+    void mutateRegDep (RegDepTable<RegNum>&, const RegIndex_t&, const Cycles&);
 
+    // Checks the register dependence of the current instruction.
     bool isRegDep (void) const;
 
+    // Checks the register dependence of an operand.
     bool isRegDep (const Op_t& op) const;
 
+    // Checks the register dependence of a register.
     bool isRegDep (const RegFile_t&, const RegIndex_t&) const;
 
+    // Checks the register dependence in the given register dependence table.
     template <size_t RegNum>
     bool isRegDep (const RegDepTable<RegNum>&, const RegIndex_t&) const;
 
-    void setRegDep (void);
+    // Inserts registers of the current instruction into the register dependence tables.
+    void insertRegDep (void);
 
-    void setRegDep (const Op_t& op);
+    // Inserts registers of an operand into the register dependence tables.
+    void insertRegDep (const Op_t& op);
 
-    void setRegDep (const RegFile_t&, const RegIndex_t&, const Cycles&);
+    // Inserts a given register into the register dependence table.
+    void insertRegDep (const RegFile_t&, const RegIndex_t&, const Cycles&);
 
+    // Inserts a given register into the given register dependence table.
     template <size_t RegNum>
-    void setRegDep (RegDepTable<RegNum>&, const RegIndex_t&, const Cycles&);
+    void insertRegDep (RegDepTable<RegNum>&, const RegIndex_t&, const Cycles&);
 
+    // Checks if all the register dependence tables are empty.
+    bool isRegDepTableEmpty (void) const;
+
+    // Checks if the given register dependence table is empty.
+    template <size_t RegNum>
+    bool isRegDepTableEmpty (const RegDepTable<RegNum>&) const;
+
+    // Gets the maximum register back cycle in all the register dependence table.
     Cycles maxRegDepCycle (void) const;
 
+    // Gets the maximum register back cycle in the given register dependence table.
     template <size_t RegNum>
     Cycles maxRegDepCycle (const RegDepTable<RegNum>&) const;
 
+    // Refreshes all the register dependence table by the given cycle.
     void refreshRegDepTable (const Cycles&);
 
+    // Refreshes the given register dependence table by the given cycle.
     template <size_t RegNum>
     void refreshRegDepTable (RegDepTable<RegNum>&, const Cycles&);
 
   private:
-    // Register file interfaces.
+    //
+    // Register file and register file buffers.
+    //
+
+    // Gets the value of a given register in a given register file.
     template <size_t RegNum, class RegValue_t>
     RegValue_t getRegValue (const TheISA::RegFile<RegNum, RegValue_t>&, const RegIndex_t&) const;
 
+    // Sets the value of a given register in a given register file.
     template <size_t RegNum, class RegValue_t>
     void setRegValue (TheISA::RegFile<RegNum, RegValue_t>&, const RegIndex_t&, const RegValue_t&);
 
-    // Register file buffer interfaces.
+    // Gets the value of a given register in a given register file buffer.
     template <size_t RegNum, class RegValue_t>
     RegValue_t getRegBufValue (const TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&) const;
 
+    // Sets the value of a given register in a given register file buffer.
     template <size_t RegNum, class RegValue_t>
     void setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&,
                          const RegValue_t&, const RegValue_t&, const Cycles&);
+
+    // Sets the register back cycle of a given operand in the register file buffers.
+    void setRegBufCycle (const Op_t& op, const Cycles&);
+
+    void setRegBufCycle (const RegFile_t& fileName, const RegIndex_t& regIndex, const Cycles&);
+
+    // Sets the register back cycle of a given register in a given register file buffer.
+    template <size_t RegNum, class RegValue_t>
+    void setRegBufCycle (TheISA::RegFileBuf<RegNum, RegValue_t>&, const RegIndex_t&, const Cycles&);
 
     void refreshRegs (const Cycles&);
 
@@ -549,14 +597,51 @@ class HybridCPU : public BaseSimpleCPU
     // PC state interfaces.
     //
 
-    // Branch target.
-    void bpc (Addr);
+    // Gets the current instruction address.
+    Addr pc (void) const
+    {
+        TheISA::PCState pcState = thread->pcState ();
+        return pcState.pc ();
+    }
 
-    // Load instruction effective address.
-    void lpc (Addr);
+    // Gets the next instruction address.
+    Addr npc (void) const
+    {
+        TheISA::PCState pcState = thread->pcState ();
+        return pcState.npc ();
+    }
 
-    // Store instruction effective address.
-    void spc (Addr);
+    // Gets the return address.
+    Addr rpc (void) const
+    {
+        GRegValue_t retAddr
+            = getRegValue (thread->getGRegFile (), TheISA::RAddrReg);
+        return static_cast<Addr> (retAddr);
+    }
+
+    // Sets the branch target.
+    void bpc (Addr branchTarget)
+    {
+        TheISA::PCState pcState = thread->pcState ();
+        pcState.bpc (branchTarget);
+        thread->pcState (pcState);
+    }
+
+    // Sets the load instruction effective address.
+    void lpc (Addr effAddr)
+    {
+        TheISA::PCState pcState = thread->pcState ();
+        pcState.lpc (effAddr);
+        thread->pcState (pcState);
+    }
+
+    // Sets the store instruction effective address.
+    void spc (Addr effAddr)
+    {
+        TheISA::PCState pcState = thread->pcState ();
+        pcState.spc (effAddr);
+        thread->pcState (pcState);
+    }
 
   private:
     // Interfaces for debugging.
@@ -642,6 +727,15 @@ class HybridCPU : public BaseSimpleCPU
 };
 
 template <size_t RegNum>
+void
+HybridCPU::mutateRegDep (RegDepTable<RegNum>& regDepTable,
+                         const RegIndex_t& regIndex,
+                         const Cycles& regBackCycle)
+{
+    regDepTable.mutateReg (regIndex, regBackCycle);
+}
+
+template <size_t RegNum>
 bool
 HybridCPU::isRegDepTableEmpty (const RegDepTable<RegNum>& regDepTable) const
 {
@@ -658,7 +752,7 @@ HybridCPU::isRegDep (const RegDepTable<RegNum>& regDepTable,
 
 template <size_t RegNum>
 void
-HybridCPU::setRegDep (RegDepTable<RegNum>& regDepTable,
+HybridCPU::insertRegDep (RegDepTable<RegNum>& regDepTable,
                       const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     regDepTable.insertReg (regIndex, regBackCycle);
@@ -710,6 +804,14 @@ HybridCPU::setRegBufValue (TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
                            const RegValue_t& regMask, const Cycles& regBackCycle)
 {
     return regFileBuf.insert (regIndex, regValue, regMask, regBackCycle);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+HybridCPU::setRegBufCycle (TheISA::RegFileBuf<RegNum, RegValue_t>& regFileBuf,
+                           const RegIndex_t& regIndex, const Cycles& regBackCycle)
+{
+    return regFileBuf.setRegBackCycle (regIndex, regBackCycle);
 }
 
 template <size_t RegNum, class RegValue_t>

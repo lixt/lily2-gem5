@@ -55,6 +55,7 @@ const RegIndex_t NumGRegs = 8;
 const RegIndex_t NumMRegs = 8;
 
 // Semantically meaningful register indexes.
+const RegIndex_t RAddrReg = 3;
 const RegIndex_t CarryReg = 1;
 
 // Types for register files.
@@ -210,6 +211,9 @@ class RegFileBuf : public Table<RegNum, BufNum, RegIndex_t, RegFileBufMapped_t<R
     void insert (const RegIndex_t &regIndex, const RegValue_t &regValue,
                  const RegValue_t &regMask, const Cycles &regBackCycle);
 
+    // Sets the register back cycle in the register file buffer.
+    void setRegBackCycle (const RegIndex_t& regIndex, const Cycles &regBackCycle);
+
     // Decreases the register back cycles in the register dependence table.
     std::vector<Position> decrRegBackCycle (const Cycles& regBackCycleDelta);
 
@@ -278,6 +282,17 @@ RegFileBuf<RegNum, RegValue_t>::insert (const RegIndex_t &regIndex,
 {
     mapped_type mapped (regValue, regMask, regBackCycle);
     Base::insert (regIndex, mapped);
+}
+
+template <size_t RegNum, class RegValue_t>
+void
+RegFileBuf<RegNum, RegValue_t>::setRegBackCycle (const RegIndex_t& regIndex,
+                                                 const Cycles& regBackCycle)
+{
+    Position mutatePos = Base::search (regIndex);
+    mapped_type mapped = Base::access (mutatePos);
+    mapped.regBackCycle = regBackCycle;
+    Base::mutate (mutatePos, mapped);
 }
 
 template <size_t RegNum, class RegValue_t>

@@ -462,6 +462,12 @@ class CheckerCPU : public BaseCPU
                     Opd32f_t &val, Opd32f_t &mask)
     {}
 
+    Addr pc (void) const { return 0; }
+
+    Addr npc (void) const { return 0; }
+
+    Addr rpc (void) const { return 0; }
+
     void bpc (Addr branchTarget) {}
 
     void lpc (Addr effAddr) {}

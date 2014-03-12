@@ -294,7 +294,7 @@ class Lily2StaticInst : public StaticInst
 
   protected:
     enum Flags {
-        IsNop,
+        IsNop,        // Nop instruction.
 
         IsIter,       // Iterative instruction.
         IsIntDiv,     // Integer division instruction.
@@ -308,12 +308,13 @@ class Lily2StaticInst : public StaticInst
         IsControl,    // Flow control instruction.
         IsBranch,     // Jump instruction.
         IsCall,       // Jump and link instruction.
+        IsRet,        // Return instruction.
 
-        IsModeSwitch, // Mode switching.
-        IsToRisc, // Switch to Risc.
-        IsToVliw, // Switch to Vliw.
+        IsModeSwitch, // Mode switching instruction.
+        IsToRisc,     // Switch to Risc instruction.
+        IsToVliw,     // Switch to Vliw instruction.
 
-        IsSyscall, // Syscall.
+        IsSyscall,    // Syscall instruction.
 
         NumFlags
     };

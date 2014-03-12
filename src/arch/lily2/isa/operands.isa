@@ -92,13 +92,15 @@ def operands {{
     'mw': ('MemOp32i' , 'uw' , 'RD', '', 1),
     'md': ('MemOpd32i', 'udw', 'RD', '', 1),
 
-    # Memory addres operands.
-    'rBase' : ('Op32i'   , 'sw', 'RA'  , '', 1),
-    'rOfst' : ('Op32i'   , 'sw', 'RB'  , '', 1),
-    'iOfst' : ('I8Op32i', 'sw', 'IMM8', '', 1),
+    # Address operands.
+    'rBase' : ('Op32i'   , 'sw', 'RA'   , '', 1),
+    'rOfst' : ('Op32i'   , 'sw', 'RB'   , '', 1),
+    'iOfst' : ('I8Op32i' , 'sw', 'IMM8' , '', 1),
+    'iDisp' : ('I21Op32i', 'sw', 'IMM21', '', 1),
 
     # Semantically meaningful operands.
-    'w_carry' : ('Op32i', 'sw', 'CarryReg', '', 1),
+    'rCarry' : ('Op32i', 'sw', 'CarryReg', '', 1),
+    'rRAddr' : ('Op32i', 'sw', 'RAddrReg', '', 1),
 
     # Immediate operands.
     'i1' : ('I1Op32i' , 'uw', 'IMM1' , '', 1),

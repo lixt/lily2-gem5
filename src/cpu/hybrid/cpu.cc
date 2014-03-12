@@ -142,8 +142,9 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       currentBBV(0, 0),
       currentBBVInstCount(0),
       pipelineMacho (R_Idle),
+      cycle (0),
+      numIssued (0), IssueWidth (p->IssueWidth),
       xRegDepTable (), yRegDepTable (), gRegDepTable (), mRegDepTable (),
-      IssueWidth (p->IssueWidth),
       IntArithLatency     (p->IntArithLatency),
       IntLogicLatency     (p->IntLogicLatency),
       IntTestLatency      (p->IntTestLatency),
@@ -875,7 +876,7 @@ HybridCPU::rPreExecute (void)
         }
 
         // Updates the register dependence table.
-        setRegDep ();
+        insertRegDep ();
     }
 
 #if DEBUG
@@ -931,7 +932,17 @@ HybridCPU::postExecute (void)
                     // Value prediction is right.
                     curPipelineEvent = VPreded;
 
-                    // Modifies the register dependence table and register file buffer.
+                    // Mutates the register back cycle in register dependence
+                    // table and register file buffer.
+                    for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
+                        Op_t *op = curStaticInst->getDestOp (i);
+                        if (op->memFlag ()) {
+                            Cycles newLoadLatency (IntMemPrededLatency);
+                            mutateRegDep (*op, newLoadLatency);
+                            setRegBufCycle (*op, newLoadLatency);
+                        }
+                    }
+
                 } else {
                     // Value prediction is wrong.
                     curPipelineEvent = MisVPred;
@@ -1005,13 +1016,63 @@ HybridCPU::renew (void)
     refreshRegs (decrRegBackCycleDelta);
 
     // Increase the cycles.
-    refreshCycle (decrRegBackCycleDelta);
+    setCycle (getCycle () + decrRegBackCycleDelta);
 
 #if DEBUG
     std::cout << "x register dependence table:" << std::endl;
     std::cout << xRegDepTable << std::endl;
     std::cout << "----------> renew" << std::endl << std::endl;
 #endif
+}
+
+void
+HybridCPU::mutateRegDep (const Op_t& op, const Cycles& regBackCycle)
+{
+    RegFile_t fileName = op.regFile ();
+    RegIndex_t regIndex = op.regIndex ();
+
+    switch (op.numRegs ()) {
+        case 1:
+            mutateRegDep (fileName, regIndex    , regBackCycle);
+            break;
+
+        case 2:
+            mutateRegDep (fileName, regIndex    , regBackCycle);
+            mutateRegDep (fileName, regIndex + 1, regBackCycle);
+            break;
+
+        case 4:
+            mutateRegDep (fileName, regIndex    , regBackCycle);
+            mutateRegDep (fileName, regIndex + 1, regBackCycle);
+            mutateRegDep (fileName, regIndex + 2, regBackCycle);
+            mutateRegDep (fileName, regIndex + 3, regBackCycle);
+            break;
+
+        default:
+            assert (0);
+    }
+}
+
+void
+HybridCPU::mutateRegDep (const RegFile_t& fileName,
+                         const RegIndex_t& regIndex, const Cycles& cycle)
+{
+    switch (fileName) {
+        case TheISA::REG_X:
+            mutateRegDep (xRegDepTable, regIndex, cycle); break;
+
+        case TheISA::REG_Y:
+            mutateRegDep (yRegDepTable, regIndex, cycle); break;
+
+        case TheISA::REG_G:
+            mutateRegDep (gRegDepTable, regIndex, cycle); break;
+
+        case TheISA::REG_M:
+            mutateRegDep (mRegDepTable, regIndex, cycle); break;
+
+        default:
+            assert (0);
+    }
 }
 
 bool
@@ -1104,15 +1165,15 @@ HybridCPU::isRegDep (const RegFile_t& fileName, const RegIndex_t& regIndex) cons
 }
 
 void
-HybridCPU::setRegDep (void)
+HybridCPU::insertRegDep (void)
 {
     for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
-        setRegDep (*(curStaticInst->getDestOp (i)));
+        insertRegDep (*(curStaticInst->getDestOp (i)));
     }
 }
 
 void
-HybridCPU::setRegDep (const Op_t& op)
+HybridCPU::insertRegDep (const Op_t& op)
 {
     if (op.immFlag ()) {
         assert (0);
@@ -1126,19 +1187,19 @@ HybridCPU::setRegDep (const Op_t& op)
 
         switch (op.numRegs ()) {
             case 1:
-                setRegDep (fileName, regIndex    , regBackCycle);
+                insertRegDep (fileName, regIndex    , regBackCycle);
                 break;
 
             case 2:
-                setRegDep (fileName, regIndex    , regBackCycle);
-                setRegDep (fileName, regIndex + 1, regBackCycle);
+                insertRegDep (fileName, regIndex    , regBackCycle);
+                insertRegDep (fileName, regIndex + 1, regBackCycle);
                 break;
 
             case 4:
-                setRegDep (fileName, regIndex    , regBackCycle);
-                setRegDep (fileName, regIndex + 1, regBackCycle);
-                setRegDep (fileName, regIndex + 2, regBackCycle);
-                setRegDep (fileName, regIndex + 3, regBackCycle);
+                insertRegDep (fileName, regIndex    , regBackCycle);
+                insertRegDep (fileName, regIndex + 1, regBackCycle);
+                insertRegDep (fileName, regIndex + 2, regBackCycle);
+                insertRegDep (fileName, regIndex + 3, regBackCycle);
                 break;
 
             default:
@@ -1148,24 +1209,24 @@ HybridCPU::setRegDep (const Op_t& op)
 }
 
 void
-HybridCPU::setRegDep (const RegFile_t& fileName,
+HybridCPU::insertRegDep (const RegFile_t& fileName,
                       const RegIndex_t& regIndex, const Cycles& regBackCycle)
 {
     switch (fileName) {
         case TheISA::REG_X:
-            setRegDep (xRegDepTable, regIndex, regBackCycle);
+            insertRegDep (xRegDepTable, regIndex, regBackCycle);
             break;
 
         case TheISA::REG_Y:
-            setRegDep (yRegDepTable, regIndex, regBackCycle);
+            insertRegDep (yRegDepTable, regIndex, regBackCycle);
             break;
 
         case TheISA::REG_G:
-            setRegDep (gRegDepTable, regIndex, regBackCycle);
+            insertRegDep (gRegDepTable, regIndex, regBackCycle);
             break;
 
         case TheISA::REG_M:
-            setRegDep (mRegDepTable, regIndex, regBackCycle);
+            insertRegDep (mRegDepTable, regIndex, regBackCycle);
             break;
 
         default:
@@ -1198,40 +1259,10 @@ HybridCPU::maxRegDepCycle (void) const
 }
 
 void
-HybridCPU::bpc (Addr branchTarget)
-{
-    TheISA::PCState pcState = thread->pcState ();
-    pcState.bpc (branchTarget);
-    thread->pcState (pcState);
-}
-
-void
-HybridCPU::lpc (Addr effAddr)
-{
-    TheISA::PCState pcState = thread->pcState ();
-    pcState.lpc (effAddr);
-    thread->pcState (pcState);
-}
-
-void
-HybridCPU::spc (Addr effAddr)
-{
-    TheISA::PCState pcState = thread->pcState ();
-    pcState.spc (effAddr);
-    thread->pcState (pcState);
-}
-
-void
 HybridCPU::debugPipeline (std::ostream& os) const
 {
     std::string pipelineStateStr = PipelineStateStr[curPipelineState];
     os << "pipeline state = " << pipelineStateStr << std::endl;
-}
-
-void
-HybridCPU::refreshCycle (const Cycles& cycleDelta)
-{
-    cycle += cycleDelta;
 }
 
 void
@@ -1250,6 +1281,60 @@ HybridCPU::refreshRegDepTable (const Cycles& decrRegBackCycleDelta)
     refreshRegDepTable (mRegDepTable, decrRegBackCycleDelta);
 }
 
+void
+HybridCPU::setRegBufCycle (const Op_t& op, const Cycles& regBackCycle)
+{
+    RegFile_t fileName = op.regFile ();
+    RegIndex_t regIndex = op.regIndex ();
+
+    switch (op.numRegs ()) {
+        case 1:
+            setRegBufCycle (fileName, regIndex    , regBackCycle);
+            break;
+
+        case 2:
+            setRegBufCycle (fileName, regIndex    , regBackCycle);
+            setRegBufCycle (fileName, regIndex + 1, regBackCycle);
+            break;
+
+        case 4:
+            setRegBufCycle (fileName, regIndex    , regBackCycle);
+            setRegBufCycle (fileName, regIndex + 1, regBackCycle);
+            setRegBufCycle (fileName, regIndex + 2, regBackCycle);
+            setRegBufCycle (fileName, regIndex + 3, regBackCycle);
+            break;
+
+        default:
+            assert (0);
+    }
+}
+
+void
+HybridCPU::setRegBufCycle (const RegFile_t& fileName,
+                           const RegIndex_t& regIndex,
+                           const Cycles& regBackCycle)
+{
+    switch (fileName) {
+        case TheISA::REG_X:
+            setRegBufCycle (thread->getXRegFileBuf (), regIndex, regBackCycle);
+            break;
+
+        case TheISA::REG_Y:
+            setRegBufCycle (thread->getYRegFileBuf (), regIndex, regBackCycle);
+            break;
+
+        case TheISA::REG_G:
+            setRegBufCycle (thread->getGRegFileBuf (), regIndex, regBackCycle);
+            break;
+
+        case TheISA::REG_M:
+            setRegBufCycle (thread->getMRegFileBuf (), regIndex, regBackCycle);
+            break;
+
+        default:
+            assert (0);
+    }
+}
 
 void
 HybridCPU::refreshRegs (const Cycles& decrRegBackCycleDelta)
@@ -1476,26 +1561,26 @@ HybridCPU::callback_R_Run (void)
 void
 HybridCPU::callback_R_Flush (void)
 {
-    Cycles decrRegBackCycleDelta (BranchDelaySlot);
-    refreshRegDepTable (decrRegBackCycleDelta);
-    refreshRegs (decrRegBackCycleDelta);
-    refreshCycle (decrRegBackCycleDelta);
+    Cycles flushCycle (BranchDelaySlot);
+    refreshRegDepTable (flushCycle);
+    refreshRegs (flushCycle);
+    setCycle (getCycle () + flushCycle);
 }
 
 void
 HybridCPU::callback_R_InstWait (void)
 {
-    Cycles cycle;
+    Cycles stallCycle;
 
     if (curStaticInst->isIntDiv ()) {
-        cycle = Cycles (IntDivStall);
+        stallCycle = Cycles (IntDivStall);
     } else if (curStaticInst->isIntRem ()) {
-        cycle = Cycles (IntRemStall);
+        stallCycle = Cycles (IntRemStall);
     } else {
         assert (0);
     }
 
-    refreshCycle (cycle);
+    setCycle (getCycle () + stallCycle);
 }
 
 void
