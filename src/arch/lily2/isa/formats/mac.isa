@@ -18,23 +18,12 @@ output header {{
         std::string generateOperation (void) const;
     };
 
-    // Base class for mac vector instructions.
-    class MacVecOp : public Lily2StaticInst
+    // Base class for floating-point mac instructions.
+    class MacFPOp : public Lily2StaticInst
     {
       protected:
-        MacVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntMacOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
-
-    // Base class for mac immediate instructions.
-    class MacImmOp : public Lily2StaticInst
-    {
-      protected:
-        MacImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntMacOp) {}
+        MacFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatMacOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -74,8 +63,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Mac vector instructions.
-    std::string MacVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Floating-Point mac instructions.
+    std::string MacFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -92,38 +81,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string MacVecOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
-
-        return ss.str ();
-    }
-
-    // Mac immediate instructions.
-    std::string MacImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string MacImmOp::generateOperation (void) const
+    std::string MacFPOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -145,16 +103,8 @@ def format MacOp(code, *opt_flags) {{
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format MacVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'MacVecOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format MacImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'MacImmOp', code, opt_flags)
+def format MacFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'MacFPOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

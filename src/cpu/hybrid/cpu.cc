@@ -153,17 +153,11 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       IntMoveLatency      (p->IntMoveLatency),
       IntMulLatency       (p->IntMulLatency),
       IntMacLatency       (p->IntMacLatency),
-      IntIterLatency      (p->IntIterLatency),
+      IntDivLatency       (p->IntDivLatency),
+      IntRemLatency       (p->IntRemLatency),
       IntMemLatency       (p->IntMemLatency),
       IntMemAddrLatency   (p->IntMemAddrLatency),
       IntMiscLatency      (p->IntMiscLatency),
-      SimdIntArithLatency (p->SimdIntArithLatency),
-      SimdIntLogicLatency (p->SimdIntLogicLatency),
-      SimdIntTestLatency  (p->SimdIntTestLatency),
-      SimdIntShiftLatency (p->SimdIntShiftLatency),
-      SimdIntMulLatency   (p->SimdIntMulLatency),
-      SimdIntMacLatency   (p->SimdIntMacLatency),
-      SimdIntIterLatency  (p->SimdIntIterLatency),
       BranchDelaySlot     (p->BranchDelaySlot),
       IntDivStall         (p->IntDivStall),
       IntRemStall         (p->IntRemStall),
@@ -2050,6 +2044,74 @@ HybridCPU::setOp32i (Lily2StaticInst *si, const OpCount_t& idx,
 }
 
 void
+HybridCPU::setOp64i (Lily2StaticInst *si, const OpCount_t& idx,
+                     const Op64i_t& val, const Op64i_t& mask)
+{
+    Op64i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op64i_t *> (si->getDestOp (idx)));
+
+    if (op->immFlag ()) {
+        // Destination operand can not be an immediate.
+        assert (0);
+    } else {
+        RegIndex_t regIndexLo = op->regIndex ();
+        RegIndex_t regIndexHi = regIndexLo + 1;
+        uint64_t regValue = val.uval ();
+        uint32_t regValueLo = bits (regValue, 31, 0);
+        uint32_t regValueHi = bits (regValue, 63, 32);
+        uint64_t regMask = mask.uval ();
+        uint32_t regMaskLo = bits (regMask, 31, 0);
+        uint32_t regMaskHi = bits (regMask, 63, 32);
+
+        // Gets the functional unit latency.
+        Cycles regBackCycle = funcUnitLatencyFactory (si->opClass (), op->memFlag ());
+
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                setRegBufValue (thread->getXRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getXRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_Y:
+                setRegBufValue (thread->getYRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getYRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_G:
+                setRegBufValue (thread->getGRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getGRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            case TheISA::REG_M:
+                setRegBufValue (thread->getMRegFileBuf (), regIndexLo,
+                                regValueLo, regMaskLo, regBackCycle);
+                setRegBufValue (thread->getMRegFileBuf (), regIndexHi,
+                                regValueHi, regMaskHi, regBackCycle);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        op->setUval (regValue);
+    }
+
+    return;
+}
+
+
+void
 HybridCPU::setOp32f (Lily2StaticInst *si, const OpCount_t& idx,
                      const Op32f_t& val, const Op32f_t& mask)
 {
@@ -2164,7 +2226,7 @@ HybridCPU::setOp64f (Lily2StaticInst *si, const OpCount_t& idx,
         }
 
         // Sets the operand value.
-        op->setBval ((uint64_t)regValueLo + (((uint64_t)regValueHi) << 32));
+        op->setBval (regValue);
     }
 
     return;
@@ -2540,14 +2602,8 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
         case IntMoveOp     : return Cycles (IntMoveLatency);
         case IntMulOp      : return Cycles (IntMulLatency);
         case IntMacOp      : return Cycles (IntMacLatency);
-        case IntIterOp     : return Cycles (IntIterLatency);
-        case SimdIntArithOp: return Cycles (SimdIntArithLatency);
-        case SimdIntLogicOp: return Cycles (SimdIntLogicLatency);
-        case SimdIntTestOp : return Cycles (SimdIntTestLatency);
-        case SimdIntShiftOp: return Cycles (SimdIntShiftLatency);
-        case SimdIntMulOp  : return Cycles (SimdIntMulLatency);
-        case SimdIntMacOp  : return Cycles (SimdIntMacLatency);
-        case SimdIntIterOp : return Cycles (SimdIntIterLatency);
+        case IntDivOp      : return Cycles (IntDivLatency);
+        case IntRemOp      : return Cycles (IntRemLatency);
         case IntMemOp      : if (memFlag) {
                                  return Cycles (IntMemLatency);
                              } else {

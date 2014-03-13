@@ -22,6 +22,7 @@ typedef enum OpLabel_t
     OP_NIL,
 
     OP_32I,
+    OP_64I,
     OP_32F,
     OP_64F,
     OP_Q8I,
@@ -185,6 +186,70 @@ class Op32i_t : public Op_t
     union {
         int32_t  sval;
         uint32_t uval;
+    } val;
+};
+
+class Op64i_t : public Op_t
+{
+  public:
+    // Constructors.
+    Op64i_t (void) : Op_t ()
+    {
+        setUval (0);
+    }
+    explicit Op64i_t (int64_t val) : Op_t ()
+    {
+        setSval (val);
+    }
+    explicit Op64i_t (uint64_t val) : Op_t ()
+    {
+        setUval (val);
+    }
+
+    // Copy constructor.
+    Op64i_t (const Op64i_t &op)
+        : Op_t (op._regFile, op._regIndex, op._immFlag)
+    {
+        setUval (op.val.uval);
+    }
+
+  public:
+    // Implements pure virtual function.
+    // Accesses number of registers an operand contains.
+    RegCount_t numRegs (void) const { return NumRegs; }
+
+    void setImmValue (MachInst _immValue)
+    {
+        this->_immValue = _immValue;
+        setUval (_immValue);
+    }
+
+    // Implements pure virtual function.
+    // Prints readable operand value.
+    void print (std::ostream &os) const
+    {
+        os << IO_OP64I_HEX << uval ()
+           << "("
+           << IO_OP64I_DEC << sval ()
+           << ","
+           << IO_OP64I_DEC << uval ()
+           << ")";
+    }
+
+    // Accessors and mutators of the operand value.
+    int64_t  sval (void) const { return val.sval; }
+    uint64_t uval (void) const { return val.uval; }
+    void setSval (int64_t  val) { this->val.sval = val; }
+    void setUval (uint64_t val) { this->val.uval = val; }
+
+  private:
+    // Number of registers a word contains.
+    static const RegCount_t NumRegs = 2;
+
+  private:
+    union {
+        int64_t  sval;
+        uint64_t uval;
     } val;
 };
 
@@ -658,6 +723,12 @@ Op32i_t maskGenOp32i (int first, int last)
 }
 
 inline
+Op64i_t maskGenOp64i (int first, int last)
+{
+    return Op64i_t (static_cast<uint64_t> (mask (first, last)));
+}
+
+inline
 Op32f_t maskGenOp32f (int first, int last)
 {
     uint32_t tval = static_cast<uint32_t> (mask (first, last));
@@ -718,6 +789,7 @@ Op_t *opFactory (OpLabel_t opLabel)
     Op_t *op;
     switch (opLabel) {
         case OP_32I : op = new Op32i_t  (); break;
+        case OP_64I : op = new Op64i_t  (); break;
         case OP_32F : op = new Op32f_t  (); break;
         case OP_64F : op = new Op64f_t  (); break;
         case OP_Q8I : op = new Opq8i_t  (); break;

@@ -24,6 +24,8 @@
 // Output formats of operands.
 #define IO_OP32I_DEC DEC
 #define IO_OP32I_HEX HEX_32
+#define IO_OP64I_DEC DEC
+#define IO_OP64I_HEX HEX_64
 #define IO_OP32F_DEC DEC
 #define IO_OP32F_HEX HEX_32
 #define IO_OP64F_DEC DEC

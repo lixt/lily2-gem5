@@ -31,6 +31,8 @@ def operand_types {{
     # Scalar Operands.
     'sw'  : 'Op32i_t',  # Signed single word.
     'uw'  : 'Op32i_t',  # Unsigned single word.
+    'sx'  : 'Op64i_t',  # Signed single xword.
+    'ux'  : 'Op64i_t',  # Unsigned single xword.
     'sf'  : 'Op32f_t',  # Single single-precision.
     'df'  : 'Op64f_t',  # Single double-precision.
 
@@ -52,6 +54,11 @@ def operands {{
     'wd': ('Op32i', 'sw', 'RD', '', 1),
     'wa': ('Op32i', 'sw', 'RA', '', 2),
     'wb': ('Op32i', 'sw', 'RB', '', 3),
+
+    # 64-bit integer operands.
+    'xd': ('Op64i', 'sw', 'RD', '', 1),
+    'xa': ('Op64i', 'sw', 'RA', '', 2),
+    'xb': ('Op64i', 'sw', 'RB', '', 3),
 
     # Single-Precision operands.
     'sfd': ('Op32f', 'sf', 'RD', '', 1),

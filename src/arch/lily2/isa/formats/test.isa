@@ -18,23 +18,12 @@ output header {{
         std::string generateOperation (void) const;
     };
 
-    // Base class for test vector instructions.
-    class TestVecOp : public Lily2StaticInst
+    // Base class for floating-point test instructions.
+    class TestFPOp : public Lily2StaticInst
     {
       protected:
-        TestVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntTestOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
-
-    // Base class for test immediate instructions.
-    class TestImmOp : public Lily2StaticInst
-    {
-      protected:
-        TestImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntTestOp) {}
+        TestFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatTestOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -74,8 +63,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Test vector instructions.
-    std::string TestVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Floating-Point test instructions.
+    std::string TestFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -92,7 +81,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string TestVecOp::generateOperation (void) const
+    std::string TestFPOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -105,36 +94,7 @@ output decoder {{
         return ss.str ();
     }
 
-    // Test immediate instructions.
-    std::string TestImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
 
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string TestImmOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
-
-        return ss.str ();
-    }
 }};
 
 def format TestOp(code, *opt_flags) {{
@@ -145,16 +105,8 @@ def format TestOp(code, *opt_flags) {{
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format TestVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'TestVecOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format TestImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'TestImmOp', code, opt_flags)
+def format TestFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'TestFPOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

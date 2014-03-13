@@ -6,6 +6,7 @@
 #ifndef __ARCH_LILY2_ISA_UTIL_HH__
 #define __ARCH_LILY2_ISA_UTIL_HH__
 
+#include <cmath>
 #include "base/bitfield.hh"
 #include "base/types.hh"
 
@@ -128,39 +129,39 @@ T _bitNot (T op)
 }
 
 template <class T>
-T _tgt (T opa, T opb)
+uint32_t _tgt (T opa, T opb)
 {
-    return (opa > opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa > opb) ? 1 : 0;
 }
 
 template <class T>
-T _tge (T opa, T opb)
+uint32_t _tge (T opa, T opb)
 {
-    return (opa >= opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa >= opb) ? 1 : 0;
 }
 
 template <class T>
-T _tlt (T opa, T opb)
+uint32_t _tlt (T opa, T opb)
 {
-    return (opa < opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa < opb) ? 1 : 0;
 }
 
 template <class T>
-T _tle (T opa, T opb)
+uint32_t _tle (T opa, T opb)
 {
-    return (opa <= opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa <= opb) ? 1 : 0;
 }
 
 template <class T>
-T _teq (T opa, T opb)
+uint32_t _teq (T opa, T opb)
 {
-    return (opa == opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa == opb) ? 1 : 0;
 }
 
 template <class T>
-T _tne (T opa, T opb)
+uint32_t _tne (T opa, T opb)
 {
-    return (opa != opb) ? static_cast<T> (1) : static_cast<T> (0);
+    return (opa != opb) ? 1 : 0;
 }
 
 template <class T>
@@ -410,6 +411,21 @@ uint32_t _rvs_4 (uint32_t op)
     uint32_t op_vvh = bits (op, 31, 24);
 
     return (op_vvl << 24) | (op_vlo << 16) | (op_vhi << 8) | (op_vvh);
+}
+
+//
+// FLoating-Point arithmetic instructions.
+//
+template <class T, class U>
+T _cvt (U op)
+{
+    return static_cast<T> (op);
+}
+
+template <class T>
+T _trc (T op)
+{
+    return round (op);
 }
 
 template <class T>

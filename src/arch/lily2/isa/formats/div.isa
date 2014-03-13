@@ -12,29 +12,29 @@ output header {{
     {
       protected:
         DivOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntIterOp) {}
+            Lily2StaticInst (mnemonic, machInst, IntDivOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
 
-    // Base class for division vector instructions.
-    class DivVecOp : public Lily2StaticInst
+    // Base class for floating-point division instructions.
+    class DivFPOp : public Lily2StaticInst
     {
       protected:
-        DivVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntIterOp) {}
+        DivFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatDivOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
 
-    // Base class for division immediate instructions.
-    class DivImmOp : public Lily2StaticInst
+    // Base class for remainder instructions.
+    class RemOp : public Lily2StaticInst
     {
       protected:
-        DivImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntIterOp) {}
+        RemOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, IntRemOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -43,7 +43,7 @@ output header {{
 
 // Outputs to decoder.cc
 output decoder {{
-    // Div instructions.
+    // Division instructions.
     std::string DivOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
@@ -74,8 +74,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Div vector instructions.
-    std::string DivVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Floating-Point division instructions.
+    std::string DivFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -92,7 +92,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string DivVecOp::generateOperation (void) const
+    std::string DivFPOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -105,8 +105,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Div immediate instructions.
-    std::string DivImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Remainder instructions.
+    std::string RemOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -123,7 +123,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string DivImmOp::generateOperation (void) const
+    std::string RemOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -145,16 +145,16 @@ def format DivOp(code, *opt_flags) {{
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format DivVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'DivVecOp', code, opt_flags)
+def format DivFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'DivFPOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format DivImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'DivImmOp', code, opt_flags)
+def format RemOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'RemOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

@@ -17,28 +17,6 @@ output header {{
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
-
-    // Base class for logic vector instructions.
-    class LogicVecOp : public Lily2StaticInst
-    {
-      protected:
-        LogicVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntLogicOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
-
-    // Base class for logic immediate instructions.
-    class LogicImmOp : public Lily2StaticInst
-    {
-      protected:
-        LogicImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntLogicOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
 }};
 
 // Outputs to decoder.cc
@@ -73,88 +51,10 @@ output decoder {{
 
         return ss.str ();
     }
-
-    // Logic vector instructions.
-    std::string LogicVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string LogicVecOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
-
-        return ss.str ();
-    }
-
-    // Logic immediate instructions.
-    std::string LogicImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string LogicImmOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
-
-        return ss.str ();
-    }
 }};
 
 def format LogicOp(code, *opt_flags) {{
     iop = InstObjParams(name, Name, 'LogicOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format LogicVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'LogicVecOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format LogicImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'LogicImmOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

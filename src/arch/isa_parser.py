@@ -534,6 +534,8 @@ class Operand(object):
         if self.is_dest:
             if (self.ctype == 'Op32i_t'):
                 return op_decl + op_mask_decl + 'maskGenOp32i (31, 0);\n'
+            elif (self.ctype == 'Op64i_t'):
+                return op_decl + op_mask_decl + 'maskGenOp64i (64, 0);\n'
             elif (self.ctype == 'Op32f_t'):
                 return op_decl + op_mask_decl + 'maskGenOp32f (31, 0);\n'
             elif (self.ctype == 'Op64f_t'):
@@ -579,6 +581,36 @@ class Op32iOperand(Operand):
         {
             %s final_val = %s;
             xc->setOp32i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
+
+        return wb
+
+class Op64iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcRegOp (OP_64I, REG_FILE, %s);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestRegOp (OP_64I, REG_FILE, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp64i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOp64i (this, %s, final_val, %s);\n
         }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb
@@ -630,7 +662,7 @@ class Op64fOperand(Operand):
         return c_src + c_dest
 
     def makeRead(self, predRead):
-        word_val = 'xc->readOp64F (this, %d)' % self.src_op_idx
+        word_val = 'xc->readOp64f (this, %d)' % self.src_op_idx
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
@@ -638,7 +670,7 @@ class Op64fOperand(Operand):
         wb = '''
         {
             %s final_val = %s;
-            xc->setOp64F (this, %s, final_val, %s);\n
+            xc->setOp64f (this, %s, final_val, %s);\n
         }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
 
         return wb

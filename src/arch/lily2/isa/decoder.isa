@@ -47,14 +47,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ArithOp::add_a ({{ wd = add (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ArithVecOp::add_b_4_a ({{ qbd = add_b_4 (qba, qbb); }});
-                                            0x1: ArithVecOp::add_h_2_a ({{ dhd = add_h_2 (dha, dhb); }});
-                                            0x2: ArithVecOp::add_h_4_a ({{ qhd = add_h_4 (qha, qhb); }});
-                                            0x3: ArithVecOp::add_w_2_a ({{ dwd = add_w_2 (dwa, dwb); }});
+                                            0x0: ArithOp::add_b_4_a ({{ qbd = add_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::add_h_2_a ({{ dhd = add_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::add_h_4_a ({{ qhd = add_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::add_w_2_a ({{ dwd = add_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: ArithImmOp::add_i_a ({{ wd = add (wa, i8); }});
+                            0x1: ArithOp::add_i_a ({{ wd = add (wa, i8); }});
 
                         } //> ADD.
 
@@ -62,7 +62,7 @@ decode FU default Unknown::unknown () {
                         decode FLAG_IMM default Unknown::unknown () {
 
                             0x0: ArithOp::adc_a      ({{ wd = adc (wa, wb, rCarry); }});
-                            0x1: ArithImmOp::adc_i_a ({{ wd = adc (wa, i8, rCarry); }});
+                            0x1: ArithOp::adc_i_a ({{ wd = adc (wa, i8, rCarry); }});
 
                         } //> ADC.
 
@@ -74,14 +74,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ArithOp::sub_a ({{ wd = sub (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ArithVecOp::sub_b_4_a ({{ qbd = sub_b_4 (qba, qbb); }});
-                                            0x1: ArithVecOp::sub_h_2_a ({{ dhd = sub_h_2 (dha, dhb); }});
-                                            0x2: ArithVecOp::sub_h_4_a ({{ qhd = sub_h_4 (qha, qhb); }});
-                                            0x3: ArithVecOp::sub_w_2_a ({{ dwd = sub_w_2 (dwa, dwb); }});
+                                            0x0: ArithOp::sub_b_4_a ({{ qbd = sub_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::sub_h_2_a ({{ dhd = sub_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::sub_h_4_a ({{ qhd = sub_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::sub_w_2_a ({{ dwd = sub_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: ArithImmOp::sub_i_a ({{ wd = sub (wa, i8); }});
+                            0x1: ArithOp::sub_i_a ({{ wd = sub (wa, i8); }});
 
                         } //> SUB.
 
@@ -89,7 +89,7 @@ decode FU default Unknown::unknown () {
                         decode FLAG_IMM default Unknown::unknown () {
 
                             0x0: ArithOp::sbc_a      ({{ wd = sbc (wa, wb, rCarry); }});
-                            0x1: ArithImmOp::sbc_i_a ({{ wd = sbc (wa, i8, rCarry); }});
+                            0x1: ArithOp::sbc_i_a ({{ wd = sbc (wa, i8, rCarry); }});
 
                         } //> SBC.
 
@@ -101,14 +101,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ArithOp::rsb_a ({{ wd = rsb (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ArithVecOp::rsb_b_4_a ({{ qbd = rsb_b_4 (qba, qbb); }});
-                                            0x1: ArithVecOp::rsb_h_2_a ({{ dhd = rsb_h_2 (dha, dhb); }});
-                                            0x2: ArithVecOp::rsb_h_4_a ({{ qhd = rsb_h_4 (qha, qhb); }});
-                                            0x3: ArithVecOp::rsb_w_2_a ({{ dwd = rsb_w_2 (dwa, dwb); }});
+                                            0x0: ArithOp::rsb_b_4_a ({{ qbd = rsb_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::rsb_h_2_a ({{ dhd = rsb_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::rsb_h_4_a ({{ qhd = rsb_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::rsb_w_2_a ({{ dwd = rsb_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: ArithImmOp::rsb_i_a ({{ wd = rsb (wa, i8); }});
+                            0x1: ArithOp::rsb_i_a ({{ wd = rsb (wa, i8); }});
 
                         } //> RSB.
 
@@ -116,7 +116,7 @@ decode FU default Unknown::unknown () {
                         decode FLAG_IMM default Unknown::unknown () {
 
                             0x0: ArithOp::rsc_a      ({{ wd = rsc (wa, wb, rCarry); }});
-                            0x1: ArithImmOp::rsc_i_a ({{ wd = rsc (wa, i8, rCarry); }});
+                            0x1: ArithOp::rsc_i_a ({{ wd = rsc (wa, i8, rCarry); }});
 
                         } //> RSC.
 
@@ -129,10 +129,10 @@ decode FU default Unknown::unknown () {
                                     0x0: ArithOp::abs_a ({{ wd = abs (wa); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ArithVecOp::abs_b_4_a ({{ qbd = abs_b_4 (qba); }});
-                                            0x1: ArithVecOp::abs_h_2_a ({{ dhd = abs_h_2 (dha); }});
-                                            0x2: ArithVecOp::abs_h_4_a ({{ qhd = abs_h_4 (qha); }});
-                                            0x3: ArithVecOp::abs_w_2_a ({{ dwd = abs_w_2 (dwa); }});
+                                            0x0: ArithOp::abs_b_4_a ({{ qbd = abs_b_4 (qba); }});
+                                            0x1: ArithOp::abs_h_2_a ({{ dhd = abs_h_2 (dha); }});
+                                            0x2: ArithOp::abs_h_4_a ({{ qhd = abs_h_4 (qha); }});
+                                            0x3: ArithOp::abs_w_2_a ({{ dwd = abs_w_2 (dwa); }});
                                         }
 
                                 } //> ABS.
@@ -143,10 +143,10 @@ decode FU default Unknown::unknown () {
                                     0x0: ArithOp::neg_a ({{ wd = abs (wa); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ArithVecOp::neg_b_4_a ({{ qbd = neg_b_4 (qba); }});
-                                            0x1: ArithVecOp::neg_h_2_a ({{ dhd = neg_h_2 (dha); }});
-                                            0x2: ArithVecOp::neg_h_4_a ({{ qhd = neg_h_4 (qha); }});
-                                            0x3: ArithVecOp::neg_w_2_a ({{ dwd = neg_w_2 (dwa); }});
+                                            0x0: ArithOp::neg_b_4_a ({{ qbd = neg_b_4 (qba); }});
+                                            0x1: ArithOp::neg_h_2_a ({{ dhd = neg_h_2 (dha); }});
+                                            0x2: ArithOp::neg_h_4_a ({{ qhd = neg_h_4 (qha); }});
+                                            0x3: ArithOp::neg_w_2_a ({{ dwd = neg_w_2 (dwa); }});
                                         }
 
                                 } //> NEG.
@@ -171,14 +171,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::and_a ({{ wd = bitAnd (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::and_b_4_a ({{ qbd = bitAnd_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::and_h_2_a ({{ dhd = bitAnd_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::and_h_4_a ({{ qhd = bitAnd_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::and_w_2_a ({{ dwd = bitAnd_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::and_b_4_a ({{ qbd = bitAnd_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::and_h_2_a ({{ dhd = bitAnd_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::and_h_4_a ({{ qhd = bitAnd_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::and_w_2_a ({{ dwd = bitAnd_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::and_i_a ({{ wd = bitAnd (wa, i8); }});
+                            0x1: LogicOp::and_i_a ({{ wd = bitAnd (wa, i8); }});
 
                         } //> AND.
 
@@ -190,14 +190,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::nad_a ({{ wd = bitNad (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::nad_b_4_a ({{ qbd = bitNad_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::nad_h_2_a ({{ dhd = bitNad_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::nad_h_4_a ({{ qhd = bitNad_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::nad_w_2_a ({{ dwd = bitNad_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::nad_b_4_a ({{ qbd = bitNad_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::nad_h_2_a ({{ dhd = bitNad_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::nad_h_4_a ({{ qhd = bitNad_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::nad_w_2_a ({{ dwd = bitNad_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::nad_i_a ({{ wd = bitNad (wa, i8); }});
+                            0x1: LogicOp::nad_i_a ({{ wd = bitNad (wa, i8); }});
 
                         } //> NAD.
 
@@ -209,14 +209,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::orr_a ({{ wd = bitOrr (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::orr_b_4_a ({{ qbd = bitOrr_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::orr_h_2_a ({{ dhd = bitOrr_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::orr_h_4_a ({{ qhd = bitOrr_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::orr_w_2_a ({{ dwd = bitOrr_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::orr_b_4_a ({{ qbd = bitOrr_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::orr_h_2_a ({{ dhd = bitOrr_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::orr_h_4_a ({{ qhd = bitOrr_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::orr_w_2_a ({{ dwd = bitOrr_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::orr_i_a ({{ wd = bitOrr (wa, i8); }});
+                            0x1: LogicOp::orr_i_a ({{ wd = bitOrr (wa, i8); }});
 
                         } //> ORR.
 
@@ -228,14 +228,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::nor_a ({{ wd = bitNor (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::nor_b_4_a ({{ qbd = bitNor_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::nor_h_2_a ({{ dhd = bitNor_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::nor_h_4_a ({{ qhd = bitNor_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::nor_w_2_a ({{ dwd = bitNor_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::nor_b_4_a ({{ qbd = bitNor_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::nor_h_2_a ({{ dhd = bitNor_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::nor_h_4_a ({{ qhd = bitNor_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::nor_w_2_a ({{ dwd = bitNor_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::nor_i_a ({{ wd = bitNor (wa, i8); }});
+                            0x1: LogicOp::nor_i_a ({{ wd = bitNor (wa, i8); }});
 
                         } //> NOR.
 
@@ -247,14 +247,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::xor_a ({{ wd = bitXor (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::xor_b_4_a ({{ qbd = bitXor_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::xor_h_2_a ({{ dhd = bitXor_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::xor_h_4_a ({{ qhd = bitXor_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::xor_w_2_a ({{ dwd = bitXor_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::xor_b_4_a ({{ qbd = bitXor_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::xor_h_2_a ({{ dhd = bitXor_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::xor_h_4_a ({{ qhd = bitXor_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::xor_w_2_a ({{ dwd = bitXor_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::xor_i_a ({{ wd = bitXor (wa, i8); }});
+                            0x1: LogicOp::xor_i_a ({{ wd = bitXor (wa, i8); }});
 
                         } //> XOR.
 
@@ -266,14 +266,14 @@ decode FU default Unknown::unknown () {
                                     0x0: LogicOp::nxr_a ({{ wd = bitNxr (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: LogicVecOp::nxr_b_4_a ({{ qbd = bitNxr_b_4 (qba, qbb); }});
-                                            0x1: LogicVecOp::nxr_h_2_a ({{ dhd = bitNxr_h_2 (dha, dhb); }});
-                                            0x2: LogicVecOp::nxr_h_4_a ({{ qhd = bitNxr_h_4 (qha, qhb); }});
-                                            0x3: LogicVecOp::nxr_w_2_a ({{ dwd = bitNxr_w_2 (dwa, dwb); }});
+                                            0x0: LogicOp::nxr_b_4_a ({{ qbd = bitNxr_b_4 (qba, qbb); }});
+                                            0x1: LogicOp::nxr_h_2_a ({{ dhd = bitNxr_h_2 (dha, dhb); }});
+                                            0x2: LogicOp::nxr_h_4_a ({{ qhd = bitNxr_h_4 (qha, qhb); }});
+                                            0x3: LogicOp::nxr_w_2_a ({{ dwd = bitNxr_w_2 (dwa, dwb); }});
                                         }
                                 }
 
-                            0x1: LogicImmOp::nxr_i_a ({{ wd = bitNxr (wa, i8); }});
+                            0x1: LogicOp::nxr_i_a ({{ wd = bitNxr (wa, i8); }});
 
                         } //> NXR.
 
@@ -288,10 +288,10 @@ decode FU default Unknown::unknown () {
                                             0x0: LogicOp::not_a ({{ wd = bitNot (wa); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: LogicVecOp::not_b_4_a ({{ qbd = bitNot_b_4 (qba); }});
-                                                    0x1: LogicVecOp::not_h_2_a ({{ dhd = bitNot_h_2 (dha); }});
-                                                    0x2: LogicVecOp::not_h_4_a ({{ qhd = bitNot_h_4 (qha); }});
-                                                    0x3: LogicVecOp::not_w_2_a ({{ dwd = bitNot_w_2 (dwa); }});
+                                                    0x0: LogicOp::not_b_4_a ({{ qbd = bitNot_b_4 (qba); }});
+                                                    0x1: LogicOp::not_h_2_a ({{ dhd = bitNot_h_2 (dha); }});
+                                                    0x2: LogicOp::not_h_4_a ({{ qhd = bitNot_h_4 (qha); }});
+                                                    0x3: LogicOp::not_w_2_a ({{ dwd = bitNot_w_2 (dwa); }});
                                                 }
                                         }
 
@@ -315,8 +315,8 @@ decode FU default Unknown::unknown () {
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: TestImmOp::tgt_u_i_a ({{ wd = tgt_u (wa, i8); }});
-                                    0x1: TestImmOp::tgt_i_a   ({{ wd = tgt   (wa, i8); }});
+                                    0x0: TestOp::tgt_u_i_a ({{ wd = tgt_u (wa, i8); }});
+                                    0x1: TestOp::tgt_i_a   ({{ wd = tgt   (wa, i8); }});
                                 }
 
                         } //> TGT.
@@ -332,8 +332,8 @@ decode FU default Unknown::unknown () {
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: TestImmOp::tge_u_i_a ({{ wd = tge_u (wa, i8); }});
-                                    0x1: TestImmOp::tge_i_a   ({{ wd = tge   (wa, i8); }});
+                                    0x0: TestOp::tge_u_i_a ({{ wd = tge_u (wa, i8); }});
+                                    0x1: TestOp::tge_i_a   ({{ wd = tge   (wa, i8); }});
                                 }
 
                         } //> TGE.
@@ -349,8 +349,8 @@ decode FU default Unknown::unknown () {
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: TestImmOp::tlt_u_i_a ({{ wd = tlt_u (wa, i8); }});
-                                    0x1: TestImmOp::tlt_i_a   ({{ wd = tlt   (wa, i8); }});
+                                    0x0: TestOp::tlt_u_i_a ({{ wd = tlt_u (wa, i8); }});
+                                    0x1: TestOp::tlt_i_a   ({{ wd = tlt   (wa, i8); }});
                                 }
 
                         } //> TLT.
@@ -366,8 +366,8 @@ decode FU default Unknown::unknown () {
 
                             0x1:
                                 decode FLAG_SIG default Unknown::unknown () {
-                                    0x0: TestImmOp::tle_u_i_a ({{ wd = tle_u (wa, i8); }});
-                                    0x1: TestImmOp::tle_i_a   ({{ wd = tle   (wa, i8); }});
+                                    0x0: TestOp::tle_u_i_a ({{ wd = tle_u (wa, i8); }});
+                                    0x1: TestOp::tle_i_a   ({{ wd = tle   (wa, i8); }});
                                 }
 
                         } //> TLE.
@@ -376,7 +376,7 @@ decode FU default Unknown::unknown () {
                         decode FLAG_IMM default Unknown::unknown () {
 
                             0x0: TestOp::teq_a      ({{ wd = teq (wa, wb); }});
-                            0x1: TestImmOp::teq_i_a ({{ wd = teq (wa, i8); }});
+                            0x1: TestOp::teq_i_a ({{ wd = teq (wa, i8); }});
 
                         } //> TEQ.
 
@@ -384,11 +384,11 @@ decode FU default Unknown::unknown () {
                         decode FLAG_IMM default Unknown::unknown () {
 
                             0x0: TestOp::tne_a      ({{ wd = tne (wa, wb); }});
-                            0x1: TestImmOp::tne_i_a ({{ wd = tne (wa, i8); }});
+                            0x1: TestOp::tne_i_a ({{ wd = tne (wa, i8); }});
 
                         } //> TNE.
 
-                } //> FU(0b'00) + HI(0b'001).
+                } //> FU(0b'00) + HI(0b'010).
 
             0x3: //< FU(0b'00) + HI(0b'011).
                 decode OPCODE_ME default Unknown::unknown () {
@@ -401,18 +401,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gto_u_b_4_a ({{ wd = gto_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gto_u_h_2_a ({{ wd = gto_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gto_u_h_4_a ({{ wd = gto_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gto_u_w_2_a ({{ wd = gto_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gto_u_b_4_a ({{ wd = gto_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gto_u_h_2_a ({{ wd = gto_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gto_u_h_4_a ({{ wd = gto_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gto_u_w_2_a ({{ wd = gto_u_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gta_u_b_4_a ({{ wd = gta_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gta_u_h_2_a ({{ wd = gta_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gta_u_h_4_a ({{ wd = gta_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gta_u_w_2_a ({{ wd = gta_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gta_u_b_4_a ({{ wd = gta_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gta_u_h_2_a ({{ wd = gta_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gta_u_h_4_a ({{ wd = gta_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gta_u_w_2_a ({{ wd = gta_u_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -421,18 +421,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gto_b_4_a ({{ wd = gto_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gto_h_2_a ({{ wd = gto_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gto_h_4_a ({{ wd = gto_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gto_w_2_a ({{ wd = gto_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gto_b_4_a ({{ wd = gto_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gto_h_2_a ({{ wd = gto_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gto_h_4_a ({{ wd = gto_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gto_w_2_a ({{ wd = gto_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gta_b_4_a ({{ wd = gta_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gta_h_2_a ({{ wd = gta_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gta_h_4_a ({{ wd = gta_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gta_w_2_a ({{ wd = gta_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gta_b_4_a ({{ wd = gta_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gta_h_2_a ({{ wd = gta_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gta_h_4_a ({{ wd = gta_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gta_w_2_a ({{ wd = gta_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -446,18 +446,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::geo_u_b_4_a ({{ wd = geo_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::geo_u_h_2_a ({{ wd = geo_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::geo_u_h_4_a ({{ wd = geo_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::geo_u_w_2_a ({{ wd = geo_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::geo_u_b_4_a ({{ wd = geo_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::geo_u_h_2_a ({{ wd = geo_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::geo_u_h_4_a ({{ wd = geo_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::geo_u_w_2_a ({{ wd = geo_u_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gea_u_b_4_a ({{ wd = gea_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gea_u_h_2_a ({{ wd = gea_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gea_u_h_4_a ({{ wd = gea_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gea_u_w_2_a ({{ wd = gea_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gea_u_b_4_a ({{ wd = gea_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gea_u_h_2_a ({{ wd = gea_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gea_u_h_4_a ({{ wd = gea_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gea_u_w_2_a ({{ wd = gea_u_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -466,18 +466,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::geo_b_4_a ({{ wd = geo_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::geo_h_2_a ({{ wd = geo_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::geo_h_4_a ({{ wd = geo_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::geo_w_2_a ({{ wd = geo_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::geo_b_4_a ({{ wd = geo_b_4 (qba, qbb); }});
+                                            0x1: TestOp::geo_h_2_a ({{ wd = geo_h_2 (dha, dhb); }});
+                                            0x2: TestOp::geo_h_4_a ({{ wd = geo_h_4 (qha, qhb); }});
+                                            0x3: TestOp::geo_w_2_a ({{ wd = geo_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::gea_b_4_a ({{ wd = gea_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::gea_h_2_a ({{ wd = gea_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::gea_h_4_a ({{ wd = gea_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::gea_w_2_a ({{ wd = gea_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::gea_b_4_a ({{ wd = gea_b_4 (qba, qbb); }});
+                                            0x1: TestOp::gea_h_2_a ({{ wd = gea_h_2 (dha, dhb); }});
+                                            0x2: TestOp::gea_h_4_a ({{ wd = gea_h_4 (qha, qhb); }});
+                                            0x3: TestOp::gea_w_2_a ({{ wd = gea_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -491,18 +491,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lto_u_b_4_a ({{ wd = lto_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lto_u_h_2_a ({{ wd = lto_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lto_u_h_4_a ({{ wd = lto_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lto_u_w_2_a ({{ wd = lto_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lto_u_b_4_a ({{ wd = lto_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lto_u_h_2_a ({{ wd = lto_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lto_u_h_4_a ({{ wd = lto_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lto_u_w_2_a ({{ wd = lto_u_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lta_u_b_4_a ({{ wd = lta_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lta_u_h_2_a ({{ wd = lta_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lta_u_h_4_a ({{ wd = lta_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lta_u_w_2_a ({{ wd = lta_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lta_u_b_4_a ({{ wd = lta_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lta_u_h_2_a ({{ wd = lta_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lta_u_h_4_a ({{ wd = lta_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lta_u_w_2_a ({{ wd = lta_u_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -511,18 +511,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lto_b_4_a ({{ wd = lto_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lto_h_2_a ({{ wd = lto_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lto_h_4_a ({{ wd = lto_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lto_w_2_a ({{ wd = lto_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lto_b_4_a ({{ wd = lto_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lto_h_2_a ({{ wd = lto_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lto_h_4_a ({{ wd = lto_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lto_w_2_a ({{ wd = lto_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lta_b_4_a ({{ wd = lta_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lta_h_2_a ({{ wd = lta_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lta_h_4_a ({{ wd = lta_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lta_w_2_a ({{ wd = lta_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lta_b_4_a ({{ wd = lta_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lta_h_2_a ({{ wd = lta_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lta_h_4_a ({{ wd = lta_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lta_w_2_a ({{ wd = lta_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -536,18 +536,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::leo_u_b_4_a ({{ wd = leo_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::leo_u_h_2_a ({{ wd = leo_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::leo_u_h_4_a ({{ wd = leo_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::leo_u_w_2_a ({{ wd = leo_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::leo_u_b_4_a ({{ wd = leo_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::leo_u_h_2_a ({{ wd = leo_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::leo_u_h_4_a ({{ wd = leo_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::leo_u_w_2_a ({{ wd = leo_u_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lea_u_b_4_a ({{ wd = lta_u_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lea_u_h_2_a ({{ wd = lta_u_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lea_u_h_4_a ({{ wd = lta_u_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lea_u_w_2_a ({{ wd = lta_u_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lea_u_b_4_a ({{ wd = lta_u_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lea_u_h_2_a ({{ wd = lta_u_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lea_u_h_4_a ({{ wd = lta_u_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lea_u_w_2_a ({{ wd = lta_u_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -556,18 +556,18 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::leo_b_4_a ({{ wd = leo_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::leo_h_2_a ({{ wd = leo_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::leo_h_4_a ({{ wd = leo_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::leo_w_2_a ({{ wd = leo_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::leo_b_4_a ({{ wd = leo_b_4 (qba, qbb); }});
+                                            0x1: TestOp::leo_h_2_a ({{ wd = leo_h_2 (dha, dhb); }});
+                                            0x2: TestOp::leo_h_4_a ({{ wd = leo_h_4 (qha, qhb); }});
+                                            0x3: TestOp::leo_w_2_a ({{ wd = leo_w_2 (dwa, dwb); }});
                                         }
 
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: TestVecOp::lea_b_4_a ({{ wd = lta_b_4 (qba, qbb); }});
-                                            0x1: TestVecOp::lea_h_2_a ({{ wd = lta_h_2 (dha, dhb); }});
-                                            0x2: TestVecOp::lea_h_4_a ({{ wd = lta_h_4 (qha, qhb); }});
-                                            0x3: TestVecOp::lea_w_2_a ({{ wd = lta_w_2 (dwa, dwb); }});
+                                            0x0: TestOp::lea_b_4_a ({{ wd = lta_b_4 (qba, qbb); }});
+                                            0x1: TestOp::lea_h_2_a ({{ wd = lta_h_2 (dha, dhb); }});
+                                            0x2: TestOp::lea_h_4_a ({{ wd = lta_h_4 (qha, qhb); }});
+                                            0x3: TestOp::lea_w_2_a ({{ wd = lta_w_2 (dwa, dwb); }});
                                         }
                                 }
 
@@ -578,18 +578,18 @@ decode FU default Unknown::unknown () {
 
                             0x0:
                                 decode VEC default Unknown::unknown () {
-                                    0x0: TestVecOp::eqo_b_4_a ({{ wd = eqo_b_4 (qba, qbb); }});
-                                    0x1: TestVecOp::eqo_h_2_a ({{ wd = eqo_h_2 (dha, dhb); }});
-                                    0x2: TestVecOp::eqo_h_4_a ({{ wd = eqo_h_4 (qha, qhb); }});
-                                    0x3: TestVecOp::eqo_w_2_a ({{ wd = eqo_w_2 (dwa, dwb); }});
+                                    0x0: TestOp::eqo_b_4_a ({{ wd = eqo_b_4 (qba, qbb); }});
+                                    0x1: TestOp::eqo_h_2_a ({{ wd = eqo_h_2 (dha, dhb); }});
+                                    0x2: TestOp::eqo_h_4_a ({{ wd = eqo_h_4 (qha, qhb); }});
+                                    0x3: TestOp::eqo_w_2_a ({{ wd = eqo_w_2 (dwa, dwb); }});
                                 }
 
                             0x1:
                                 decode VEC default Unknown::unknown () {
-                                    0x0: TestVecOp::eqa_b_4_a ({{ wd = eqa_b_4 (qba, qbb); }});
-                                    0x1: TestVecOp::eqa_h_2_a ({{ wd = eqa_h_2 (dha, dhb); }});
-                                    0x2: TestVecOp::eqa_h_4_a ({{ wd = eqa_h_4 (qha, qhb); }});
-                                    0x3: TestVecOp::eqa_w_2_a ({{ wd = eqa_w_2 (dwa, dwb); }});
+                                    0x0: TestOp::eqa_b_4_a ({{ wd = eqa_b_4 (qba, qbb); }});
+                                    0x1: TestOp::eqa_h_2_a ({{ wd = eqa_h_2 (dha, dhb); }});
+                                    0x2: TestOp::eqa_h_4_a ({{ wd = eqa_h_4 (qha, qhb); }});
+                                    0x3: TestOp::eqa_w_2_a ({{ wd = eqa_w_2 (dwa, dwb); }});
                                 }
                         } //> EQO, EQA.
 
@@ -598,21 +598,22 @@ decode FU default Unknown::unknown () {
 
                             0x0:
                                 decode VEC default Unknown::unknown () {
-                                    0x0: TestVecOp::neo_b_4_a ({{ wd = neo_b_4 (qba, qbb); }});
-                                    0x1: TestVecOp::neo_h_2_a ({{ wd = neo_h_2 (dha, dhb); }});
-                                    0x2: TestVecOp::neo_h_4_a ({{ wd = neo_h_4 (qha, qhb); }});
-                                    0x3: TestVecOp::neo_w_2_a ({{ wd = neo_w_2 (dwa, dwb); }});
+                                    0x0: TestOp::neo_b_4_a ({{ wd = neo_b_4 (qba, qbb); }});
+                                    0x1: TestOp::neo_h_2_a ({{ wd = neo_h_2 (dha, dhb); }});
+                                    0x2: TestOp::neo_h_4_a ({{ wd = neo_h_4 (qha, qhb); }});
+                                    0x3: TestOp::neo_w_2_a ({{ wd = neo_w_2 (dwa, dwb); }});
                                 }
 
                             0x1:
                                 decode VEC default Unknown::unknown () {
-                                    0x0: TestVecOp::nea_b_4_a ({{ wd = nea_b_4 (qba, qbb); }});
-                                    0x1: TestVecOp::nea_h_2_a ({{ wd = nea_h_2 (dha, dhb); }});
-                                    0x2: TestVecOp::nea_h_4_a ({{ wd = nea_h_4 (qha, qhb); }});
-                                    0x3: TestVecOp::nea_w_2_a ({{ wd = nea_w_2 (dwa, dwb); }});
+                                    0x0: TestOp::nea_b_4_a ({{ wd = nea_b_4 (qba, qbb); }});
+                                    0x1: TestOp::nea_h_2_a ({{ wd = nea_h_2 (dha, dhb); }});
+                                    0x2: TestOp::nea_h_4_a ({{ wd = nea_h_4 (qha, qhb); }});
+                                    0x3: TestOp::nea_w_2_a ({{ wd = nea_w_2 (dwa, dwb); }});
                                 }
                         } //> NEO, NEA.
-                }
+
+                } //> FU(0b'00) + HI(0b'011).
 
             0x4: //< FU(0b'00) + HI(0b'100).
                 decode OPCODE_ME default Unknown::unknown () {
@@ -625,14 +626,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ShiftOp::lsl_a ({{ wd = lsl (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ShiftVecOp::lsl_b_4_a ({{ qbd = lsl_b_4 (qba, wb); }});
-                                            0x1: ShiftVecOp::lsl_h_2_a ({{ dhd = lsl_h_2 (dha, wb); }});
-                                            0x2: ShiftVecOp::lsl_h_4_a ({{ qhd = lsl_h_4 (qha, wb); }});
-                                            0x3: ShiftVecOp::lsl_w_2_a ({{ dwd = lsl_w_2 (dwa, wb); }});
+                                            0x0: ShiftOp::lsl_b_4_a ({{ qbd = lsl_b_4 (qba, wb); }});
+                                            0x1: ShiftOp::lsl_h_2_a ({{ dhd = lsl_h_2 (dha, wb); }});
+                                            0x2: ShiftOp::lsl_h_4_a ({{ qhd = lsl_h_4 (qha, wb); }});
+                                            0x3: ShiftOp::lsl_w_2_a ({{ dwd = lsl_w_2 (dwa, wb); }});
                                         }
                                 }
 
-                            0x1: ShiftImmOp::lsl_i_a ({{ wd = lsl (wa, i5); }});
+                            0x1: ShiftOp::lsl_i_a ({{ wd = lsl (wa, i5); }});
 
                         } //> LSL.
 
@@ -644,14 +645,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ShiftOp::lsr_a ({{ wd = lsr (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ShiftVecOp::lsr_b_4_a ({{ qbd = lsr_b_4 (qba, wb); }});
-                                            0x1: ShiftVecOp::lsr_h_2_a ({{ dhd = lsr_h_2 (dha, wb); }});
-                                            0x2: ShiftVecOp::lsr_h_4_a ({{ qhd = lsr_h_4 (qha, wb); }});
-                                            0x3: ShiftVecOp::lsr_w_2_a ({{ dwd = lsr_w_2 (dwa, wb); }});
+                                            0x0: ShiftOp::lsr_b_4_a ({{ qbd = lsr_b_4 (qba, wb); }});
+                                            0x1: ShiftOp::lsr_h_2_a ({{ dhd = lsr_h_2 (dha, wb); }});
+                                            0x2: ShiftOp::lsr_h_4_a ({{ qhd = lsr_h_4 (qha, wb); }});
+                                            0x3: ShiftOp::lsr_w_2_a ({{ dwd = lsr_w_2 (dwa, wb); }});
                                         }
                                 }
 
-                            0x1: ShiftImmOp::lsr_i_a ({{ wd = lsr (wa, i5); }});
+                            0x1: ShiftOp::lsr_i_a ({{ wd = lsr (wa, i5); }});
 
                         } //> LSR.
 
@@ -663,14 +664,14 @@ decode FU default Unknown::unknown () {
                                     0x0: ShiftOp::asr_a ({{ wd = asr (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ShiftVecOp::asr_b_4_a ({{ qbd = asr_b_4 (qba, wb); }});
-                                            0x1: ShiftVecOp::asr_h_2_a ({{ dhd = asr_h_2 (dha, wb); }});
-                                            0x2: ShiftVecOp::asr_h_4_a ({{ qhd = asr_h_4 (qha, wb); }});
-                                            0x3: ShiftVecOp::asr_w_2_a ({{ dwd = asr_w_2 (dwa, wb); }});
+                                            0x0: ShiftOp::asr_b_4_a ({{ qbd = asr_b_4 (qba, wb); }});
+                                            0x1: ShiftOp::asr_h_2_a ({{ dhd = asr_h_2 (dha, wb); }});
+                                            0x2: ShiftOp::asr_h_4_a ({{ qhd = asr_h_4 (qha, wb); }});
+                                            0x3: ShiftOp::asr_w_2_a ({{ dwd = asr_w_2 (dwa, wb); }});
                                         }
                                 }
 
-                            0x1: ShiftImmOp::asr_i_a ({{ wd = asr (wa, i5); }});
+                            0x1: ShiftOp::asr_i_a ({{ wd = asr (wa, i5); }});
 
                         } //> ASR.
 
@@ -682,20 +683,20 @@ decode FU default Unknown::unknown () {
                                     0x0: ShiftOp::rsr_a ({{ wd = rsr (wa, wb); }});
                                     0x1:
                                         decode VEC default Unknown::unknown () {
-                                            0x0: ShiftVecOp::rsr_b_4_a ({{ qbd = rsr_b_4 (qba, wb); }});
-                                            0x1: ShiftVecOp::rsr_h_2_a ({{ dhd = rsr_h_2 (dha, wb); }});
-                                            0x2: ShiftVecOp::rsr_h_4_a ({{ qhd = rsr_h_4 (qha, wb); }});
-                                            0x3: ShiftVecOp::rsr_w_2_a ({{ dwd = rsr_w_2 (dwa, wb); }});
+                                            0x0: ShiftOp::rsr_b_4_a ({{ qbd = rsr_b_4 (qba, wb); }});
+                                            0x1: ShiftOp::rsr_h_2_a ({{ dhd = rsr_h_2 (dha, wb); }});
+                                            0x2: ShiftOp::rsr_h_4_a ({{ qhd = rsr_h_4 (qha, wb); }});
+                                            0x3: ShiftOp::rsr_w_2_a ({{ dwd = rsr_w_2 (dwa, wb); }});
                                         }
                                 }
 
-                            0x1: ShiftImmOp::rsr_i_a ({{ wd = rsr (wa, i5); }});
+                            0x1: ShiftOp::rsr_i_a ({{ wd = rsr (wa, i5); }});
 
                         } //> RSR.
 
                 } //> FU(0b'00) + HI(0b'100).
 
-            0x5: // FU(0b'00) + HI(0b'101).
+            0x5: //< FU(0b'00) + HI(0b'101).
                 decode OPCODE_ME default Unknown::unknown () {
 
                     0x0,0x1: // MKL.
@@ -703,7 +704,7 @@ decode FU default Unknown::unknown () {
                     0x2,0x3: // MKH.
                         MoveImmOp::mkh_a ({{ wd = mkh (i16); wd_mask = maskGenOp32i (31, 16); }});
 
-                }
+                } //> FU(0b'00) + HI(0b'101).
 
             0x6: //< FU(0b'00) + HI(0b'110).
                 decode OPCODE_ME default Unknown::unknown () {
@@ -764,6 +765,242 @@ decode FU default Unknown::unknown () {
 
         } //> FU(0b'00).
 
+    0x1: //< FU(0b'01).
+        decode OPCODE_HI default Unknown::unknown () {
+
+            0x0: //< FU(0b'01) + HI(0b'000)
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< ADD.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::add_sp_a ({{ sfd = add_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::add_dp_a ({{ dfd = add_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::add_sp_2_a ({{ dsfd = add_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> ADD.FP.
+
+                    0x2: //< SUB.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::sub_sp_a ({{ sfd = sub_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::sub_dp_a ({{ dfd = sub_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::sub_sp_2_a ({{ dsfd = sub_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> SUB.FP.
+
+                    0x4: //< RSB.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::rsb_sp_a ({{ sfd = rsb_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::rsb_dp_a ({{ dfd = rsb_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::rsb_sp_2_a ({{ dsfd = rsb_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> RSB.FP.
+
+                    0x7: //< ABS.FP, NEG.FP, FPI.FP, IFP.FP, DSP, SDP, TRC.FP.
+                        decode OPCODE_LO default Unknown::unknown () {
+
+                            0x0: //< ABS.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::abs_sp_a ({{ sfd = abs_sp_ (sfa); }});
+                                            0x1: ArithFPOp::abs_dp_a ({{ dfd = abs_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::abs_sp_2_a ({{ dsfd = abs_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> ABS.FP.
+
+                            0x1: //< NEG.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::neg_sp_a ({{ sfd = neg_sp_ (sfa); }});
+                                            0x1: ArithFPOp::neg_dp_a ({{ dfd = neg_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::neg_sp_2_a ({{ dsfd = neg_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> NEG.FP.
+
+                            0x2: //< FPI.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::fpi_sp_a ({{ wd = fpi_sp_ (sfa); }});
+                                            0x1: ArithFPOp::fpi_dp_a ({{ wd = fpi_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::fpi_sp_2_a ({{ dwd = fpi_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> FPI.FP.
+
+                            0x3: //< IFP.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::ifp_sp_a ({{ sfd = ifp_sp_ (wa); }});
+                                            0x1: ArithFPOp::ifp_dp_a ({{ dfd = ifp_dp_ (wa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::ifp_sp_2_a ({{ dsfd = ifp_sp_2_ (dwa); }});
+                                        }
+
+                                } //> IFP.FP.
+
+                            0x4: //< DSP, SDP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::dsp_a ({{ sfd = dsp_ (dfd); }});
+                                            0x1: ArithFPOp::sdp_a ({{ dfd = sdp_ (sfd); }});
+                                        }
+
+                                } //> DSP, SDP.
+
+                            0x5: //< TRC.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::trc_sp_a ({{ sfd = trc_sp_ (sfa); }});
+                                            0x1: ArithFPOp::trc_dp_a ({{ dfd = trc_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::trc_sp_2_a ({{ dsfd = trc_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> TRC.FP.
+
+                        } //> ABS.FP, NEG.FP, FPI.FP, IFP.FP, DSP, SDP, TRC.FP.
+
+                } //> FU(0b'01) + HI(0b'000).
+
+            0x1: //< FU(0b'01) + HI(0b'001).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< TGT.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::tgt_sp_a ({{ wd = tgt_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::tgt_dp_a ({{ wd = tgt_dp_ (dfa, dfb); }});
+                        } //> TGT.FP.
+
+                    0x1: //< TGE.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::tge_sp_a ({{ wd = tge_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::tge_dp_a ({{ wd = tge_dp_ (dfa, dfb); }});
+                        } //> TGE.FP.
+
+                    0x2: //< TLT.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::tlt_sp_a ({{ wd = tlt_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::tlt_dp_a ({{ wd = tlt_dp_ (dfa, dfb); }});
+                        } //> TLT.FP.
+
+                    0x3: //< TLE.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::tle_sp_a ({{ wd = tle_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::tle_dp_a ({{ wd = tle_dp_ (dfa, dfb); }});
+                        } //> TLE.FP.
+
+                    0x4: //< TEQ.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::teq_sp_a ({{ wd = teq_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::teq_dp_a ({{ wd = teq_dp_ (dfa, dfb); }});
+                        } //> TEQ.FP.
+
+                    0x5: //< TNE.FP.
+                        decode FP default Unknown::unknown () {
+                            0x0: TestFPOp::tne_sp_a ({{ wd = tne_sp_ (sfa, sfb); }});
+                            0x1: TestFPOp::tne_dp_a ({{ wd = tne_dp_ (dfa, dfb); }});
+                        } //> TNE.FP.
+
+                } //> FU(0b'01) + HI(0b'001).
+
+            0x2: //< FU(0b'10) + HI(0b'010).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< GTO.FP, GTA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::gto_sp_2 ({{ wd = gto_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::gta_sp_2 ({{ wd = gta_sp_2_ (dsfa, dsfb); }});
+                        } //> GTO.FP, GTA.FP.
+
+                    0x1: //< GEO.FP, GEA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::geo_sp_2 ({{ wd = geo_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::gea_sp_2 ({{ wd = gea_sp_2_ (dsfa, dsfb); }});
+                        } //> GEO.FP, GEA.FP.
+
+                    0x2: //< LTO.FP, LTA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::lto_sp_2 ({{ wd = lto_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::lta_sp_2 ({{ wd = lta_sp_2_ (dsfa, dsfb); }});
+                        } //> LTO.FP, LTA.FP.
+
+                    0x3: //< LEO.FP, LEA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::leo_sp_2 ({{ wd = leo_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::lea_sp_2 ({{ wd = lea_sp_2_ (dsfa, dsfb); }});
+                        } //> LEO.FP, LEA.FP.
+
+                    0x4: //< EQO.FP, EQA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::eqo_sp_2 ({{ wd = eqo_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::eqa_sp_2 ({{ wd = eqa_sp_2_ (dsfa, dsfb); }});
+                        } //> EQO.FP, EQA.FP.
+
+                    0x5: //< NEO.FP, NEA.FP.
+                        decode FLAG_OA default Unknown::unknown () {
+                            0x0: TestFPOp::neo_sp_2 ({{ wd = neo_sp_2_ (dsfa, dsfb); }});
+                            0x1: TestFPOp::nea_sp_2 ({{ wd = nea_sp_2_ (dsfa, dsfb); }});
+                        } //> NEO.FP, NEA.FP.
+
+                } //> FU(0b'10) + HI(0b'010).
+
+        } //> FU(0b'01).
+
     0x2: //< FU(0b'10).
         decode OPCODE_HI default Unknown::unknown () {
 
@@ -781,14 +1018,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MulOp::mul_u_m ({{ wd = mul_u (wa, wb); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MulVecOp::mul_u_b_4_m ({{ qbd = mul_u_b_4 (qba, qbb); }});
-                                                    0x1: MulVecOp::mul_u_h_2_m ({{ dhd = mul_u_h_2 (dha, dhb); }});
-                                                    0x2: MulVecOp::mul_u_h_4_m ({{ qhd = mul_u_h_4 (qha, qhb); }});
-                                                    0x3: MulVecOp::mul_u_w_2_m ({{ dwd = mul_u_w_2 (dwa, dwb); }});
+                                                    0x0: MulOp::mul_u_b_4_m ({{ qbd = mul_u_b_4 (qba, qbb); }});
+                                                    0x1: MulOp::mul_u_h_2_m ({{ dhd = mul_u_h_2 (dha, dhb); }});
+                                                    0x2: MulOp::mul_u_h_4_m ({{ qhd = mul_u_h_4 (qha, qhb); }});
+                                                    0x3: MulOp::mul_u_w_2_m ({{ dwd = mul_u_w_2 (dwa, dwb); }});
                                                 }
                                         }
 
-                                    0x1: MulImmOp::mul_u_i_m ({{ wd = mul_u (wa, i8); }});
+                                    0x1: MulOp::mul_u_i_m ({{ wd = mul_u (wa, i8); }});
                                 }
 
                             0x1:
@@ -799,14 +1036,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MulOp::mul_m ({{ wd = mul (wa, wb); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MulVecOp::mul_b_4_m ({{ qbd = mul_b_4 (qba, qbb); }});
-                                                    0x1: MulVecOp::mul_h_2_m ({{ dhd = mul_h_2 (dha, dhb); }});
-                                                    0x2: MulVecOp::mul_h_4_m ({{ qhd = mul_h_4 (qha, qhb); }});
-                                                    0x3: MulVecOp::mul_w_2_m ({{ dwd = mul_w_2 (dwa, dwb); }});
+                                                    0x0: MulOp::mul_b_4_m ({{ qbd = mul_b_4 (qba, qbb); }});
+                                                    0x1: MulOp::mul_h_2_m ({{ dhd = mul_h_2 (dha, dhb); }});
+                                                    0x2: MulOp::mul_h_4_m ({{ qhd = mul_h_4 (qha, qhb); }});
+                                                    0x3: MulOp::mul_w_2_m ({{ dwd = mul_w_2 (dwa, dwb); }});
                                                 }
                                         }
 
-                                    0x1: MulImmOp::mul_i_m ({{ wd = mul (wa, i8); }});
+                                    0x1: MulOp::mul_i_m ({{ wd = mul (wa, i8); }});
                                 }
 
                         } //> MUL.
@@ -822,14 +1059,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MulOp::nmu_u_m ({{ wd = nmu_u (wa, wb); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MulVecOp::nmu_u_b_4_m ({{ qbd = nmu_u_b_4 (qba, qbb); }});
-                                                    0x1: MulVecOp::nmu_u_h_2_m ({{ dhd = nmu_u_h_2 (dha, dhb); }});
-                                                    0x2: MulVecOp::nmu_u_h_4_m ({{ qhd = nmu_u_h_4 (qha, qhb); }});
-                                                    0x3: MulVecOp::nmu_u_w_2_m ({{ dwd = nmu_u_w_2 (dwa, dwb); }});
+                                                    0x0: MulOp::nmu_u_b_4_m ({{ qbd = nmu_u_b_4 (qba, qbb); }});
+                                                    0x1: MulOp::nmu_u_h_2_m ({{ dhd = nmu_u_h_2 (dha, dhb); }});
+                                                    0x2: MulOp::nmu_u_h_4_m ({{ qhd = nmu_u_h_4 (qha, qhb); }});
+                                                    0x3: MulOp::nmu_u_w_2_m ({{ dwd = nmu_u_w_2 (dwa, dwb); }});
                                                 }
                                         }
 
-                                    0x1: MulImmOp::nmu_u_i_m ({{ wd = nmu_u (wa, i8); }});
+                                    0x1: MulOp::nmu_u_i_m ({{ wd = nmu_u (wa, i8); }});
                                 }
 
                             0x1:
@@ -840,14 +1077,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MulOp::nmu_m ({{ wd = nmu (wa, wb); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MulVecOp::nmu_b_4_m ({{ qbd = nmu_b_4 (qba, qbb); }});
-                                                    0x1: MulVecOp::nmu_h_2_m ({{ dhd = nmu_h_2 (dha, dhb); }});
-                                                    0x2: MulVecOp::nmu_h_4_m ({{ qhd = nmu_h_4 (qha, qhb); }});
-                                                    0x3: MulVecOp::nmu_w_2_m ({{ dwd = nmu_w_2 (dwa, dwb); }});
+                                                    0x0: MulOp::nmu_b_4_m ({{ qbd = nmu_b_4 (qba, qbb); }});
+                                                    0x1: MulOp::nmu_h_2_m ({{ dhd = nmu_h_2 (dha, dhb); }});
+                                                    0x2: MulOp::nmu_h_4_m ({{ qhd = nmu_h_4 (qha, qhb); }});
+                                                    0x3: MulOp::nmu_w_2_m ({{ dwd = nmu_w_2 (dwa, dwb); }});
                                                 }
                                         }
 
-                                    0x1: MulImmOp::nmu_i_m ({{ wd = nmu (wa, i8); }});
+                                    0x1: MulOp::nmu_i_m ({{ wd = nmu (wa, i8); }});
                                 }
 
                         } //> NMU.
@@ -863,14 +1100,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::mac_u_m ({{ wd = mac_u (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::mac_u_b_4_m ({{ qbd = mac_u_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::mac_u_h_2_m ({{ dhd = mac_u_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::mac_u_h_4_m ({{ qhd = mac_u_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::mac_u_w_2_m ({{ dwd = mac_u_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::mac_u_b_4_m ({{ qbd = mac_u_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::mac_u_h_2_m ({{ dhd = mac_u_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::mac_u_h_4_m ({{ qhd = mac_u_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::mac_u_w_2_m ({{ dwd = mac_u_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::mac_u_i_m ({{ wd = mac_u (wa, i8, wd); }});
+                                    0x1: MacOp::mac_u_i_m ({{ wd = mac_u (wa, i8, wd); }});
                                 }
 
                             0x1:
@@ -881,14 +1118,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::mac_m ({{ wd = mac (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::mac_b_4_m ({{ qbd = mac_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::mac_h_2_m ({{ dhd = mac_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::mac_h_4_m ({{ qhd = mac_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::mac_w_2_m ({{ dwd = mac_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::mac_b_4_m ({{ qbd = mac_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::mac_h_2_m ({{ dhd = mac_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::mac_h_4_m ({{ qhd = mac_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::mac_w_2_m ({{ dwd = mac_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::mac_i_m ({{ wd = mac (wa, i8, wd); }});
+                                    0x1: MacOp::mac_i_m ({{ wd = mac (wa, i8, wd); }});
                                 }
 
                         } //> MAC.
@@ -904,14 +1141,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::nma_u_m ({{ wd = nma_u (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::nma_u_b_4_m ({{ qbd = nma_u_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::nma_u_h_2_m ({{ dhd = nma_u_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::nma_u_h_4_m ({{ qhd = nma_u_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::nma_u_w_2_m ({{ dwd = nma_u_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::nma_u_b_4_m ({{ qbd = nma_u_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::nma_u_h_2_m ({{ dhd = nma_u_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::nma_u_h_4_m ({{ qhd = nma_u_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::nma_u_w_2_m ({{ dwd = nma_u_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::nma_u_i_m ({{ wd = nma_u (wa, i8, wd); }});
+                                    0x1: MacOp::nma_u_i_m ({{ wd = nma_u (wa, i8, wd); }});
                                 }
 
                             0x1:
@@ -922,14 +1159,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::nma_m ({{ wd = nma (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::nma_b_4_m ({{ qbd = nma_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::nma_h_2_m ({{ dhd = nma_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::nma_h_4_m ({{ qhd = nma_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::nma_w_2_m ({{ dwd = nma_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::nma_b_4_m ({{ qbd = nma_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::nma_h_2_m ({{ dhd = nma_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::nma_h_4_m ({{ qhd = nma_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::nma_w_2_m ({{ dwd = nma_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::nma_i_m ({{ wd = nma (wa, i8, wd); }});
+                                    0x1: MacOp::nma_i_m ({{ wd = nma (wa, i8, wd); }});
                                 }
 
                         } //> NMA.
@@ -945,14 +1182,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::msu_u_m ({{ wd = msu_u (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::msu_u_b_4_m ({{ qbd = msu_u_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::msu_u_h_2_m ({{ dhd = msu_u_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::msu_u_h_4_m ({{ qhd = msu_u_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::msu_u_w_2_m ({{ dwd = msu_u_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::msu_u_b_4_m ({{ qbd = msu_u_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::msu_u_h_2_m ({{ dhd = msu_u_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::msu_u_h_4_m ({{ qhd = msu_u_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::msu_u_w_2_m ({{ dwd = msu_u_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::msu_u_i_m ({{ wd = msu_u (wa, i8, wd); }});
+                                    0x1: MacOp::msu_u_i_m ({{ wd = msu_u (wa, i8, wd); }});
                                 }
 
                             0x1:
@@ -963,14 +1200,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::msu_m ({{ wd = msu (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::msu_b_4_m ({{ qbd = msu_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::msu_h_2_m ({{ dhd = msu_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::msu_h_4_m ({{ qhd = msu_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::msu_w_2_m ({{ dwd = msu_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::msu_b_4_m ({{ qbd = msu_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::msu_h_2_m ({{ dhd = msu_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::msu_h_4_m ({{ qhd = msu_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::msu_w_2_m ({{ dwd = msu_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::msu_i_m ({{ wd = msu (wa, i8, wd); }});
+                                    0x1: MacOp::msu_i_m ({{ wd = msu (wa, i8, wd); }});
                                 }
 
                         } //> MSU.
@@ -986,14 +1223,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::nms_u_m ({{ wd = nms_u (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::nms_u_b_4_m ({{ qbd = nms_u_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::nms_u_h_2_m ({{ dhd = nms_u_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::nms_u_h_4_m ({{ qhd = nms_u_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::nms_u_w_2_m ({{ dwd = nms_u_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::nms_u_b_4_m ({{ qbd = nms_u_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::nms_u_h_2_m ({{ dhd = nms_u_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::nms_u_h_4_m ({{ qhd = nms_u_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::nms_u_w_2_m ({{ dwd = nms_u_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::nms_u_i_m ({{ wd = nms_u (wa, i8, wd); }});
+                                    0x1: MacOp::nms_u_i_m ({{ wd = nms_u (wa, i8, wd); }});
                                 }
 
                             0x1:
@@ -1004,14 +1241,14 @@ decode FU default Unknown::unknown () {
                                             0x0: MacOp::nms_m ({{ wd = nms (wa, wb, wd); }});
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: MacVecOp::nms_b_4_m ({{ qbd = nms_b_4 (qba, qbb, qbd); }});
-                                                    0x1: MacVecOp::nms_h_2_m ({{ dhd = nms_h_2 (dha, dhb, dhd); }});
-                                                    0x2: MacVecOp::nms_h_4_m ({{ qhd = nms_h_4 (qha, qhb, qhd); }});
-                                                    0x3: MacVecOp::nms_w_2_m ({{ dwd = nms_w_2 (dwa, dwb, dwd); }});
+                                                    0x0: MacOp::nms_b_4_m ({{ qbd = nms_b_4 (qba, qbb, qbd); }});
+                                                    0x1: MacOp::nms_h_2_m ({{ dhd = nms_h_2 (dha, dhb, dhd); }});
+                                                    0x2: MacOp::nms_h_4_m ({{ qhd = nms_h_4 (qha, qhb, qhd); }});
+                                                    0x3: MacOp::nms_w_2_m ({{ dwd = nms_w_2 (dwa, dwb, dwd); }});
                                                 }
                                         }
 
-                                    0x1: MacImmOp::nms_i_m ({{ wd = nms (wa, i8, wd); }});
+                                    0x1: MacOp::nms_i_m ({{ wd = nms (wa, i8, wd); }});
                                 }
 
                         } //> NMS.
@@ -1027,14 +1264,14 @@ decode FU default Unknown::unknown () {
                                             0x0: DivOp::div_u_m ({{ wd = div_u (wa, wb); }}, IsIter, IsIntDiv);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::div_u_b_4_m ({{ qbd = div_u_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
-                                                    0x1: DivVecOp::div_u_h_2_m ({{ dhd = div_u_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
-                                                    0x2: DivVecOp::div_u_h_4_m ({{ qhd = div_u_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
-                                                    0x3: DivVecOp::div_u_w_2_m ({{ dwd = div_u_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
+                                                    0x0: DivOp::div_u_b_4_m ({{ qbd = div_u_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
+                                                    0x1: DivOp::div_u_h_2_m ({{ dhd = div_u_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
+                                                    0x2: DivOp::div_u_h_4_m ({{ qhd = div_u_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
+                                                    0x3: DivOp::div_u_w_2_m ({{ dwd = div_u_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::div_u_i_m ({{ wd = div_u (wa, i8); }}, IsIter, IsIntDiv);
+                                    0x1: DivOp::div_u_i_m ({{ wd = div_u (wa, i8); }}, IsIter, IsIntDiv);
                                 }
 
                             0x1:
@@ -1045,14 +1282,14 @@ decode FU default Unknown::unknown () {
                                             0x0: DivOp::div_m ({{ wd = div (wa, wb); }}, IsIter, IsIntDiv);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::div_b_4_m ({{ qbd = div_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
-                                                    0x1: DivVecOp::div_h_2_m ({{ dhd = div_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
-                                                    0x2: DivVecOp::div_h_4_m ({{ qhd = div_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
-                                                    0x3: DivVecOp::div_w_2_m ({{ dwd = div_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
+                                                    0x0: DivOp::div_b_4_m ({{ qbd = div_b_4 (qba, qbb); }}, IsIter, IsIntDiv);
+                                                    0x1: DivOp::div_h_2_m ({{ dhd = div_h_2 (dha, dhb); }}, IsIter, IsIntDiv);
+                                                    0x2: DivOp::div_h_4_m ({{ qhd = div_h_4 (qha, qhb); }}, IsIter, IsIntDiv);
+                                                    0x3: DivOp::div_w_2_m ({{ dwd = div_w_2 (dwa, dwb); }}, IsIter, IsIntDiv);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::div_i_m ({{ wd = div (wa, i8); }}, IsIter, IsIntDiv);
+                                    0x1: DivOp::div_i_m ({{ wd = div (wa, i8); }}, IsIter, IsIntDiv);
                                 }
 
                         } //> DIV.
@@ -1068,14 +1305,14 @@ decode FU default Unknown::unknown () {
                                             0x0: DivOp::rem_u_m ({{ wd = rem_u (wa, wb); }}, IsIter, IsIntRem);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivVecOp::rem_u_b_4_m ({{ qbd = rem_u_b_4 (qba, qbb); }}, IsIter, IsIntRem);
-                                                    0x1: DivVecOp::rem_u_h_2_m ({{ dhd = rem_u_h_2 (dha, dhb); }}, IsIter, IsIntRem);
-                                                    0x2: DivVecOp::rem_u_h_4_m ({{ qhd = rem_u_h_4 (qha, qhb); }}, IsIter, IsIntRem);
-                                                    0x3: DivVecOp::rem_u_w_2_m ({{ dwd = rem_u_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
+                                                    0x0: DivOp::rem_u_b_4_m ({{ qbd = rem_u_b_4 (qba, qbb); }}, IsIter, IsIntRem);
+                                                    0x1: DivOp::rem_u_h_2_m ({{ dhd = rem_u_h_2 (dha, dhb); }}, IsIter, IsIntRem);
+                                                    0x2: DivOp::rem_u_h_4_m ({{ qhd = rem_u_h_4 (qha, qhb); }}, IsIter, IsIntRem);
+                                                    0x3: DivOp::rem_u_w_2_m ({{ dwd = rem_u_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::rem_u_i_m ({{ wd = rem_u (wa, i8); }}, IsIter, IsIntRem);
+                                    0x1: DivOp::rem_u_i_m ({{ wd = rem_u (wa, i8); }}, IsIter, IsIntRem);
                                 }
 
                             0x1:
@@ -1083,22 +1320,391 @@ decode FU default Unknown::unknown () {
 
                                     0x0:
                                         decode FLAG_VEC default Unknown::unknown () {
-                                            0x0: DivOp::rem_m ({{ wd = rem (wa, wb); }}, IsIter, IsIntRem);
+                                            0x0: RemOp::rem_m ({{ wd = rem (wa, wb); }}, IsIter, IsIntRem);
                                             0x1:
                                                 decode VEC default Unknown::unknown () {
-                                                    0x0: DivOp::rem_b_4_m ({{ qbd = rem_b_4 (qba, qbb); }}, IsIter, IsIntRem);
-                                                    0x1: DivOp::rem_h_2_m ({{ dhd = rem_h_2 (dha, dhb); }}, IsIter, IsIntRem);
-                                                    0x2: DivOp::rem_h_4_m ({{ qhd = rem_h_4 (qha, qhb); }}, IsIter, IsIntRem);
-                                                    0x3: DivOp::rem_w_2_m ({{ dwd = rem_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
+                                                    0x0: RemOp::rem_b_4_m ({{ qbd = rem_b_4 (qba, qbb); }}, IsIter, IsIntRem);
+                                                    0x1: RemOp::rem_h_2_m ({{ dhd = rem_h_2 (dha, dhb); }}, IsIter, IsIntRem);
+                                                    0x2: RemOp::rem_h_4_m ({{ qhd = rem_h_4 (qha, qhb); }}, IsIter, IsIntRem);
+                                                    0x3: RemOp::rem_w_2_m ({{ dwd = rem_w_2 (dwa, dwb); }}, IsIter, IsIntRem);
                                                 }
                                         }
 
-                                    0x1: DivImmOp::rem_i_m ({{ wd = rem (wa, i8); }}, IsIter, IsIntRem);
+                                    0x1: RemOp::rem_i_m ({{ wd = rem (wa, i8); }}, IsIter, IsIntRem);
                                 }
 
                         } //> REM.
 
                 } //> FU(0b'10) + HI(0b'000).
+
+            0x2: //< FU(0b'10) + HI(0b'010).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< ADD.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ArithOp::add_m ({{ wd = add (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithOp::add_b_4_m ({{ qbd = add_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::add_h_2_m ({{ dhd = add_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::add_h_4_m ({{ qhd = add_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::add_w_2_m ({{ dwd = add_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: ArithOp::add_i_m ({{ wd = add (wa, i8); }});
+
+                        } //> ADD.
+
+                    0x1: //< ADC.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: ArithOp::adc_m      ({{ wd = adc (wa, wb, rCarry); }});
+                            0x1: ArithOp::adc_i_m ({{ wd = adc (wa, i8, rCarry); }});
+
+                        } //> ADC.
+
+                    0x2: //< SUB.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ArithOp::sub_m ({{ wd = sub (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithOp::sub_b_4_m ({{ qbd = sub_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::sub_h_2_m ({{ dhd = sub_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::sub_h_4_m ({{ qhd = sub_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::sub_w_2_m ({{ dwd = sub_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: ArithOp::sub_i_m ({{ wd = sub (wa, i8); }});
+
+                        } //> SUB.
+
+                    0x3: //< SBC.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: ArithOp::sbc_m      ({{ wd = sbc (wa, wb, rCarry); }});
+                            0x1: ArithOp::sbc_i_m ({{ wd = sbc (wa, i8, rCarry); }});
+
+                        } //> SBC.
+
+                    0x4: //< RSB.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0:
+                                decode FLAG_VEC default Unknown::unknown () {
+                                    0x0: ArithOp::rsb_m ({{ wd = rsb (wa, wb); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithOp::rsb_b_4_m ({{ qbd = rsb_b_4 (qba, qbb); }});
+                                            0x1: ArithOp::rsb_h_2_m ({{ dhd = rsb_h_2 (dha, dhb); }});
+                                            0x2: ArithOp::rsb_h_4_m ({{ qhd = rsb_h_4 (qha, qhb); }});
+                                            0x3: ArithOp::rsb_w_2_m ({{ dwd = rsb_w_2 (dwa, dwb); }});
+                                        }
+                                }
+
+                            0x1: ArithOp::rsb_i_m ({{ wd = rsb (wa, i8); }});
+
+                        } //> RSB.
+
+                    0x5: //< RSC.
+                        decode FLAG_IMM default Unknown::unknown () {
+
+                            0x0: ArithOp::rsc_m      ({{ wd = rsc (wa, wb, rCarry); }});
+                            0x1: ArithOp::rsc_i_m ({{ wd = rsc (wa, i8, rCarry); }});
+
+                        } //> RSC.
+
+                    0x7: //< ABS, NEG, SXB, SXH, ZXB, ZXH.
+                        decode OPCODE_LO default Unknown::unknown () {
+
+                            0x0: //< ABS.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0: ArithOp::abs_m ({{ wd = abs (wa); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithOp::abs_b_4_m ({{ qbd = abs_b_4 (qba); }});
+                                            0x1: ArithOp::abs_h_2_m ({{ dhd = abs_h_2 (dha); }});
+                                            0x2: ArithOp::abs_h_4_m ({{ qhd = abs_h_4 (qha); }});
+                                            0x3: ArithOp::abs_w_2_m ({{ dwd = abs_w_2 (dwa); }});
+                                        }
+
+                                } //> ABS.
+
+                            0x1: //< NEG.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0: ArithOp::neg_m ({{ wd = abs (wa); }});
+                                    0x1:
+                                        decode VEC default Unknown::unknown () {
+                                            0x0: ArithOp::neg_b_4_m ({{ qbd = neg_b_4 (qba); }});
+                                            0x1: ArithOp::neg_h_2_m ({{ dhd = neg_h_2 (dha); }});
+                                            0x2: ArithOp::neg_h_4_m ({{ qhd = neg_h_4 (qha); }});
+                                            0x3: ArithOp::neg_w_2_m ({{ dwd = neg_w_2 (dwa); }});
+                                        }
+
+                                } //> NEG.
+
+                            0x2: ArithOp::sxb_m ({{ wd = sxb (wa); }});
+                            0x3: ArithOp::sxh_m ({{ wd = sxh (wa); }});
+                            0x4: ArithOp::zxb_m ({{ wd = zxb (wa); }});
+                            0x5: ArithOp::zxh_m ({{ wd = zxh (wa); }});
+
+                        } //> ABS, NEG, SXB, SXH, ZXB, ZXH.
+
+                } //> FU(0b'10) + HI(0b'010).
+
+            0x4: //< FU(0b'10) + HI(0b'100).
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< MUL.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MulFPOp::mul_sp_m ({{ sfd = mul_sp_ (sfa, sfb); }});
+                                    0x1: MulFPOp::mul_dp_m ({{ dfd = mul_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1: MulFPOp::mul_sp_2_m ({{ dsfd = mul_sp_2_ (dsfa, dsfb); }});
+
+                        } //> MUL.FP.
+
+                    0x1: //< NMU.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MulFPOp::nmu_sp_m ({{ sfd = nmu_sp_ (sfa, sfb); }});
+                                    0x1: MulFPOp::nmu_dp_m ({{ dfd = nmu_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1: MulFPOp::nmu_sp_2_m ({{ dsfd = nmu_sp_2_ (dsfa, dsfb); }});
+
+                        } //> NMU.FP.
+
+                    0x2: //< MAC.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MacFPOp::mac_sp_m ({{ sfd = mac_sp_ (sfa, sfb, sfd); }});
+                                    0x1: MacFPOp::mac_dp_m ({{ dfd = mac_dp_ (dfa, dfb, dfd); }});
+                                }
+
+                            0x1: MacFPOp::mac_sp_2_m ({{ dsfd = mac_sp_2_ (dsfa, dsfb, dsfd); }});
+
+                        } //> MAC.FP.
+
+                    0x3: //< NMA.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MacFPOp::nma_sp_m ({{ sfd = nma_sp_ (sfa, sfb, sfd); }});
+                                    0x1: MacFPOp::nma_dp_m ({{ dfd = nma_dp_ (dfa, dfb, dfd); }});
+                                }
+
+                            0x1: MacFPOp::nma_sp_2_m ({{ dsfd = nma_sp_2_ (dsfa, dsfb, dsfd); }});
+
+                        } //> NMA.FP.
+
+                    0x4: //< MSU.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MacFPOp::msu_sp_m ({{ sfd = msu_sp_ (sfa, sfb, sfd); }});
+                                    0x1: MacFPOp::msu_dp_m ({{ dfd = msu_dp_ (dfa, dfb, dfd); }});
+                                }
+
+                            0x1: MacFPOp::msu_sp_2_m ({{ dsfd = msu_sp_2_ (dsfa, dsfb, dsfd); }});
+
+                        } //> MSU.FP.
+
+                    0x5: //< NMS.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: MacFPOp::nms_sp_m ({{ sfd = nms_sp_ (sfa, sfb, sfd); }});
+                                    0x1: MacFPOp::nms_dp_m ({{ dfd = nms_dp_ (dfa, dfb, dfd); }});
+                                }
+
+                            0x1: MacFPOp::nms_sp_2_m ({{ dsfd = nms_sp_2_ (dsfa, dsfb, dsfd); }});
+
+                        } //> NMS.FP.
+
+                    0x6: //< DIV.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: DivFPOp::div_sp_m ({{ sfd = div_sp_ (sfa, sfb); }});
+                                    0x1: DivFPOp::div_dp_m ({{ dfd = div_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1: DivFPOp::div_sp_2_m ({{ dsfd = div_sp_2_ (dsfa, dsfb); }});
+
+                        } //> DIV.FP.
+
+                } //> FU(0b'10) + HI(0b'100).
+
+            0x6: //< FU(0b'10) + HI(0b'110)
+                decode OPCODE_ME default Unknown::unknown () {
+
+                    0x0: //< ADD.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::add_sp_m ({{ sfd = add_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::add_dp_m ({{ dfd = add_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::add_sp_2_m ({{ dsfd = add_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> ADD.FP.
+
+                    0x2: //< SUB.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::sub_sp_m ({{ sfd = sub_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::sub_dp_m ({{ dfd = sub_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::sub_sp_2_m ({{ dsfd = sub_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> SUB.FP.
+
+                    0x4: //< RSB.FP.
+                        decode FLAG_VEC default Unknown::unknown () {
+
+                            0x0:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::rsb_sp_m ({{ sfd = rsb_sp_ (sfa, sfb); }});
+                                    0x1: ArithFPOp::rsb_dp_m ({{ dfd = rsb_dp_ (dfa, dfb); }});
+                                }
+
+                            0x1:
+                                decode FP default Unknown::unknown () {
+                                    0x0: ArithFPOp::rsb_sp_2_m ({{ dsfd = rsb_sp_2_ (dsfa, dsfb); }});
+                                }
+
+                        } //> RSB.FP.
+
+                    0x7: //< ABS.FP, NEG.FP, FPI.FP, IFP.FP, DSP, SDP, TRC.FP.
+                        decode OPCODE_LO default Unknown::unknown () {
+
+                            0x0: //< ABS.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::abs_sp_m ({{ sfd = abs_sp_ (sfa); }});
+                                            0x1: ArithFPOp::abs_dp_m ({{ dfd = abs_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::abs_sp_2_m ({{ dsfd = abs_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> ABS.FP.
+
+                            0x1: //< NEG.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::neg_sp_m ({{ sfd = neg_sp_ (sfa); }});
+                                            0x1: ArithFPOp::neg_dp_m ({{ dfd = neg_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::neg_sp_2_m ({{ dsfd = neg_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> NEG.FP.
+
+                            0x2: //< FPI.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::fpi_sp_m ({{ wd = fpi_sp_ (sfa); }});
+                                            0x1: ArithFPOp::fpi_dp_m ({{ wd = fpi_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::fpi_sp_2_m ({{ dwd = fpi_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> FPI.FP.
+
+                            0x3: //< IFP.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::ifp_sp_m ({{ sfd = ifp_sp_ (wa); }});
+                                            0x1: ArithFPOp::ifp_dp_m ({{ dfd = ifp_dp_ (wa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::ifp_sp_2_m ({{ dsfd = ifp_sp_2_ (dwa); }});
+                                        }
+
+                                } //> IFP.FP.
+
+                            0x4: //< DSP, SDP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::dsp_m ({{ sfd = dsp_ (dfd); }});
+                                            0x1: ArithFPOp::sdp_m ({{ dfd = sdp_ (sfd); }});
+                                        }
+
+                                } //> DSP, SDP.
+
+                            0x5: //< TRC.FP.
+                                decode FLAG_VEC default Unknown::unknown () {
+
+                                    0x0:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::trc_sp_m ({{ sfd = trc_sp_ (sfa); }});
+                                            0x1: ArithFPOp::trc_dp_m ({{ dfd = trc_dp_ (dfa); }});
+                                        }
+
+                                    0x1:
+                                        decode FP default Unknown::unknown () {
+                                            0x0: ArithFPOp::trc_sp_2_m ({{ dsfd = trc_sp_2_ (dsfa); }});
+                                        }
+
+                                } //> TRC.FP.
+
+                        } //> ABS.FP, NEG.FP, FPI.FP, IFP.FP, DSP, SDP, TRC.FP.
+
+                } //> FU(0b'10) + HI(0b'110).
 
         } //> FU(0b'10).
 

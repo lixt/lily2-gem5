@@ -1149,6 +1149,281 @@ inline Op32i_t rvs_b_4 (Op32i_t op)
     return Op32i_t (_rvs_4 (op.uval ()));
 }
 
+//
+// Floating-Point arithmetic instructions.
+//
+inline Op32f_t add_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_add (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t add_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_add (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t add_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_add (opa.fvlo (), opb.fvlo ()),
+                     _add (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32f_t sub_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_sub (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t sub_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_sub (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t sub_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_sub (opa.fvlo (), opb.fvlo ()),
+                     _sub (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32f_t rsb_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_rsb (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t rsb_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_rsb (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t rsb_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_rsb (opa.fvlo (), opb.fvlo ()),
+                     _rsb (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32f_t abs_sp_ (const Op32f_t& op)
+{
+    return Op32f_t (_abs (op.fval ()));
+}
+
+inline Op64f_t abs_dp_ (const Op64f_t& op)
+{
+    return Op64f_t (_abs (op.fval ()));
+}
+
+inline Opd32f_t abs_sp_2_ (const Opd32f_t& op)
+{
+    return Opd32f_t (_abs (op.fvlo ()),
+                     _abs (op.fvhi ()));
+}
+
+inline Op32f_t neg_sp_ (const Op32f_t& op)
+{
+    return Op32f_t (_neg (op.fval ()));
+}
+
+inline Op64f_t neg_dp_ (const Op64f_t& op)
+{
+    return Op64f_t (_neg (op.fval ()));
+}
+
+inline Opd32f_t neg_sp_2_ (const Opd32f_t& op)
+{
+    return Opd32f_t (_neg (op.fvlo ()),
+                     _neg (op.fvhi ()));
+}
+
+inline Op32i_t fpi_sp_ (const Op32f_t& op)
+{
+    return Op32i_t (_cvt<int32_t> (op.fval ()));
+}
+
+inline Op32i_t fpi_dp_ (const Op64f_t& op)
+{
+    return Op32i_t (_cvt<int32_t> (op.fval ()));
+}
+
+inline Opd32i_t fpi_sp_2_ (const Opd32f_t& op)
+{
+    return Opd32i_t (_cvt<int32_t> (op.fvlo ()),
+                     _cvt<int32_t> (op.fvhi ()));
+}
+
+inline Op32f_t ifp_sp_ (const Op32i_t& op)
+{
+    return Op32f_t (_cvt<float> (op.sval ()));
+}
+
+inline Op64f_t ifp_dp_ (const Op32i_t& op)
+{
+    return Op64f_t (_cvt<double> (op.sval ()));
+}
+
+inline Opd32f_t ifp_sp_2_ (const Opd32i_t& op)
+{
+    return Opd32f_t (_cvt<float> (op.svlo ()),
+                     _cvt<float> (op.svhi ()));
+}
+
+inline Op32f_t dsp_ (const Op64f_t& op)
+{
+    return Op32f_t (_cvt<float> (op.fval ()));
+}
+
+inline Op64f_t sdp_ (const Op32f_t& op)
+{
+    return Op64f_t (_cvt<double> (op.fval ()));
+}
+
+inline Op32f_t trc_sp_ (const Op32f_t& op)
+{
+    return Op32f_t (_trc (op.fval ()));
+}
+
+inline Op64f_t trc_dp_ (const Op64f_t& op)
+{
+    return Op64f_t (_trc (op.fval ()));
+}
+
+inline Opd32f_t trc_sp_2_ (const Opd32f_t& op)
+{
+    return Opd32f_t (_trc (op.fvlo ()),
+                     _trc (op.fvhi ()));
+}
+
+//
+// Floating-Point test instructions.
+//
+inline Op32i_t tgt_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_tgt (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tgt_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_tgt (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tge_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_tge (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tge_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_tge (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tlt_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_tlt (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tlt_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_tlt (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tle_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_tle (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tle_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_tle (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t teq_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_teq (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t teq_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_teq (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tne_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32i_t (_tne (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t tne_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op32i_t (_tne (opa.fval (), opb.fval ()));
+}
+
+inline Op32i_t gto_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tgt (opa.fvlo (), opb.fvlo ()) ||
+                    _tgt (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t gta_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tgt (opa.fvlo (), opb.fvlo ()) &&
+                    _tgt (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t geo_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tge (opa.fvlo (), opb.fvlo ()) ||
+                    _tge (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t gea_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tge (opa.fvlo (), opb.fvlo ()) &&
+                    _tge (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t lto_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tlt (opa.fvlo (), opb.fvlo ()) ||
+                    _tlt (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t lta_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tlt (opa.fvlo (), opb.fvlo ()) &&
+                    _tlt (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t leo_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tle (opa.fvlo (), opb.fvlo ()) ||
+                    _tle (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t lea_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tle (opa.fvlo (), opb.fvlo ()) &&
+                    _tle (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t eqo_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_teq (opa.fvlo (), opb.fvlo ()) ||
+                    _teq (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t eqa_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_teq (opa.fvlo (), opb.fvlo ()) &&
+                    _teq (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t neo_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tne (opa.fvlo (), opb.fvlo ()) ||
+                    _tne (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32i_t nea_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Op32i_t (_tne (opa.fvlo (), opb.fvlo ()) &&
+                    _tne (opa.fvhi (), opb.fvhi ()));
+}
 // Multiply instructions.
 inline Op32i_t mul (Op32i_t opa, Op32i_t opb)
 {
@@ -1604,6 +1879,121 @@ inline Opd32i_t rem_u_w_2 (Opd32i_t opa, Opd32i_t opb)
 {
     return Opd32i_t (_rem (opa.uvhi (), opb.uvhi ()),
                      _rem (opa.uvlo (), opb.uvlo ()));
+}
+
+//
+// Floating-Point multiply instructions.
+//
+inline Op32f_t mul_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_mul (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t mul_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_mul (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t mul_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_mul (opa.fvlo (), opb.fvlo ()),
+                     _mul (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32f_t nmu_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_nmu (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t nmu_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_nmu (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t nmu_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_nmu (opa.fvlo (), opb.fvlo ()),
+                     _nmu (opa.fvhi (), opb.fvhi ()));
+}
+
+inline Op32f_t mac_sp_ (const Op32f_t& opa, const Op32f_t& opb, const Op32f_t& opc)
+{
+    return Op32f_t (_mac (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Op64f_t mac_dp_ (const Op64f_t& opa, const Op64f_t& opb, const Op64f_t& opc)
+{
+    return Op64f_t (_mac (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Opd32f_t mac_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb, const Opd32f_t& opc)
+{
+    return Opd32f_t (_mac (opa.fvlo (), opb.fvlo (), opc.fvlo ()),
+                     _mac (opa.fvhi (), opb.fvhi (), opc.fvhi ()));
+}
+
+inline Op32f_t nma_sp_ (const Op32f_t& opa, const Op32f_t& opb, const Op32f_t& opc)
+{
+    return Op32f_t (_nma (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Op64f_t nma_dp_ (const Op64f_t& opa, const Op64f_t& opb, const Op64f_t& opc)
+{
+    return Op64f_t (_nma (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Opd32f_t nma_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb, const Opd32f_t& opc)
+{
+    return Opd32f_t (_nma (opa.fvlo (), opb.fvlo (), opc.fvlo ()),
+                     _nma (opa.fvhi (), opb.fvhi (), opc.fvhi ()));
+}
+
+inline Op32f_t msu_sp_ (const Op32f_t& opa, const Op32f_t& opb, const Op32f_t& opc)
+{
+    return Op32f_t (_msu (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Op64f_t msu_dp_ (const Op64f_t& opa, const Op64f_t& opb, const Op64f_t& opc)
+{
+    return Op64f_t (_msu (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Opd32f_t msu_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb, const Opd32f_t& opc)
+{
+    return Opd32f_t (_msu (opa.fvlo (), opb.fvlo (), opc.fvlo ()),
+                     _msu (opa.fvhi (), opb.fvhi (), opc.fvhi ()));
+}
+
+inline Op32f_t nms_sp_ (const Op32f_t& opa, const Op32f_t& opb, const Op32f_t& opc)
+{
+    return Op32f_t (_nms (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Op64f_t nms_dp_ (const Op64f_t& opa, const Op64f_t& opb, const Op64f_t& opc)
+{
+    return Op64f_t (_nms (opa.fval (), opb.fval (), opc.fval ()));
+}
+
+inline Opd32f_t nms_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb, const Opd32f_t& opc)
+{
+    return Opd32f_t (_nms (opa.fvlo (), opb.fvlo (), opc.fvlo ()),
+                     _nms (opa.fvhi (), opb.fvhi (), opc.fvhi ()));
+}
+
+inline Op32f_t div_sp_ (const Op32f_t& opa, const Op32f_t& opb)
+{
+    return Op32f_t (_div (opa.fval (), opb.fval ()));
+}
+
+inline Op64f_t div_dp_ (const Op64f_t& opa, const Op64f_t& opb)
+{
+    return Op64f_t (_div (opa.fval (), opb.fval ()));
+}
+
+inline Opd32f_t div_sp_2_ (const Opd32f_t& opa, const Opd32f_t& opb)
+{
+    return Opd32f_t (_div (opa.fvlo (), opb.fvlo ()),
+                     _div (opa.fvhi (), opb.fvhi ()));
 }
 
 // Memory access instructions.

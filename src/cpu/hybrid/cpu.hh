@@ -657,6 +657,7 @@ class HybridCPU : public BaseSimpleCPU
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
     typedef TheISA::Op32i_t Op32i_t;
+    typedef TheISA::Op64i_t Op64i_t;
     typedef TheISA::Op32f_t Op32f_t;
     typedef TheISA::Op64f_t Op64f_t;
     typedef TheISA::Opq8i_t Opq8i_t;
@@ -674,6 +675,7 @@ class HybridCPU : public BaseSimpleCPU
 
 
     const Op32i_t&  readOp32i  (Lily2StaticInst*, const OpCount_t&);
+    const Op64i_t&  readOp64i  (Lily2StaticInst*, const OpCount_t&);
     const Op32f_t&  readOp32f  (Lily2StaticInst*, const OpCount_t&);
     const Op64f_t&  readOp64f  (Lily2StaticInst*, const OpCount_t&);
     const Opq8i_t&  readOpq8i  (Lily2StaticInst*, const OpCount_t&);
@@ -683,6 +685,7 @@ class HybridCPU : public BaseSimpleCPU
     const Opd32f_t& readOpd32f (Lily2StaticInst*, const OpCount_t&);
 
     void setOp32i  (Lily2StaticInst*, const OpCount_t&, const Op32i_t& , const Op32i_t& );
+    void setOp64i  (Lily2StaticInst*, const OpCount_t&, const Op64i_t& , const Op64i_t& );
     void setOp32f  (Lily2StaticInst*, const OpCount_t&, const Op32f_t& , const Op32f_t& );
     void setOp64f  (Lily2StaticInst*, const OpCount_t&, const Op64f_t& , const Op64f_t& );
     void setOpq8i  (Lily2StaticInst*, const OpCount_t&, const Opq8i_t& , const Opq8i_t& );
@@ -703,17 +706,11 @@ class HybridCPU : public BaseSimpleCPU
     int IntMoveLatency;
     int IntMulLatency;
     int IntMacLatency;
-    int IntIterLatency;
+    int IntDivLatency;
+    int IntRemLatency;
     int IntMemLatency;
     int IntMemAddrLatency;
     int IntMiscLatency;
-    int SimdIntArithLatency;
-    int SimdIntLogicLatency;
-    int SimdIntTestLatency;
-    int SimdIntShiftLatency;
-    int SimdIntMulLatency;
-    int SimdIntMacLatency;
-    int SimdIntIterLatency;
 
     // Branch delay slot.
     int BranchDelaySlot;

@@ -18,23 +18,12 @@ output header {{
         std::string generateOperation (void) const;
     };
 
-    // Base class for multiply vector instructions.
-    class MulVecOp : public Lily2StaticInst
+    // Base class for floating-point multiply instructions.
+    class MulFPOp : public Lily2StaticInst
     {
       protected:
-        MulVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntMulOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
-
-    // Base class for multiply immediate instructions.
-    class MulImmOp : public Lily2StaticInst
-    {
-      protected:
-        MulImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntMulOp) {}
+        MulFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatMulOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -43,7 +32,7 @@ output header {{
 
 // Outputs to decoder.cc
 output decoder {{
-    // Mul instructions.
+    // Multiply instructions.
     std::string MulOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
@@ -74,8 +63,8 @@ output decoder {{
         return ss.str ();
     }
 
-    // Mul vector instructions.
-    std::string MulVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Floating-Point multiply instructions.
+    std::string MulFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -92,38 +81,7 @@ output decoder {{
         return ss.str ();
     }
 
-    std::string MulVecOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
-
-        return ss.str ();
-    }
-
-    // Mul immediate instructions.
-    std::string MulImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string MulImmOp::generateOperation (void) const
+    std::string MulFPOp::generateOperation (void) const
     {
         std::stringstream ss;
 
@@ -145,16 +103,8 @@ def format MulOp(code, *opt_flags) {{
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format MulVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'MulVecOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format MulImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'MulImmOp', code, opt_flags)
+def format MulFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'MulFPOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

@@ -18,23 +18,12 @@ output header {{
         std::string generateOperation (void) const;
     };
 
-    // Base class for arithmetic vector instructions.
-    class ArithVecOp : public Lily2StaticInst
+    // Base class for arithmetic float-point instructions.
+    class ArithFPOp : public Lily2StaticInst
     {
       protected:
-        ArithVecOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, SimdIntArithOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
-
-    // Base class for arithmetic immediate instructions.
-    class ArithImmOp : public Lily2StaticInst
-    {
-      protected:
-        ArithImmOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntArithOp) {}
+        ArithFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatArithOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -55,8 +44,11 @@ output decoder {{
         printDestOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOp (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -68,14 +60,17 @@ output decoder {{
         printDestOpValue (ss, 0);
         ss << ",";
         printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOpValue (ss, 1);
+        }
 
         return ss.str ();
     }
 
-    // Arithmetic vector instructions.
-    std::string ArithVecOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    // Arithmetic float-point instructions.
+    std::string ArithFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
     {
         std::stringstream ss;
 
@@ -86,52 +81,27 @@ output decoder {{
         printDestOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOp (ss, 1);
+        }
 
         return ss.str ();
     }
 
-    std::string ArithVecOp::generateOperation (void) const
+    std::string ArithFPOp::generateOperation (void) const
     {
         std::stringstream ss;
 
         printDestOpValue (ss, 0);
         ss << ",";
         printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
 
-        return ss.str ();
-    }
-
-    // Arithmetic immediate instructions.
-    std::string ArithImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
-
-        return ss.str ();
-    }
-
-    std::string ArithImmOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOpValue (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -145,16 +115,8 @@ def format ArithOp(code, *opt_flags) {{
     exec_output = BasicExecute.subst(iop)
 }};
 
-def format ArithVecOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'ArithVecOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format ArithImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'ArithImmOp', code, opt_flags)
+def format ArithFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'ArithFPOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)
