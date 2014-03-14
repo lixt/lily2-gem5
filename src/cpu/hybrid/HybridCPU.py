@@ -85,13 +85,21 @@ class HybridCPU(BaseSimpleCPU):
     IntMemLatency       = Param.Int (4, "Integer memory instruction latency")
     IntMemAddrLatency   = Param.Int (1, "Integer memory offset self-modify instruction latency")
     IntMiscLatency      = Param.Int (1, "Integer miscellaneous instruction latency")
+    FloatArithLatency   = Param.Int (1, "Float arithmetic instruction latency")
+    FloatTestLatency    = Param.Int (1, "Float test instruction latency")
+    FLoatMulLatency     = Param.Int (2, "Float multiplication instruction latency")
+    FloatMacLatency     = Param.Int (3, "Float multiplication and addition instruction latency")
+    FloatDivLatency     = Param.Int (1, "Float division instruction latency")
+    FloatSqrLatency     = Param.Int (1, "Float square instruction latency")
 
     # Branch delay slots.
     BranchDelaySlot = Param.Int (6, "Branch delay slot")
 
     # Interative instruction pipeline stalls.
-    IntDivStall = Param.Int (10, "Integer division instruction iterative stall")
-    IntRemStall = Param.Int (10, "Integer remainder instruction iterative stall")
+    IntDivStall = Param.Int (20, "Integer division instruction iterative stall")
+    IntRemStall = Param.Int (20, "Integer remainder instruction iterative stall")
+    FloatDivStall = Param.Int (20, "Float division instruction iterative stall")
+    FloatSqrStall = Param.Int (20, "Float square instruction iterative stall ")
 
     # Load instruction new latency when value prediction is right.
     IntMemPrededLatency = Param.Int (1, "Integer memory access instruction latency when value prediction is right.")

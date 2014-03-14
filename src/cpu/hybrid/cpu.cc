@@ -158,9 +158,17 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       IntMemLatency       (p->IntMemLatency),
       IntMemAddrLatency   (p->IntMemAddrLatency),
       IntMiscLatency      (p->IntMiscLatency),
+      FloatArithLatency   (p->FloatArithLatency),
+      FloatTestLatency    (p->FloatTestLatency),
+      FloatMulLatency     (p->FLoatMulLatency),
+      FloatMacLatency     (p->FloatMacLatency),
+      FloatDivLatency     (p->FloatDivLatency),
+      FloatSqrLatency     (p->FloatSqrLatency),
       BranchDelaySlot     (p->BranchDelaySlot),
       IntDivStall         (p->IntDivStall),
       IntRemStall         (p->IntRemStall),
+      FloatDivStall       (p->FloatDivStall),
+      FloatSqrStall       (p->FloatSqrStall),
       IntMemPrededLatency (p->IntMemPrededLatency)
 {
     _status = Idle;
@@ -2650,14 +2658,33 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
         case IntMoveOp     : return Cycles (IntMoveLatency);
         case IntMulOp      : return Cycles (IntMulLatency);
         case IntMacOp      : return Cycles (IntMacLatency);
-        case IntDivOp      : return Cycles (IntDivLatency);
+        case IntDiviOp     : return Cycles (IntDivLatency);
         case IntRemOp      : return Cycles (IntRemLatency);
         case IntMemOp      : if (memFlag) {
                                  return Cycles (IntMemLatency);
                              } else {
                                  return Cycles (IntMemAddrLatency);
                              }
+        case IntMiscOp     : return Cycles (IntMiscLatency);
+        case FloatArithOp  : return Cycles (FloatArithLatency);
+        case FloatTestOp   : return Cycles (FloatTestLatency);
+        case FloatMulOp    : return Cycles (FloatMulLatency);
+        case FloatMacOp    : return Cycles (FloatMacLatency);
+        case FloatDiviOp   : return Cycles (FloatDivLatency);
+        case FloatSqrOp    : return Cycles (FloatSqrLatency);
         default            : assert (0);
+    }
+}
+
+Cycles
+HybridCPU::iterInstStallFactory (const OpClass& opClass) const
+{
+    switch (opClass) {
+        case IntDiviOp   : return Cycles (IntDivStall);
+        case IntRemOp    : return Cycles (IntRemStall);
+        case FloatDiviOp : return Cycles (FloatDivStall);
+        case FloatSqrOp  : return Cycles (FloatSqrStall);
+        default          : assert (0);
     }
 }
 

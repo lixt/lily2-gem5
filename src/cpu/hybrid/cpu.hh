@@ -654,6 +654,8 @@ class HybridCPU : public BaseSimpleCPU
     // Factory of functional unit delay slots.
     Cycles funcUnitLatencyFactory (const OpClass &opClass, bool memFlag) const;
 
+    Cycles iterInstStallFactory (const OpClass &opClass) const;
+
     typedef TheISA::FuncUnit_t FuncUnit_t;
 
     typedef TheISA::Op32i_t Op32i_t;
@@ -711,6 +713,12 @@ class HybridCPU : public BaseSimpleCPU
     int IntMemLatency;
     int IntMemAddrLatency;
     int IntMiscLatency;
+    int FloatArithLatency;
+    int FloatTestLatency;
+    int FloatMulLatency;
+    int FloatMacLatency;
+    int FloatDivLatency;
+    int FloatSqrLatency;
 
     // Branch delay slot.
     int BranchDelaySlot;
@@ -718,6 +726,8 @@ class HybridCPU : public BaseSimpleCPU
     // Iterative instruction stalls.
     int IntDivStall;
     int IntRemStall;
+    int FloatDivStall;
+    int FloatSqrStall;
 
     // Load instruction latency if value preidiction is right.
     int IntMemPrededLatency;
