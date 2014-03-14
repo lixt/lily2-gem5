@@ -99,6 +99,7 @@ const OpClass IntShiftOp = Enums::IntShift;
 const OpClass IntBitOp = Enums::IntBit;
 const OpClass IntMulOp = Enums::IntMul;
 const OpClass IntMacOp = Enums::IntMac;
+const OpClass IntDiviOp = Enums::IntDivi;
 const OpClass IntRemOp = Enums::IntRem;
 const OpClass IntMemOp = Enums::IntMem;
 const OpClass IntMiscOp = Enums::IntMisc;
@@ -106,6 +107,8 @@ const OpClass FloatArithOp = Enums::FloatArith;
 const OpClass FloatTestOp = Enums::FloatTest;
 const OpClass FloatMulOp = Enums::FloatMul;
 const OpClass FloatMacOp = Enums::FloatMac;
+const OpClass FloatDiviOp = Enums::FloatDivi;
+const OpClass FloatSqrOp = Enums::FloatSqr;
 
 const OpClass Num_OpClasses = Num_OpClass;
 

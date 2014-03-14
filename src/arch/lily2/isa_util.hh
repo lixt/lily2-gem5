@@ -12,11 +12,19 @@
 
 namespace Lily2ISA
 {
-// Arithmetic instructions.
+//
+// Arithmetic.
+//
 template <class T>
 T _add (T opa, T opb)
 {
     return opa + opb;
+}
+
+template <class T>
+T _add (T opa, T opb, T opc, T opd)
+{
+    return opa + opb + opc + opd;
 }
 
 template <class T>
@@ -475,6 +483,19 @@ T _rem (T opa, T opb)
 {
     return opa % opb;
 }
+
+template <class T>
+T _sqr (T op)
+{
+    return sqrt (op);
+}
+
+template <class T>
+T _rpc (T opc)
+{
+    return 1 / opc;
+}
+
 } // namespace Lily2ISA
 
 #endif // __ARCH_LILY2_ISA_UTIL_HH__

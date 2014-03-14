@@ -1642,6 +1642,54 @@ HybridCPU::readOp32i (Lily2StaticInst *si, const OpCount_t& idx)
     return *op;
 }
 
+const Op64i_t&
+HybridCPU::readOp64i (Lily2StaticInst *si, const OpCount_t& idx)
+{
+    Op64i_t *op;
+
+    // Dynamic cast checking.
+    assert (op = dynamic_cast<Op64i_t *> (si->getSrcOp (idx)));
+
+    if (op->immFlag ()) {
+        // The immediate value is already stored in OP.
+    } else {
+        uint64_t val;
+        uint32_t vlo, vhi;
+        RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                vlo = getRegValue (thread->getXRegFile (), regIndex    );
+                vhi = getRegValue (thread->getXRegFile (), regIndex + 1);
+                break;
+
+            case TheISA::REG_Y:
+                vlo = getRegValue (thread->getYRegFile (), regIndex    );
+                vhi = getRegValue (thread->getYRegFile (), regIndex + 1);
+                break;
+
+            case TheISA::REG_G:
+                vlo = getRegValue (thread->getGRegFile (), regIndex    );
+                vhi = getRegValue (thread->getGRegFile (), regIndex + 1);
+                break;
+
+            case TheISA::REG_M:
+                vlo = getRegValue (thread->getMRegFile (), regIndex    );
+                vhi = getRegValue (thread->getMRegFile (), regIndex + 1);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        // Sets the operand value.
+        val = static_cast<uint64_t> (vlo) + ((static_cast<uint64_t> (vhi)) << 32);
+        op->setUval (val);
+    }
+
+    return *op;
+}
 const Op32f_t&
 HybridCPU::readOp32f (Lily2StaticInst *si, const OpCount_t& idx)
 {

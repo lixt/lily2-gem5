@@ -376,6 +376,7 @@ class CheckerCPU : public BaseCPU
 #if THE_ISA == LILY2_ISA
     // LILY2 interfaces.
     typedef TheISA::Op32i_t Op32i_t;
+    typedef TheISA::Op64i_t Op64i_t;
     typedef TheISA::Op32f_t Op32f_t;
     typedef TheISA::Op64f_t Op64f_t;
     typedef TheISA::Opq8i_t Opq8i_t;
@@ -393,6 +394,11 @@ class CheckerCPU : public BaseCPU
     Op32i_t readOp32i (const Lily2StaticInst *si, int idx)
     {
         return Op32i_t (static_cast<uint32_t> (0));
+    }
+
+    Op64i_t readOp64i (const Lily2StaticInst *si, int idx)
+    {
+        return Op64i_t (static_cast<uint64_t> (0));
     }
 
     Op32f_t readOp32f (const Lily2StaticInst *si, int idx)
@@ -432,6 +438,10 @@ class CheckerCPU : public BaseCPU
 
     void setOp32i (const Lily2StaticInst *si, int idx,
                    Op32i_t &val, Op32i_t &mask)
+    {}
+
+    void setOp64i (const Lily2StaticInst *si, int idx,
+                   Op64i_t& val, Op64i_t& mask)
     {}
 
     void setOp32f (const Lily2StaticInst *si, int idx,

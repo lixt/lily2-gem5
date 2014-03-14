@@ -55,10 +55,16 @@ def operands {{
     'wa': ('Op32i', 'sw', 'RA', '', 2),
     'wb': ('Op32i', 'sw', 'RB', '', 3),
 
+    # 32-bit integer cross-cluster operands.
+    'xwd': ('XOp32i', 'sw', 'RD', '', 1),
+
     # 64-bit integer operands.
-    'xd': ('Op64i', 'sw', 'RD', '', 1),
-    'xa': ('Op64i', 'sw', 'RA', '', 2),
-    'xb': ('Op64i', 'sw', 'RB', '', 3),
+    'xd': ('Op64i', 'sx', 'RD', '', 1),
+    'xa': ('Op64i', 'sx', 'RA', '', 2),
+    'xb': ('Op64i', 'sx', 'RB', '', 3),
+
+    # 64-bit integer corss-cluster operands.
+    'xxd': ('XOp64i', 'sx', 'RD', '', 1),
 
     # Single-Precision operands.
     'sfd': ('Op32f', 'sf', 'RD', '', 1),

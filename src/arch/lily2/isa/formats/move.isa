@@ -17,17 +17,6 @@ output header {{
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
-
-    // Base class for arithmetic vector instructions.
-    class MoveImmOp : public Lily2StaticInst
-    {
-      protected:
-        MoveImmOp (const char *mnemonic, MachInst machInst, OpClass opClass)
-            : Lily2StaticInst (mnemonic, machInst, IntMoveOp) {}
-
-        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
-        std::string generateOperation (void) const;
-    };
 }};
 
 // Outputs to decoder.cc
@@ -57,44 +46,10 @@ output decoder {{
 
         return ss.str ();
     }
-
-    std::string MoveImmOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
-    {
-        std::stringstream ss;
-
-        printFuncUnit (ss);
-        printCond (ss);
-        printName (ss);
-
-        printDestOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 0);
-
-        return ss.str ();
-    }
-
-    std::string MoveImmOp::generateOperation (void) const
-    {
-        std::stringstream ss;
-
-        printDestOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 0);
-
-        return ss.str ();
-    }
 }};
 
 def format MoveOp(code, *opt_flags) {{
     iop = InstObjParams(name, Name, 'MoveOp', code, opt_flags)
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = CondNopCheckDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format MoveImmOp(code, *opt_flags) {{
-    iop = InstObjParams(name, Name, 'MoveImmOp', code, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = BasicConstructor.subst(iop)
     decode_block = CondNopCheckDecode.subst(iop)

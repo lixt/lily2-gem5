@@ -585,6 +585,36 @@ class Op32iOperand(Operand):
 
         return wb
 
+class XOp32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcRegOp (OP_32I, REG_FILE, %s, 1);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestRegOp (OP_32I, REG_FILE, %s, 1);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOp32i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
+
+        return wb
+
 class Op64iOperand(Operand):
     def isOp(self):
         return 1
@@ -598,6 +628,36 @@ class Op64iOperand(Operand):
 
         if self.is_dest:
             c_dest = '\n\t  decodeDestRegOp (OP_64I, REG_FILE, %s);' % (self.reg_spec)
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp64i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+    def makeWrite(self, predWrite):
+        wb = '''
+        {
+            %s final_val = %s;
+            xc->setOp64i (this, %s, final_val, %s);\n
+        }''' % (self.ctype, self.base_name, self.dest_op_idx, self.base_name + '_mask')
+
+        return wb
+
+class XOp64iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcRegOp (OP_64I, REG_FILE, %s, 1);' % (self.reg_spec)
+
+        if self.is_dest:
+            c_dest = '\n\t  decodeDestRegOp (OP_64I, REG_FILE, %s, 1);' % (self.reg_spec)
 
         return c_src + c_dest
 

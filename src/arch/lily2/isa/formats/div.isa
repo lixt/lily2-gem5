@@ -12,7 +12,7 @@ output header {{
     {
       protected:
         DivOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntDivOp) {}
+            Lily2StaticInst (mnemonic, machInst, IntDiviOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -23,7 +23,7 @@ output header {{
     {
       protected:
         DivFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, FloatDivOp) {}
+            Lily2StaticInst (mnemonic, machInst, FloatDiviOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -39,6 +39,19 @@ output header {{
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
     };
+
+    // Base class for floating-point square instructions.
+    class SqrFPOp : public Lily2StaticInst
+    {
+      protected:
+        SqrFPOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
+            Lily2StaticInst (mnemonic, machInst, FloatDiviOp) {}
+
+        std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
+        std::string generateOperation (void) const;
+    };
+
+
 }};
 
 // Outputs to decoder.cc
@@ -55,8 +68,11 @@ output decoder {{
         printDestOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOp (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -68,8 +84,11 @@ output decoder {{
         printDestOpValue (ss, 0);
         ss << ",";
         printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOpValue (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -86,8 +105,11 @@ output decoder {{
         printDestOp (ss, 0);
         ss << ",";
         printSrcOp (ss, 0);
-        ss << ",";
-        printSrcOp (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOp (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -99,8 +121,11 @@ output decoder {{
         printDestOpValue (ss, 0);
         ss << ",";
         printSrcOpValue (ss, 0);
-        ss << ",";
-        printSrcOpValue (ss, 1);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOpValue (ss, 1);
+        }
 
         return ss.str ();
     }
@@ -135,6 +160,43 @@ output decoder {{
 
         return ss.str ();
     }
+
+    // Floating-Point square instructions.
+    std::string SqrFPOp::generateDisassembly (Addr pc, const SymbolTable *symtab) const
+    {
+        std::stringstream ss;
+
+        printFuncUnit (ss);
+        printCond (ss);
+        printName (ss);
+
+        printDestOp (ss, 0);
+        ss << ",";
+        printSrcOp (ss, 0);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOp (ss, 1);
+        }
+
+        return ss.str ();
+    }
+
+    std::string SqrFPOp::generateOperation (void) const
+    {
+        std::stringstream ss;
+
+        printDestOpValue (ss, 0);
+        ss << ",";
+        printSrcOpValue (ss, 0);
+
+        if (getNumSrcOps () > 1) {
+            ss << ",";
+            printSrcOpValue (ss, 1);
+        }
+
+        return ss.str ();
+    }
 }};
 
 def format DivOp(code, *opt_flags) {{
@@ -160,3 +222,13 @@ def format RemOp(code, *opt_flags) {{
     decode_block = CondNopCheckDecode.subst(iop)
     exec_output = BasicExecute.subst(iop)
 }};
+
+def format SqrFPOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'SqrFPOp', code, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = CondNopCheckDecode.subst(iop)
+    exec_output = BasicExecute.subst(iop)
+}};
+
+
