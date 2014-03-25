@@ -132,6 +132,7 @@ Lily2LiveProcess::argsInit(int pageSize)
 
     // set bottom of stack
     stack_min = stack_base - space_needed;
+    stack_min = 0;
     // align it
     stack_min = roundDown(stack_min, pageSize);
     stack_size = stack_base - stack_min;

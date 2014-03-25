@@ -2268,7 +2268,7 @@ inline Addr getTA (Addr base)
 
 inline Addr getTA (Addr base, const Op32i_t& disp)
 {
-    return (Addr) (base + disp.sval ());
+    return (Addr) (base + (disp.sval () << 2));
 }
 
 inline Op32i_t getRA (Addr addr)

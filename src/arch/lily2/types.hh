@@ -40,14 +40,14 @@ namespace Lily2ISA
 typedef uint32_t MachInst;
 typedef uint64_t ExtMachInst;
 
-// Types for dispatch modes.
-enum DispMode_t {
-    DISPMODE_NIL,
+// Types for running modes.
+enum RunMode_t {
+    RM_NIL,
 
-    DISPMODE_RISC,
-    DISPMODE_VLIW,
+    RM_RISC,
+    RM_VLIW,
 
-    NUM_DISPMODE
+    NUM_RM
 };
 
 // Types for functional units.

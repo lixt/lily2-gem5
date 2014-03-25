@@ -699,8 +699,8 @@ decode FU default Unknown::unknown () {
             0x5: //< FU(0b'00) + HI(0b'101).
                 decode OPCODE_ME default Unknown::unknown () {
 
-                    0x0, 0x1: MoveOp::mkl_a ({{ wd = mkl_ (i16); wd_mask = maskGenOp32i (15,  0); }});
-                    0x2, 0x3: MoveOp::mkh_a ({{ wd = mkh_ (i16); wd_mask = maskGenOp32i (31, 16); }});
+                    0x0, 0x1: MoveOp::mkl_a ({{ wd = mkl_ (u16); wd_mask = maskGenOp32i (15,  0); }});
+                    0x2, 0x3: MoveOp::mkh_a ({{ wd = mkh_ (u16); wd_mask = maskGenOp32i (31, 16); }});
 
                     0x7: //< MRW, SRW, MRD, SRD, MAW, SAW, MAD, SAD, MCW, SCW
                         decode OPCODE_LO default Unknown::unknown () {
@@ -739,16 +739,16 @@ decode FU default Unknown::unknown () {
                     0x2: //< UCT.
                         decode VEC default Unknown::unknown () {
 
-                            0x0: BitOp::uct_b_4_a ({{ wd = uct_b_4 (wa, i2); }});
-                            0x1: BitOp::uct_h_2_a ({{ wd = uct_h_2 (wa, i1); }});
+                            0x0: BitOp::uct_b_4_a ({{ wd = uct_b_4 (wa, u2); }});
+                            0x1: BitOp::uct_h_2_a ({{ wd = uct_h_2 (wa, u1); }});
 
                         } //> UCT.
 
                     0x3: //< UCT.
                         decode VEC default Unknown::unknown () {
 
-                            0x0: BitOp::mct_b_4_a ({{ wd = mct_b_4 (wa, i2); }});
-                            0x1: BitOp::mct_h_2_a ({{ wd = mct_h_2 (wa, i1); }});
+                            0x0: BitOp::mct_b_4_a ({{ wd = mct_b_4 (wa, u2); }});
+                            0x1: BitOp::mct_h_2_a ({{ wd = mct_h_2 (wa, u1); }});
 
                         } //> UCT.
 
@@ -1614,7 +1614,7 @@ decode FU default Unknown::unknown () {
                 decode OPCODE_ME default Unknown::unknown () {
 
                     0x0: MacFPOp::cmu_csp_m ({{ dsfd = cmu_csp_ (dsfa, dsfb); }});
-                    0x1: MacFPOp::crt_csp_m ({{ dsfd = crt_csp_ (dsfa, i2); }});
+                    0x1: MacFPOp::crt_csp_m ({{ dsfd = crt_csp_ (dsfa, u2); }});
                     0x4: MacFPOp::dmu_sp_2_m ({{ sfd = dmu_sp_2_ (dsfa, dsfb); }});
 
                     0x7: //< SQR.FP, RPC.FP.
@@ -2562,11 +2562,11 @@ decode FU default Unknown::unknown () {
                     0x5: //< RET, IRT.
                         decode OPCODE_LO default Unknown::unknown () {
 
-                            0x0: BranchOp::ret_d ({{ Addr TA = getTA (xc->rpc ());
+                            0x0: BranchOp::ret_d ({{ Addr TA = getTA (rRAddr);
                                                      xc->bpc (TA);
                                                      }}, IsControl, IsRet);
 
-                            0x1: BranchOp::irt_d ({{ Addr TA = getTA (xc->rpc ());
+                            0x1: BranchOp::irt_d ({{ Addr TA = getTA (rRAddr);
                                                      xc->bpc (TA);
                                                      }}, IsControl, IsRet);
 
@@ -2586,7 +2586,7 @@ decode FU default Unknown::unknown () {
 
                             0x2: MiscOp::smv_d ({{ ; }}, IsModeSwitch, IsToVliw);
 
-                            0x3: MiscOp::sys_d ({{ xc->syscall (i10.uval ()); }}, IsSyscall);
+                            0x3: MiscOp::sys_d ({{ xc->syscall (u10.uval ()); }}, IsSyscall);
 
                         } //> NOP, SMR, SMV, SYS.
 
@@ -2595,8 +2595,8 @@ decode FU default Unknown::unknown () {
             0x6: //< FU(0b'00) + HI(0b'110).
                 decode OPCODE_ME default Unknown::unknown () {
 
-                    0x0, 0x1: MoveOp::mkl_d ({{ wd = mkl_ (i16); wd_mask = maskGenOp32i (15,  0); }});
-                    0x2, 0x3: MoveOp::mkh_d ({{ wd = mkh_ (i16); wd_mask = maskGenOp32i (31, 16); }});
+                    0x0, 0x1: MoveOp::mkl_d ({{ wd = mkl_ (u16); wd_mask = maskGenOp32i (15,  0); }});
+                    0x2, 0x3: MoveOp::mkh_d ({{ wd = mkh_ (u16); wd_mask = maskGenOp32i (31, 16); }});
 
                     0x7: //< MRW, SRW, MRD, SRD, MAW, SAW, MAD, SAD, MCW, SCW
                         decode OPCODE_LO default Unknown::unknown () {
@@ -2635,16 +2635,16 @@ decode FU default Unknown::unknown () {
                     0x2: //< UCT.
                         decode VEC default Unknown::unknown () {
 
-                            0x0: BitOp::uct_b_4_d ({{ wd = uct_b_4 (wa, i2); }});
-                            0x1: BitOp::uct_h_2_d ({{ wd = uct_h_2 (wa, i1); }});
+                            0x0: BitOp::uct_b_4_d ({{ wd = uct_b_4 (wa, u2); }});
+                            0x1: BitOp::uct_h_2_d ({{ wd = uct_h_2 (wa, u1); }});
 
                         } //> UCT.
 
                     0x3: //< UCT.
                         decode VEC default Unknown::unknown () {
 
-                            0x0: BitOp::mct_b_4_d ({{ wd = mct_b_4 (wa, i2); }});
-                            0x1: BitOp::mct_h_2_d ({{ wd = mct_h_2 (wa, i1); }});
+                            0x0: BitOp::mct_b_4_d ({{ wd = mct_b_4 (wa, u2); }});
+                            0x1: BitOp::mct_h_2_d ({{ wd = mct_h_2 (wa, u1); }});
 
                         } //> UCT.
 

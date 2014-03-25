@@ -30,8 +30,9 @@ output decoder {{
         printCond (ss);
         printName (ss);
 
-        // Syscall instruction has a source operand.
-        printSrcOp (ss, 0);
+        if (getNumSrcOps () > 0) {
+            printSrcOp (ss, 0);
+        }
 
         return ss.str ();
     }
@@ -40,8 +41,9 @@ output decoder {{
     {
         std::stringstream ss;
 
-        // Syscall instruction has a source operand.
-        printSrcOpValue (ss, 0);
+        if (getNumSrcOps () > 0) {
+            printSrcOpValue (ss, 0);
+        }
 
         return ss.str ();
     }

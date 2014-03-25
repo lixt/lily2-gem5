@@ -81,8 +81,12 @@ def template BasicExecute {{
 
     bool %(class_name)s::execCond (%(CPU_exec_context)s *xc) const
     {
-        bool condOp = xc->readCond (this);
-        return (getCondZ () == 0) ? condOp : !condOp;
+        if (getCond () == COND_ALWAYS) {
+            return true;
+        } else {
+            bool condOp = xc->readCond (this);
+            return (getCondZ () == 0) ? !condOp : condOp;
+        }
     }
 }};
 

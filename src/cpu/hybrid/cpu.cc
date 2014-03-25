@@ -113,17 +113,14 @@ HybridCPU::init()
 const std::string HybridCPU::PipelineStateStr[] =
 {
     "FaultState",
+
     "R_Idle",
     "R_Run",
-    "R_Flush",
-    "R_InstWait",
     "R_Advance",
 
     "V_Idle",
-    "R_2_R",
-    "R_2_V",
-    "V_2_R",
-    "V_2_V",
+    "V_Run",
+    "V_Advance",
 };
 
 HybridCPU::HybridCPU(HybridCPUParams *p)
@@ -143,7 +140,7 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       currentBBVInstCount(0),
       pipelineMacho (R_Idle),
       cycle (0),
-      numIssued (0), IssueWidth (p->IssueWidth),
+      numIssued (0), IssueWidth (p->IssueWidth), lastFuncUnit (FU_NIL),
       xRegDepTable (), yRegDepTable (), gRegDepTable (), mRegDepTable (),
       IntArithLatency     (p->IntArithLatency),
       IntLogicLatency     (p->IntLogicLatency),
@@ -155,9 +152,11 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       IntMacLatency       (p->IntMacLatency),
       IntDivLatency       (p->IntDivLatency),
       IntRemLatency       (p->IntRemLatency),
-      IntMemLatency       (p->IntMemLatency),
+      IntMemSLatency      (p->IntMemSLatency),
+      IntMemLLatency      (p->IntMemLLatency),
       IntMemAddrLatency   (p->IntMemAddrLatency),
       IntMiscLatency      (p->IntMiscLatency),
+      IntBranchLatency    (p->IntBranchLatency),
       FloatArithLatency   (p->FloatArithLatency),
       FloatTestLatency    (p->FloatTestLatency),
       FloatMulLatency     (p->FLoatMulLatency),
@@ -165,11 +164,11 @@ HybridCPU::HybridCPU(HybridCPUParams *p)
       FloatDivLatency     (p->FloatDivLatency),
       FloatSqrLatency     (p->FloatSqrLatency),
       BranchDelaySlot     (p->BranchDelaySlot),
-      IntDivStall         (p->IntDivStall),
-      IntRemStall         (p->IntRemStall),
-      FloatDivStall       (p->FloatDivStall),
-      FloatSqrStall       (p->FloatSqrStall),
-      IntMemPrededLatency (p->IntMemPrededLatency)
+      IntDivBlock         (p->IntDivBlock),
+      IntRemBlock         (p->IntRemBlock),
+      FloatDivBlock       (p->FloatDivBlock),
+      FloatSqrBlock       (p->FloatSqrBlock),
+      ModeDelaySlot       (p->ModeDelaySlot)
 {
     _status = Idle;
 
@@ -525,7 +524,7 @@ HybridCPU::tick()
 #if DEBUG
     std::cout << std::endl;
     std::cout << "********************** CYCLE "
-              << cycle
+              << IO_CYCLE << cycle
               << " **********************" << std::endl;
 #endif
 
@@ -552,7 +551,11 @@ HybridCPU::tick()
 
         beginTick ();
 
-        while (curPipelineState == R_Idle || curPipelineState == R_Run) {
+        while (curPipelineState == R_Idle ||
+               curPipelineState == R_Run  ||
+               curPipelineState == V_Idle ||
+               curPipelineState == V_Run) {
+
             // Fetches the instruction.
             fetch ();
 
@@ -572,17 +575,8 @@ HybridCPU::tick()
             postExecute ();
         }
 
-        // Sets the pipeline state callbacks.
-        setCallback ();
-
-        // Calls the pre-update corresponding callbacks.
-        callPrePipelineCallback ();
-
-        // Renews the pipeline.
-        renew ();
-
-        // Calls the post-update corresponding callbacks.
-        callPostPipelineCallback ();
+        // Refreshs the pipeline.
+        refresh ();
 
         endTick ();
 
@@ -759,8 +753,8 @@ HybridCPU::decode (void)
     curStaticInst = NULL;
     TheISA::Decoder *decoder = &(thread->decoder);
 
-    StaticInstPtr tmpStaticInst = decoder->decodeInst (inst, this);
-    curStaticInst = dynamic_cast<Lily2StaticInst *> (tmpStaticInst.get ());
+    preStaticInst = decoder->decodeInst (inst, this);
+    curStaticInst = dynamic_cast<Lily2StaticInst *> (preStaticInst.get ());
 
 #if DEBUG
     std::cout << "disassemble: "
@@ -772,7 +766,18 @@ HybridCPU::decode (void)
 void
 HybridCPU::dispatch (void)
 {
-    rDispatch ();
+    switch (curRunMode ()) {
+
+        case RM_RISC: rDispatch (); break;
+
+        case RM_VLIW: vDispatch (); break;
+
+        default:
+            std::cerr << "internal error: illegal running mode "
+                      << "(" << curRunMode () << ")."
+                      << std::endl;
+            assert (0);
+    }
 }
 
 void
@@ -828,6 +833,27 @@ HybridCPU::vDispatch (void)
     // Checks the following things in Vliw dispatch.
     // 1. Functional unit ascending order.
 
+    bool vIsFUDescend = (curStaticInst->getStaticFuncUnit () <= lastFuncUnit);
+
+    bool vIsNoIssue = vIsFUDescend;
+
+    if (vIsNoIssue) {
+        curStaticInst = NULL;
+    }
+
+#if DEBUG
+    if (!vIsNoIssue) {
+        std::cout << "dispatch success." << std::endl;
+    } else {
+        std::cout << "dispatch failure." << std::endl;
+
+        if (vIsFUDescend) {
+            std::cout << "failure reason: functional unit descending order." << std::endl;
+        }
+    }
+
+    std::cout << "----------> vDispatch" << std::endl << std::endl;
+#endif
 }
 
 void
@@ -854,11 +880,35 @@ HybridCPU::execute (void)
 void
 HybridCPU::preExecute (void)
 {
-    switch (dispModeFactory (curPipelineState)) {
-        case TheISA::DISPMODE_RISC: rPreExecute (); break;
-        case TheISA::DISPMODE_VLIW: vPreExecute (); break;
-        default: assert (0);
+    switch (curRunMode ()) {
+
+        case RM_RISC: rPreExecute (); break;
+
+        case RM_VLIW: vPreExecute (); break;
+
+        default:
+            std::cerr << "internal error: illegal running mode "
+                      << "(" << curRunMode () << ")."
+                      << std::endl;
+            assert (0);
     }
+}
+
+void
+HybridCPU::vPreExecute (void)
+{
+#if DEBUG
+    std::cout << "<---------- vPreExecute" << std::endl;
+#endif
+
+    if (curStaticInst) {
+        // Record the functional unit of the issued inst.
+        setLastFuncUnit (curStaticInst->getStaticFuncUnit ());
+    }
+
+#if DEBUG
+    std::cout << "----------> vPreExecute" << std::endl << std::endl;
+#endif
 }
 
 void
@@ -883,99 +933,135 @@ HybridCPU::rPreExecute (void)
 
 #if DEBUG
     std::cout << "issued insts: " << getNumIssued () << std::endl;
-    std::cout << "x register dependence table:" << std::endl;
-    std::cout << xRegDepTable << std::endl;
-    std::cout << "g register dependence table:" << std::endl;
-    std::cout << gRegDepTable << std::endl;
     std::cout << "----------> rPreExecute" << std::endl << std::endl;
 #endif
 }
 
 void
-HybridCPU::vPreExecute (void)
+HybridCPU::postExecute (void)
 {
+    switch (curRunMode ()) {
+
+        case RM_RISC:
+            rPostExecute (); break;
+
+        case RM_VLIW:
+            vPostExecute (); break;
+
+        default:
+            assert (0);
+
+    }
 }
 
 void
-HybridCPU::postExecute (void)
+HybridCPU::rPostExecute (void)
 {
 #if DEBUG
-    std::cout << "<---------- postExecute" << std::endl;
+    std::cout << "<---------- rPostExecute" << std::endl;
+    std::cout << "pipeline state before transfer "
+              << "``" << PipelineStateStr[curPipelineState] << "''."
+              << std::endl;
 #endif
 
-    if (!curStaticInst) {
+    if (!curStaticInst) { // Dispatch failure.
         curPipelineEvent = NoIssue;
-    } else {
+
+    } else { // Dispatch success.
+
+        curPipelineEvent = Issue;
+
+        // Iterative instructions.
         if (curStaticInst->isIter ()) {
-            // Iterative inst.
-            curPipelineEvent = IterInst;
-        } else if (curStaticInst->isControl ()) {
-            // Flow control inst.
+
+            // Blocks the pipeline.
+            curPipelineEvent = Block;
+
+            // Sets the block cycles.
+            trySetBlock (rBlocks (curStaticInst->opClass ()));
+        }
+
+        // Flow-control instructions without delay slots.
+        if (curStaticInst->isControl ()) {
+
+            // Flushes the pipeline.
+            curPipelineEvent = Bubble;
+
             TheISA::PCState pcState = thread->pcState ();
 
+            // Branch prediction is right.
             if (bPredictor.predict (pcState.pc ()) == pcState.bpc ()) {
-                // Branch prediction is right.
-                curPipelineEvent = BPreded;
+                // Nothing to do here.
             } else {
-                // Branch prediction is wrong.
-                curPipelineEvent = MisBPred;
+                // Sets the bubble cycles.
+                trySetBubble (rBubbles (curStaticInst->opClass ()));
             }
 
             // Feeds back to the branch predictor.
             bPredictor.feedback (pcState.pc (), pcState.bpc ());
+        }
 
-        } else if (curStaticInst->isMemRef ()) {
-            // Memory reference inst.
+        // Load instructions without delay slots.
+        if (curStaticInst->isLoad ()) {
+
             TheISA::PCState pcState = thread->pcState ();
 
-            if (curStaticInst->isLoad ()) {
-                // Load instruction.
-                if (vPredictor.predict (pcState.pc ()) == pcState.lpc ()) {
-                    // Value prediction is right.
-                    curPipelineEvent = VPreded;
+            // Does the value prediction.
+            bool misPrediction = (vPredictor.predict (pcState.pc ()) != pcState.lpc ());
 
-                    // Mutates the register back cycle in register dependence
-                    // table and register file buffer.
-                    for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
-                        Op_t *op = curStaticInst->getDestOp (i);
-                        if (op->memFlag ()) {
-                            Cycles newLoadLatency (IntMemPrededLatency);
-                            mutateRegDep (*op, newLoadLatency);
-                            setRegBufCycle (*op, newLoadLatency);
-                        }
+            if (!misPrediction) { // Value prediction is right.
+                // Nothing to do here.
+            } else { // Value prediction is wrong.
+
+                // Mutates latencies of the load instruction destination operands.
+                for (OpCount_t i = 0; i != curStaticInst->getNumDestOps (); ++i) {
+
+                    Op_t *op = curStaticInst->getDestOp (i);
+
+                    if (op->memFlag ()) {
+                        Cycles LoadLLatency (IntMemLLatency);
+                        mutateRegDep (*op, LoadLLatency);
+                        setRegBufCycle (*op, LoadLLatency);
                     }
-
-                } else {
-                    // Value prediction is wrong.
-                    curPipelineEvent = MisVPred;
                 }
-
-                // Feeds back to the value predictor.
-                vPredictor.feedback (pcState.pc (), pcState.lpc ());
-                vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
-
-            } else if (curStaticInst->isLoadD ()) {
-                // Load instruction with delay slot.
-                curPipelineEvent = Issue;
-                // Feeds back to the value predictor.
-                vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
-
-            } else if (curStaticInst->isStore ()) {
-                // Store instruction.
-                curPipelineEvent = Issue;
-                // Feeds back to the value predictor.
-                vPredictor.feedbackStoreHistory (pcState.pc (), pcState.spc ());
-
-            } else {
-                assert (0);
             }
 
-        } else if (curStaticInst->isModeSwitch ()) {
-            // Mode switch inst.
-            curPipelineEvent = (curStaticInst->isToRisc ()) ? ToRiscInst : ToVliwInst;
-        } else {
-            // Default.
-            curPipelineEvent = Issue;
+            // Feeds back to the value predictor.
+            vPredictor.feedback (pcState.pc (), pcState.lpc ());
+            vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+        }
+
+        // Load instructions with delay slots.
+        if (curStaticInst->isLoadD ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Feeds back to the value predictor.
+            vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+        }
+
+        // Store instructions.
+        if (curStaticInst->isStore ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Feeds back to the value predictor.
+            vPredictor.feedbackStoreHistory (pcState.pc (), pcState.spc ());
+        }
+
+        // Mode switching instructions.
+        if (curStaticInst->isModeSwitch ()) {
+
+            curPipelineEvent = Mode;
+
+            // Sets the bubble cycles.
+            trySetBubble (rBubbles (curStaticInst->opClass ()));
+        }
+
+        // Syscall instructions.
+        if (curStaticInst->isSyscall ()) {
+
+            curPipelineEvent = Block;
         }
     }
 
@@ -989,41 +1075,214 @@ HybridCPU::postExecute (void)
     }
 
 #if DEBUG
-    debugPipeline (std::cout);
-    std::cout << "----------> postExecute" << std::endl << std::endl;
+    std::cout << "pipeline state after transfer "
+              << "``" << PipelineStateStr[curPipelineState] << "''."
+              << std::endl;
+    std::cout << "----------> rPostExecute" << std::endl << std::endl;
+#endif
+}
+
+void
+HybridCPU::vPostExecute (void)
+{
+#if DEBUG
+    std::cout << "pipeline state before transfer "
+              << "``" << PipelineStateStr[curPipelineState] << "''."
+              << std::endl;
+    std::cout << "<---------- vPostExecute" << std::endl;
+#endif
+
+    if (!curStaticInst) { // Dispatch failure.
+        curPipelineEvent = NoIssue;
+
+    } else { // Dispatch success.
+
+        curPipelineEvent = Issue;
+
+        // Iterative instructions.
+        if (curStaticInst->isIter ()) {
+
+            // Sets the maximum block cycle.
+            trySetBlock (vBlocks (curStaticInst->opClass ()));
+        }
+
+        // Flow-Control instructions without delay slots.
+        if (curStaticInst->isControl ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Branch prediction is right.
+            if (bPredictor.predict (pcState.pc ()) == pcState.bpc ()) {
+                // Nothing to do here.
+            } else {
+                // Sets the maximum block cycle.
+                trySetBlock (vBlocks (curStaticInst->opClass ()));
+            }
+
+            // Feeds back to the branch predictor.
+            bPredictor.feedback (pcState.pc (), pcState.bpc ());
+        }
+
+        // Load instructions without delay slots.
+        if (curStaticInst->isLoad ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Does the value prediction.
+            bool misPrediction = (vPredictor.predict (pcState.pc ()) != pcState.lpc ());
+
+            if (!misPrediction) { // Value prediction is right.
+                // Nothing to do here.
+            } else { // Value prediction is wrong.
+
+                // Sets the maximum block cycles.
+                trySetBlock (vBlocks (curStaticInst->opClass ()));
+            }
+
+            // Feeds back to the value predictor.
+            vPredictor.feedback (pcState.pc (), pcState.lpc ());
+            vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+        }
+
+        // Load instructions with delay slots.
+        if (curStaticInst->isLoadD ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Feeds back to the value predictor.
+            vPredictor.feedbackLoadHistory (pcState.pc (), pcState.lpc ());
+        }
+
+        // Store instructions.
+        if (curStaticInst->isStore ()) {
+
+            TheISA::PCState pcState = thread->pcState ();
+
+            // Feeds back to the value predictor.
+            vPredictor.feedbackStoreHistory (pcState.pc (), pcState.spc ());
+        }
+
+        // Mode-Switching instructions.
+        if (curStaticInst->isModeSwitch ()) {
+
+            curPipelineEvent = Mode;
+        }
+    }
+
+    curPipelineState = pipelineMacho.transfer (curPipelineEvent);
+
+    // Advance the pc if dispatch is success.
+    if (curStaticInst) {
+        TheISA::PCState pcState = thread->pcState ();
+        pcState.advance ();
+        thread->pcState (pcState);
+    }
+
+#if DEBUG
+    std::cout << "pipeline state after transfer "
+              << "``" << PipelineStateStr[curPipelineState] << "''."
+              << std::endl;
+    std::cout << "----------> vPostExecute" << std::endl << std::endl;
 #endif
 }
 
 
 void
-HybridCPU::renew (void)
+HybridCPU::refresh (void)
+{
+    switch (curRunMode ()) {
+
+        case RM_RISC: rRefresh (); break;
+
+        case RM_VLIW: vRefresh (); break;
+
+        default:
+            std::cerr << "internal error: illegal running mode "
+                      << "(" << curRunMode () << ")."
+                      << std::endl;
+            assert (0);
+    }
+}
+
+void
+HybridCPU::rRefresh (void)
 {
 #if DEBUG
-    std::cout << "<---------- renew" << std::endl;
-    std::cout << "x register file:" << std::endl;
-    std::cout << *(thread->getXRegs ()) << std::endl;
+    std::cout << "<---------- rRefresh" << std::endl;
+    std::cout << "***** g reg dep:" << std::endl
+              << gRegDepTable << std::endl;
+    std::cout << "***** g reg:" << std::endl
+              << thread->getGRegFile () << std::endl;
 #endif
 
-    Cycles decrRegBackCycleDelta (1);
+    // Advance the maximum block cycles.
+    setCycle (getCycle () + getBlock ());
 
-    // Clear the number of issued instructions.
+    // Resets the maximum block cycles.
+    setBlock (Cycles (0));
+
+    // Resets the number of instructions issued.
     setNumIssued (0);
 
-    // Clear the number of store instructions.
+    // Resets the number of store instructions.
     setNumStore (0);
 
-    refreshRegDepTable (decrRegBackCycleDelta);
+    // Normal advance cycle.
+    Cycles advanceCycle (1);
+    advanceCycle += getBubble ();
 
-    // Writes the register file buffers back to register files.
-    refreshRegs (decrRegBackCycleDelta);
+    // Resets the bubble cycles.
+    setBubble (Cycles (0));
 
-    // Increase the cycles.
-    setCycle (getCycle () + decrRegBackCycleDelta);
+    // Refreshes the register dependence table.
+    refreshRegDepTable (advanceCycle);
+
+    // Refreshes the register file buffers and writes them back to register files.
+    refreshRegs (advanceCycle);
+
+    // Increases the cycle.
+    setCycle (getCycle () + advanceCycle);
 
 #if DEBUG
-    std::cout << "x register dependence table:" << std::endl;
-    std::cout << xRegDepTable << std::endl;
-    std::cout << "----------> renew" << std::endl << std::endl;
+    std::cout << "^^^^^ g reg dep:" << std::endl
+              << gRegDepTable << std::endl;
+    std::cout << "^^^^^ g reg:" << std::endl
+              << thread->getGRegFile () << std::endl;
+    std::cout << "----------> rRefresh" << std::endl << std::endl;
+#endif
+}
+
+void
+HybridCPU::vRefresh (void)
+{
+#if DEBUG
+    std::cout << "<---------- vRefresh" << std::endl;
+#endif
+
+    // Advance the maximum block cycles.
+    setCycle (getCycle () + getBlock ());
+
+    // Resets the last functional unit.
+    setLastFuncUnit (FU_NIL);
+
+    // Resets the maximum block cycles.
+    setBlock (Cycles (0));
+
+    // Normal advance cycle.
+    Cycles advanceCycle (1);
+    advanceCycle += getBubble ();
+
+    // Resets the bubble cycles.
+    setBubble (Cycles (0));
+
+    // Refreshes the register dependence table.
+    refreshRegs (advanceCycle);
+
+    // Increases the cycle.
+    setCycle (getCycle () + advanceCycle);
+
+#if DEBUG
+    std::cout << "----------> vRefresh" << std::endl << std::endl;
 #endif
 }
 
@@ -1435,176 +1694,94 @@ HybridCPU::initPipelineMacho (void)
     //     idle -> ... -> run -> ... -> advance
     // In Vliw, the state transfer prototype is showed below:
 
+    //////////////
     // R_Idle.
-    // The initial state when entering the tick() is R_Idle.
-    // Tries to issue inst in R_Idle state.
+    //////////////
     pipelineMacho.regStateEvent (R_Idle, Issue, R_Run);
-    // Stays R_Idle if issue is failure.
     pipelineMacho.regStateEvent (R_Idle, NoIssue, R_Advance);
-    // Turns to R_Advance or R_Flush if branch inst is met.
-    pipelineMacho.regStateEvent (R_Idle, BPreded, R_Advance);
-    pipelineMacho.regStateEvent (R_Idle, MisBPred, R_Flush);
-    pipelineMacho.regStateEvent (R_Idle, VPreded, R_Run);
-    pipelineMacho.regStateEvent (R_Idle, MisVPred, R_Run);
-    // Turns to R_InstWait if iterative inst is met.
-    pipelineMacho.regStateEvent (R_Idle, IterInst, R_InstWait);
-    // Turns to R_2_R or R_2_V if mode switching inst is met.
-    pipelineMacho.regStateEvent (R_Idle, ToRiscInst, R_2_R);
-    pipelineMacho.regStateEvent (R_Idle, ToVliwInst, R_2_V);
-    // Fault event.
-    pipelineMacho.regLocalDefaultState (R_Idle, FaultState);
+    pipelineMacho.regStateEvent (R_Idle, Bubble, R_Advance);
+    pipelineMacho.regStateEvent (R_Idle, Block, R_Advance);
+    pipelineMacho.regStateEvent (R_Idle, Mode, V_Advance);
 
+    /////////////
     // R_Run.
-    // Tries to issue inst in R_Run state.
+    /////////////
     pipelineMacho.regStateEvent (R_Run, Issue, R_Run);
-    // Turns to R_Advance if issue is failure.
     pipelineMacho.regStateEvent (R_Run, NoIssue, R_Advance);
-    // Turns to R_Advance or R_Flush if branch inst is met.
-    pipelineMacho.regStateEvent (R_Run, BPreded, R_Advance);
-    pipelineMacho.regStateEvent (R_Run, MisBPred, R_Flush);
-    pipelineMacho.regStateEvent (R_Run, VPreded, R_Run);
-    pipelineMacho.regStateEvent (R_Run, MisVPred, R_Run);
-    // Turns to R_InstWait if iterative inst is met.
-    pipelineMacho.regStateEvent (R_Run, IterInst, R_InstWait);
-    // Turns to R_2_R or R_2_V if mode switching inst is met.
-    pipelineMacho.regStateEvent (R_Run, ToRiscInst, R_2_R);
-    pipelineMacho.regStateEvent (R_Run, ToVliwInst, R_2_V);
-    // Fault event.
-    pipelineMacho.regLocalDefaultState (R_Run, FaultState);
+    pipelineMacho.regStateEvent (R_Run, Bubble, R_Advance);
+    pipelineMacho.regStateEvent (R_Run, Block, R_Advance);
+    pipelineMacho.regStateEvent (R_Run, Mode, V_Advance);
 
-    // R_Flush.
-    // Caused by branch mispredictions.
-    // Break the issue iteration.
-    pipelineMacho.regStateEvent (R_Flush, EndTick, R_Idle);
-    pipelineMacho.regLocalDefaultState (R_Flush, FaultState);
-
-    // R_InstWait.
-    // Caused by iterative instructions.
-    // Break the issue iteration.
-    pipelineMacho.regLocalDefaultState (R_InstWait, R_Idle);
-
+    /////////////////
     // R_Advance.
-    // Caused by normal dependencies.
-    // Break the issue iteration.
+    /////////////////
     pipelineMacho.regStateEvent (R_Advance, EndTick, R_Idle);
     pipelineMacho.regLocalDefaultState (R_Advance, FaultState);
 
-    // R_2_R.
-    // Caused by SETR instruction.
-    // Break the issue iteration.
-    pipelineMacho.regLocalDefaultState (R_2_R, R_Idle);
+    //////////////
+    // V_Idle.
+    //////////////
 
-    // R_2_V.
-    // Caused by SETV instruction.
-    // Break the issue iteration.
-    pipelineMacho.regLocalDefaultState (R_2_V, V_Idle);
+    pipelineMacho.regStateEvent (V_Idle, Issue, V_Run);
+    pipelineMacho.regStateEvent (V_Idle, NoIssue, FaultState);
+    pipelineMacho.regStateEvent (V_Idle, Bubble, V_Run);
+    pipelineMacho.regStateEvent (V_Idle, Block, V_Run);
+    pipelineMacho.regStateEvent (V_Idle, Mode, R_Advance);
+
+    /////////////
+    // V_Run.
+    /////////////
+    pipelineMacho.regStateEvent (V_Run, Issue, V_Run);
+    pipelineMacho.regStateEvent (V_Run, NoIssue, V_Advance);
+    pipelineMacho.regStateEvent (V_Run, Bubble, V_Run);
+    pipelineMacho.regStateEvent (V_Run, Block, V_Run);
+    pipelineMacho.regStateEvent (V_Run, Mode, R_Advance);
+
+    /////////////////
+    // V_Advance.
+    /////////////////
+    pipelineMacho.regStateEvent (V_Advance, EndTick, V_Idle);
+    pipelineMacho.regLocalDefaultState (V_Advance, FaultState);
 }
 
-void
-HybridCPU::callPrePipelineCallback (void)
+bool
+HybridCPU::readCond (const Lily2StaticInst *si) const
 {
-    if (prePipelineCallback != NULL) {
-        (this->*prePipelineCallback) ();
-    }
-}
+    Op32i_t *op;
 
-void
-HybridCPU::callPostPipelineCallback (void)
-{
-    if (postPipelineCallback != NULL) {
-        (this->*postPipelineCallback) ();
-    }
-}
+    assert (op = dynamic_cast<Op32i_t *> (si->getCondOp ()));
 
-void
-HybridCPU::setCallback (void)
-{
-    switch (curPipelineState) {
-        case R_InstWait:
-            prePipelineCallback = &HybridCPU::callback_R_InstWait;
-            postPipelineCallback = NULL;
-            break;
-        case R_Flush:
-            prePipelineCallback = NULL;
-            postPipelineCallback = &HybridCPU::callback_R_Flush;
-            break;
-        case R_Advance:
-            prePipelineCallback = NULL;
-            postPipelineCallback = &HybridCPU::callback_R_Advance;
-            break;
-        case R_2_R:
-            prePipelineCallback = NULL;
-            postPipelineCallback = &HybridCPU::callback_R_2_R;
-            break;
-        case R_2_V:
-            prePipelineCallback = NULL;
-            postPipelineCallback = &HybridCPU::callback_R_2_V;
-            break;
-        default:
-            assert (0);
-    }
-}
-
-void
-HybridCPU::callback_R_Idle (void)
-{
-    // Loops (1).
-    // URDT.
-    // URFB.
-    // UC.
-}
-
-void
-HybridCPU::callback_R_Run (void)
-{
-    // Loops (0).
-}
-
-void
-HybridCPU::callback_R_Flush (void)
-{
-    Cycles flushCycle (BranchDelaySlot);
-    refreshRegDepTable (flushCycle);
-    refreshRegs (flushCycle);
-    setCycle (getCycle () + flushCycle);
-}
-
-void
-HybridCPU::callback_R_InstWait (void)
-{
-    Cycles stallCycle;
-
-    if (curStaticInst->isIntDiv ()) {
-        stallCycle = Cycles (IntDivStall);
-    } else if (curStaticInst->isIntRem ()) {
-        stallCycle = Cycles (IntRemStall);
-    } else {
+    if (op->immFlag ()) {
         assert (0);
+
+    } else {
+        uint32_t val;
+        RegIndex_t regIndex = op->regIndex ();
+        RegFile_t fileName = op->regFile ();
+
+        switch (fileName) {
+            case TheISA::REG_X:
+                val = getRegValue (thread->getXRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_Y:
+                val = getRegValue (thread->getYRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_G:
+                val = getRegValue (thread->getGRegFile (), regIndex);
+                break;
+
+            case TheISA::REG_M:
+                val = getRegValue (thread->getMRegFile (), regIndex);
+                break;
+
+            default:
+                assert (0);
+        }
+
+        return (bool) val;
     }
-
-    setCycle (getCycle () + stallCycle);
-}
-
-void
-HybridCPU::callback_R_Advance (void)
-{
-    // Loops (0).
-}
-
-void
-HybridCPU::callback_R_2_R (void)
-{
-    return;
-}
-
-void
-HybridCPU::callback_R_2_V (void)
-{
-
-    // Loops (mode switching cycles).
-    // URDT.
-    // URFB.
-    // UC.
 }
 
 const Op32i_t&
@@ -2640,10 +2817,24 @@ HybridCPU::setOpd32f (Lily2StaticInst *si, const OpCount_t& idx,
 }
 
 
-DispMode_t
-HybridCPU::dispModeFactory (const PipelineState& pipelineState) const
+RunMode_t
+HybridCPU::curRunMode (void) const
 {
-    return TheISA::DISPMODE_RISC;
+    switch (curPipelineState) {
+
+        case R_Idle   : // Fall through.
+        case R_Run    : // Fall through.
+        case R_Advance: return TheISA::RM_RISC;
+
+        case V_Idle   : // Fall through.
+        case V_Run    : // Fall through.
+        case V_Advance: return TheISA::RM_VLIW;
+
+        default    : std::cerr << "Internal error: Illegal pipeline state "
+                               << "``" << PipelineStateStr[curPipelineState] << "''."
+                               << std::endl;
+                     assert (0);
+    }
 }
 
 Cycles
@@ -2661,11 +2852,12 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
         case IntDiviOp     : return Cycles (IntDivLatency);
         case IntRemOp      : return Cycles (IntRemLatency);
         case IntMemOp      : if (memFlag) {
-                                 return Cycles (IntMemLatency);
+                                 return Cycles (IntMemSLatency);
                              } else {
                                  return Cycles (IntMemAddrLatency);
                              }
         case IntMiscOp     : return Cycles (IntMiscLatency);
+        case IntBranchOp   : return Cycles (IntBranchLatency);
         case FloatArithOp  : return Cycles (FloatArithLatency);
         case FloatTestOp   : return Cycles (FloatTestLatency);
         case FloatMulOp    : return Cycles (FloatMulLatency);
@@ -2677,14 +2869,75 @@ HybridCPU::funcUnitLatencyFactory (const OpClass& opClass, bool memFlag) const
 }
 
 Cycles
-HybridCPU::iterInstStallFactory (const OpClass& opClass) const
+HybridCPU::rBubbles (const OpClass& opClass) const
 {
     switch (opClass) {
-        case IntDiviOp   : return Cycles (IntDivStall);
-        case IntRemOp    : return Cycles (IntRemStall);
-        case FloatDiviOp : return Cycles (FloatDivStall);
-        case FloatSqrOp  : return Cycles (FloatSqrStall);
-        default          : assert (0);
+
+        case IntBranchOp:
+            return Cycles (BranchDelaySlot);
+
+        case IntMiscOp:
+            return Cycles (ModeDelaySlot);
+
+        default:
+            assert (0);
+
+    }
+}
+
+Cycles
+HybridCPU::vBubbles (const OpClass& opClass) const
+{
+    assert (0);
+}
+
+Cycles
+HybridCPU::rBlocks (const OpClass& opClass) const
+{
+    switch (opClass) {
+
+        case IntDiviOp: // Integer division instructions.
+            return Cycles (IntDivBlock);
+
+        case IntRemOp: // Integer remaindar instructions.
+            return Cycles (IntRemBlock);
+
+        case FloatDiviOp: // Floating-Point division instructions.
+            return Cycles (FloatDivBlock);
+
+        case FloatSqrOp: // Floating-Point square instructions.
+            return Cycles (FloatSqrBlock);
+
+        default:
+            assert (0);
+    }
+}
+
+Cycles
+HybridCPU::vBlocks (const OpClass& opClass) const
+{
+    switch (opClass) {
+
+        case IntDiviOp: // Integer division instructions.
+            return Cycles (IntDivBlock);
+
+        case IntRemOp: // Integer remaindar instructions.
+            return Cycles (IntRemBlock);
+
+        case FloatDiviOp: // Floating-Point division instructions.
+            return Cycles (FloatDivBlock);
+
+        case FloatSqrOp: // Floating-Point square instructions.
+            return Cycles (FloatSqrBlock);
+
+        case IntBranchOp:
+            return Cycles (BranchDelaySlot);
+
+        case IntMemOp:
+            return Cycles (IntMemLLatency - 1);
+
+        default:
+            assert (0);
     }
 }
 

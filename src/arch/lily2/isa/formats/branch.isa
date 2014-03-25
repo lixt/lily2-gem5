@@ -12,7 +12,7 @@ output header {{
     {
       protected:
         BranchOp (const char *mnemonic, MachInst machInst, OpClass opClass) :
-            Lily2StaticInst (mnemonic, machInst, IntLogicOp) {}
+            Lily2StaticInst (mnemonic, machInst, IntBranchOp) {}
 
         std::string generateDisassembly (Addr pc, const SymbolTable *symtab) const;
         std::string generateOperation (void) const;
@@ -30,7 +30,9 @@ output decoder {{
         printCond (ss);
         printName (ss);
 
-        printSrcOp (ss, 0);
+        if (getNumSrcOps () > 0) {
+            printSrcOp (ss, 0);
+        }
 
         return ss.str ();
     }
@@ -39,7 +41,9 @@ output decoder {{
     {
         std::stringstream ss;
 
-        printSrcOpValue (ss, 0);
+        if (getNumSrcOps () > 0) {
+            printSrcOpValue (ss, 0);
+        }
 
         return ss.str ();
     }

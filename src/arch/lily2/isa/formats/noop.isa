@@ -43,11 +43,12 @@ output header {{
 
       public:
         // Constructor
-        Nop(const std::string _originalDisassembly, MachInst machInst)
+        Nop(const std::string _originalDisassembly, MachInst machInst, FuncUnit_t funcUnit)
             : Lily2StaticInst("nop", machInst, No_OpClass),
               originalDisassembly(_originalDisassembly)
         {
             flags[IsNop] = true;
+            staticFuncUnit = funcUnit;
         }
 
         ~Nop() { }
@@ -78,7 +79,7 @@ output decoder {{
     makeNop(Lily2StaticInst *inst)
     {
         std::string originalDisassembly = "(" + inst->disassemble (0) + ")";
-        Lily2StaticInst *nop = new Nop(originalDisassembly, inst->machInst);
+        Lily2StaticInst *nop = new Nop(originalDisassembly, inst->machInst, inst->getStaticFuncUnit ());
         delete inst;
         return nop;
     }

@@ -82,9 +82,11 @@ class HybridCPU(BaseSimpleCPU):
     IntMacLatency       = Param.Int (2, "Integer multiplication and addition instruction latency")
     IntDivLatency       = Param.Int (1, "Integer division instruction latency")
     IntRemLatency       = Param.Int (1, "Integer remaindar instruction latency")
-    IntMemLatency       = Param.Int (4, "Integer memory instruction latency")
+    IntMemSLatency      = Param.Int (1, "Integer memory instruction short latency")
+    IntMemLLatency      = Param.Int (4, "Integer memory instruction long latency")
     IntMemAddrLatency   = Param.Int (1, "Integer memory offset self-modify instruction latency")
     IntMiscLatency      = Param.Int (1, "Integer miscellaneous instruction latency")
+    IntBranchLatency    = Param.Int (1, "Integer branch instruction latency")
     FloatArithLatency   = Param.Int (1, "Float arithmetic instruction latency")
     FloatTestLatency    = Param.Int (1, "Float test instruction latency")
     FLoatMulLatency     = Param.Int (2, "Float multiplication instruction latency")
@@ -96,10 +98,13 @@ class HybridCPU(BaseSimpleCPU):
     BranchDelaySlot = Param.Int (6, "Branch delay slot")
 
     # Interative instruction pipeline stalls.
-    IntDivStall = Param.Int (20, "Integer division instruction iterative stall")
-    IntRemStall = Param.Int (20, "Integer remainder instruction iterative stall")
-    FloatDivStall = Param.Int (20, "Float division instruction iterative stall")
-    FloatSqrStall = Param.Int (20, "Float square instruction iterative stall ")
+    IntDivBlock = Param.Int (20, "Integer division instruction iterative stall")
+    IntRemBlock = Param.Int (20, "Integer remainder instruction iterative stall")
+    FloatDivBlock = Param.Int (20, "Float division instruction iterative stall")
+    FloatSqrBlock = Param.Int (20, "Float square instruction iterative stall ")
 
     # Load instruction new latency when value prediction is right.
     IntMemPrededLatency = Param.Int (1, "Integer memory access instruction latency when value prediction is right.")
+
+    # Mode switching delay slots.
+    ModeDelaySlot = Param.Int (3, "Mode switching delay slot")

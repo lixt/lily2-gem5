@@ -276,7 +276,8 @@ class HybridCPU : public BaseSimpleCPU
   private:
     // arch/lily2/types.hh
     typedef TheISA::MachInst MachInst;
-    typedef TheISA::DispMode_t DispMode_t;
+    typedef TheISA::RunMode_t RunMode_t;
+    typedef TheISA::FuncUnit_t FuncUnit_t;
     // arch/lily2/registers.hh
     typedef TheISA::RegCount_t RegCount_t;
     typedef TheISA::RegFile_t RegFile_t;
@@ -308,15 +309,11 @@ class HybridCPU : public BaseSimpleCPU
 
         R_Idle         , // No instruction executed this iteration.
         R_Run          , // At least 1 inst executed this iteration.
-        R_Flush        , // Branch misprediction penalty.
-        R_InstWait     , // Waits for iterative inst.
-        R_Advance      , // Quits this iteration.
+        R_Advance      , // Normal issue quit.
 
-        V_Idle         ,
-        R_2_R          ,
-        R_2_V          ,
-        V_2_R          ,
-        V_2_V          ,
+        V_Idle         , // 0 inst has issued.
+        V_Run          , // At least 1 inst has issued.
+        V_Advance      , // Normal issue quit.
 
         NumStates      ,
     };
@@ -327,40 +324,20 @@ class HybridCPU : public BaseSimpleCPU
     enum PipelineEvent {
         Issue     , // Issue success.
         NoIssue   , // Issue failure.
-        BPreded   , // Branch predicted.
-        MisBPred  , // Branch misprediction.
-        VPreded   , // Value predicted.
-        MisVPred  , // Value misprediction.
-        IterInst  , // Iterative instructions.
-        ICacheMiss, // Instruction cache misses.
-        DCacheMiss, // Data cache misses.
-        ToRiscInst, // Risc to Risc.
-        ToVliwInst, // Vliw to Vliw.
+        Block     ,
+        Bubble    ,
+        Mode      ,
         EndTick   , // End this tick().
     };
-
-    // Types for pipeline callbacks.
-    typedef void (HybridCPU::*PipelineCallback) (void);
-
-    // Pipeline callbacks.
-    void callback_R_Idle (void);
-    void callback_R_Run (void);
-    void callback_R_Flush (void);
-    void callback_R_InstWait (void);
-    void callback_R_Advance (void);
-    void callback_R_2_R (void);
-    void callback_R_2_V (void);
 
   private:
     Macho<PipelineState, PipelineEvent> pipelineMacho;
     PipelineState curPipelineState;
     PipelineEvent curPipelineEvent;
-    PipelineCallback curPipelineCallback;
-    PipelineCallback prePipelineCallback;
-    PipelineCallback postPipelineCallback;
 
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
+    StaticInstPtr preStaticInst;
     // Branch predictor.
     BPredictor<BPredEntries, BPredLocalHistories> bPredictor;
 
@@ -370,11 +347,6 @@ class HybridCPU : public BaseSimpleCPU
   private:
     // Initializes the pipeline state machine.
     void initPipelineMacho (void);
-    // Calls pipeline callbacks.
-    void callPrePipelineCallback (void);
-    void callPostPipelineCallback (void);
-    // Sets the pre/post callbacks.
-    void setCallback (void);
 
   private:
     // Things to be done at the beginning of the tick function.
@@ -413,9 +385,13 @@ class HybridCPU : public BaseSimpleCPU
 
     // Things done after the execution. Updates the pipeline state.
     void postExecute (void);
+    void rPostExecute (void);
+    void vPostExecute (void);
 
     // Updates the cycle-related modules.
-    void renew (void);
+    void refresh (void);
+    void rRefresh (void);
+    void vRefresh (void);
 
   private:
     //
@@ -486,6 +462,75 @@ class HybridCPU : public BaseSimpleCPU
     void setNumStore (size_t numStore)
     {
         this->numStore = numStore;
+    }
+
+  private:
+    //
+    // Functional unit of the last issued instruction.
+    //
+
+    FuncUnit_t lastFuncUnit;
+
+    // Gets the functional unit of the last issued instruction.
+    FuncUnit_t getLastFuncUnit (void) const
+    {
+        return lastFuncUnit;
+    }
+
+    // Sets the functional unit of the last issued instruction.
+    void setLastFuncUnit (FuncUnit_t lastFuncUnit)
+    {
+        this->lastFuncUnit = lastFuncUnit;
+    }
+
+  private:
+    //
+    // Maximum block cycles.
+    //
+
+    Cycles block;
+
+    // Gets the maximum block cycles.
+    Cycles getBlock (void) const
+    {
+        return block;
+    }
+
+    // Sets the maximum block cycles.
+    void setBlock (const Cycles &block)
+    {
+        this->block = block;
+    }
+
+    // Tries to set the maximum block cycles.
+    void trySetBlock (const Cycles &block)
+    {
+        this->block = block > this->block ? block : this->block;
+    }
+
+  private:
+    //
+    // Maximum bubble cycles.
+    //
+
+    Cycles bubble;
+
+    // Gets the maximum bubble cycles.
+    Cycles getBubble (void) const
+    {
+        return bubble;
+    }
+
+    // Sets the maximum bubble cycles.
+    void setBubble (const Cycles &bubble)
+    {
+        this->bubble = bubble;
+    }
+
+    // Tries to set the maximum bubble cycles.
+    void trySetBubble (const Cycles &bubble)
+    {
+        this->bubble = bubble > this->bubble ? bubble : this->bubble;
     }
 
   private:
@@ -648,15 +693,28 @@ class HybridCPU : public BaseSimpleCPU
     void debugPipeline (std::ostream&) const;
 
   private:
-    // Factory of dispatch modes.
-    DispMode_t dispModeFactory (const PipelineState& pipelineState) const;
+    // What's the meaning of "bubble" and "block" here?
+    // Word "bubble" means no dispatch, but keeps on executing and writing back.
+    // Word "block" means no dispatch, no execute and no write back.
+
+    // Gets the bubble cycles.
+    // In RISC, branch misprediction and mode switching to VLIW causes bubbles.
+    // In VLIW, nothing causes bubbles.
+    Cycles rBubbles (const OpClass&) const;
+    Cycles vBubbles (const OpClass&) const;
+
+    // Gets the block cycles.
+    // In RISC, iterative calculation causes blocks.
+    // In VLIW, iterative calculation, branch misprediction, value misprediction causes
+    // blocks.
+    Cycles rBlocks (const OpClass&) const;
+    Cycles vBlocks (const OpClass&) const;
+
+    //
+    RunMode_t curRunMode () const;
 
     // Factory of functional unit delay slots.
     Cycles funcUnitLatencyFactory (const OpClass &opClass, bool memFlag) const;
-
-    Cycles iterInstStallFactory (const OpClass &opClass) const;
-
-    typedef TheISA::FuncUnit_t FuncUnit_t;
 
     typedef TheISA::Op32i_t Op32i_t;
     typedef TheISA::Op64i_t Op64i_t;
@@ -670,11 +728,7 @@ class HybridCPU : public BaseSimpleCPU
     typedef Lily2ISAInst::Lily2StaticInst Lily2StaticInst;
 
   public:
-    bool readCond (const Lily2StaticInst *si)
-    {
-        return 0;
-    }
-
+    bool readCond (const Lily2StaticInst *) const;
 
     const Op32i_t&  readOp32i  (Lily2StaticInst*, const OpCount_t&);
     const Op64i_t&  readOp64i  (Lily2StaticInst*, const OpCount_t&);
@@ -710,9 +764,11 @@ class HybridCPU : public BaseSimpleCPU
     int IntMacLatency;
     int IntDivLatency;
     int IntRemLatency;
-    int IntMemLatency;
+    int IntMemSLatency;
+    int IntMemLLatency;
     int IntMemAddrLatency;
     int IntMiscLatency;
+    int IntBranchLatency;
     int FloatArithLatency;
     int FloatTestLatency;
     int FloatMulLatency;
@@ -724,13 +780,13 @@ class HybridCPU : public BaseSimpleCPU
     int BranchDelaySlot;
 
     // Iterative instruction stalls.
-    int IntDivStall;
-    int IntRemStall;
-    int FloatDivStall;
-    int FloatSqrStall;
+    int IntDivBlock;
+    int IntRemBlock;
+    int FloatDivBlock;
+    int FloatSqrBlock;
 
-    // Load instruction latency if value preidiction is right.
-    int IntMemPrededLatency;
+    // Mode switching delay slot.
+    int ModeDelaySlot;
 };
 
 template <size_t RegNum>

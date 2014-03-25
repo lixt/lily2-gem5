@@ -50,6 +50,23 @@ class Lily2StaticInst : public StaticInst
         }
     }
 
+    // Destructor.
+    ~Lily2StaticInst (void)
+    {
+        if (!this->isNop ()) {
+
+            for (OpCount_t i = 0; i != getNumSrcOps (); ++i) {
+                delete srcOp[i];
+            }
+
+            for (OpCount_t i = 0; i != getNumDestOps (); ++i) {
+                delete destOp[i];
+            }
+
+            delete condOp;
+        }
+    }
+
     // Checks the execution condition of an instruction.
     virtual bool execCond (HybridCPU *xc) const = 0;
 
@@ -279,6 +296,7 @@ class Lily2StaticInst : public StaticInst
     bool isMemRef (void) const { return flags[IsMemRef]; }
     bool isLoad (void) const { return flags[IsLoad]; }
     bool isStore (void) const { return flags[IsStore]; }
+    bool isMemRefD (void) const { return flags[IsMemRefD]; }
     bool isLoadD (void) const { return flags[IsLoadD]; }
     bool isControl (void) const { return flags[IsControl]; }
     bool isBranch (void) const { return flags[IsBranch]; }
@@ -303,6 +321,8 @@ class Lily2StaticInst : public StaticInst
         IsMemRef,     // Memory reference instruction.
         IsLoad,       // Load instruction.
         IsStore,      // Store instruction.
+
+        IsMemRefD,    // Memory reference instruction with delay slot.
         IsLoadD,      // Load instruction with delay slot.
 
         IsControl,    // Flow control instruction.
@@ -339,6 +359,7 @@ class Lily2StaticInst : public StaticInst
         op->setRegFile (opcCond.regFile);
         op->setRegIndex (opcCond.regIndex);
 
+        setCondOp (op);
         setCondStr (opcCond.str);
     }
 
@@ -384,7 +405,7 @@ class Lily2StaticInst : public StaticInst
 
         // 32-bit for printable immediate is enough.
         // 2 for ``0x'' and 8 for hex format immediate string.
-        char *immStr = new char[10];
+        char *immStr = new char[20];
         immStr[0] = '0';
         immStr[1] = 'x';
         sprintf (immStr + 2, "%x", insnSrcImm);

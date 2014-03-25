@@ -103,6 +103,7 @@ const OpClass IntDiviOp = Enums::IntDivi;
 const OpClass IntRemOp = Enums::IntRem;
 const OpClass IntMemOp = Enums::IntMem;
 const OpClass IntMiscOp = Enums::IntMisc;
+const OpClass IntBranchOp = Enums::IntBranch;
 const OpClass FloatArithOp = Enums::FloatArith;
 const OpClass FloatTestOp = Enums::FloatTest;
 const OpClass FloatMulOp = Enums::FloatMul;

@@ -22,13 +22,13 @@ const size_t NumOpcFuncUnits = ARRAY_SIZE (OpcFuncUnits);
 
 const OpcCond_t OpcConds[] =
 {
-    {0, COND_ALWAYS, true , OP_32I, REG_NIL, 0, "      "},
-    {1, COND_CR0   , true , OP_32I, REG_X  , 0, "{ cr0}"},
-    {2, COND_NCR0  , false, OP_32I, REG_X  , 0, "{!cr0}"},
-    {3, COND_CR1   , true , OP_32I, REG_Y  , 0, "{ cr1}"},
-    {4, COND_NCR1  , false, OP_32I, REG_Y  , 0, "{!cr1}"},
-    {5, COND_CR2   , true , OP_32I, REG_G  , 0, "{ cr2}"},
-    {6, COND_NCR2  , false, OP_32I, REG_G  , 0, "{!cr2}"},
+    {0, COND_ALWAYS, true , OP_32I, REG_NIL, 0, "     "},
+    {1, COND_CR0   , true , OP_32I, REG_G  , 0, "{ gc}"},
+    {2, COND_CR1   , true , OP_32I, REG_X  , 0, "{ xc}"},
+    {3, COND_CR2   , true , OP_32I, REG_Y  , 0, "{ yc}"},
+    {4, COND_NCR0  , false, OP_32I, REG_G  , 0, "{!gc}"},
+    {5, COND_NCR1  , false, OP_32I, REG_X  , 0, "{!xc}"},
+    {6, COND_NCR2  , false, OP_32I, REG_Y  , 0, "{!yc}"},
 };
 const size_t NumOpcConds = ARRAY_SIZE (OpcConds);
 

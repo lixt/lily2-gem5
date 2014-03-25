@@ -55,7 +55,7 @@ const RegIndex_t NumGRegs = 8;
 const RegIndex_t NumMRegs = 8;
 
 // Semantically meaningful register indexes.
-const RegIndex_t RAddrReg = 3;
+const RegIndex_t RAddrReg = 29;
 const RegIndex_t CarryReg = 1;
 
 // Types for register files.

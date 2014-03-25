@@ -43,6 +43,11 @@ class Op_t
     Op_t (RegFile_t regFile, RegIndex regIndex, bool immFlag) :
         _regFile (regFile), _regIndex (regIndex), _immFlag (immFlag) {}
 
+    // Destructor.
+    virtual ~Op_t (void) {}
+
+    virtual Op_t* clone (void) const = 0;
+
     // Accesses the number of registers an operand contains.
     virtual RegCount_t numRegs (void) const = 0;
 
@@ -154,6 +159,12 @@ class Op32i_t : public Op_t
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
 
+    Op_t* clone (void) const
+    {
+        Op32i_t *op = new Op32i_t (*this);
+        return op;
+    }
+
     void setImmValue (MachInst _immValue)
     {
         this->_immValue = _immValue;
@@ -218,6 +229,12 @@ class Op64i_t : public Op_t
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
 
+    Op_t* clone (void) const
+    {
+        Op64i_t *op = new Op64i_t (*this);
+        return op;
+    }
+
     void setImmValue (MachInst _immValue)
     {
         this->_immValue = _immValue;
@@ -278,6 +295,12 @@ class Op32f_t : public Op_t
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
 
+    Op_t* clone (void) const
+    {
+        Op32f_t *op = new Op32f_t (*this);
+        return op;
+    }
+
     // Implements pure virtual function.
     // Prints readable operand value.
     void print (std::ostream &os) const {}
@@ -323,6 +346,12 @@ class Op64f_t : public Op_t
     // Implements pure virtual function.
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
+
+    Op_t* clone (void) const
+    {
+        Op64f_t *op = new Op64f_t (*this);
+        return op;
+    }
 
     // Implements pure virtual function.
     // Prints readable operand value.
@@ -388,6 +417,12 @@ class Opd32i_t : public Op_t
     // Implements pure virtual function.
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
+
+    Op_t* clone (void) const
+    {
+        Opd32i_t *op = new Opd32i_t (*this);
+        return op;
+    }
 
     // Implements pure virtual function.
     // Prints readable operand value.
@@ -469,6 +504,12 @@ class Opq8i_t : public Op_t
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
 
+    Op_t* clone (void) const
+    {
+        Opq8i_t *op = new Opq8i_t (*this);
+        return op;
+    }
+
     // Implements pure virtual function.
     // Prints readable operand value.
     void print (std::ostream &os) const {}
@@ -544,6 +585,12 @@ class Opd16i_t : public Op_t
     // Implements pure virtual function.
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
+
+    Op_t* clone (void) const
+    {
+        Opd16i_t *op = new Opd16i_t (*this);
+        return op;
+    }
 
     // Implements pure virtual function.
     // Prints readable operand value.
@@ -625,6 +672,12 @@ class Opq16i_t : public Op_t
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
 
+    Op_t* clone (void) const
+    {
+        Opq16i_t *op = new Opq16i_t (*this);
+        return op;
+    }
+
     // Implements pure virtual function.
     // Prints readable operand value.
     void print (std::ostream &os) const {}
@@ -690,6 +743,12 @@ class Opd32f_t : public Op_t
     // Implements pure virtual function.
     // Accesses number of registers an operand contains.
     RegCount_t numRegs (void) const { return NumRegs; }
+
+    Op_t* clone (void) const
+    {
+        Opd32f_t *op = new Opd32f_t (*this);
+        return op;
+    }
 
     // Implements pure virtual function.
     // Prints readable operand value.

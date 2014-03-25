@@ -915,7 +915,6 @@ class MemOp32iOperand(Operand):
 
         return wb
 
-
 class MemOpd32iOperand(Operand):
     def isOp(self):
         return 1
@@ -946,8 +945,7 @@ class MemOpd32iOperand(Operand):
 
         return wb
 
-
-class I1Op32iOperand(Operand):
+class U1Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -965,8 +963,7 @@ class I1Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-
-class I2Op32iOperand(Operand):
+class U2Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -984,8 +981,25 @@ class I2Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-
 class I5Op32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, sext<5> (IMM5));'
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+class U5Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1003,8 +1017,25 @@ class I5Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-
 class I8Op32iOperand(Operand):
+    def isOp(self):
+        return 1
+
+    def makeConstructor(self, predRead, predWrite):
+        c_src = ''
+        c_dest = ''
+
+        if self.is_src:
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, sext<8> (IMM8));'
+
+        return c_src + c_dest
+
+    def makeRead(self, predRead):
+        word_val = 'xc->readOp32i (this, %d)' % self.src_op_idx
+
+        return '%s = %s;\n' % (self.base_name, word_val)
+
+class U8Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1022,7 +1053,7 @@ class I8Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-class I10Op32iOperand(Operand):
+class U10Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1040,7 +1071,7 @@ class I10Op32iOperand(Operand):
 
         return '%s = %s;\n' % (self.base_name, word_val)
 
-class I16Op32iOperand(Operand):
+class U16Op32iOperand(Operand):
     def isOp(self):
         return 1
 
@@ -1067,7 +1098,7 @@ class I21Op32iOperand(Operand):
         c_dest = ''
 
         if self.is_src:
-            c_src = '\n\t   decodeSrcImmOp (OP_32I, IMM21);'
+            c_src = '\n\t   decodeSrcImmOp (OP_32I, sext<21> (IMM21));'
 
         return c_src + c_dest
 
