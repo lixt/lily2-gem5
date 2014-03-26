@@ -27,7 +27,7 @@ class Bimodal
     }
 
     // Sets the state according to the feedback.
-    void setAtopt (bool adopt)
+    void setAdopt (bool adopt)
     {
         switch (state) {
             case 0x0: state = adopt ? 0x1 : 0x0; break;

@@ -338,8 +338,13 @@ class HybridCPU : public BaseSimpleCPU
     MachInst inst;
     Lily2StaticInstPtr curStaticInst;
     StaticInstPtr preStaticInst;
+
     // Branch predictor.
-    BPredictor<BPredEntries, BPredLocalHistories> bPredictor;
+    BPredictor<BPredEntries, BPredCorrBits> bPredictor;
+
+    // Branch predictor statistics.
+    size_t numPredict;
+    size_t numPreded;
 
     // Value predictor.
     VPredictor<VPredEntries> vPredictor;

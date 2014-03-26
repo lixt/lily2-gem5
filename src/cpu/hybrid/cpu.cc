@@ -526,6 +526,7 @@ HybridCPU::tick()
     std::cout << "********************** CYCLE "
               << IO_CYCLE << cycle
               << " **********************" << std::endl;
+    std::cout << "(((" << numPreded << "," << numPredict << ")))" << std::endl;
 #endif
 
     DPRINTF(HybridCPU, "Tick\n");
@@ -689,6 +690,7 @@ HybridCPU::beginTick (void)
     TheISA::PCState pcState = thread->pcState ();
     if (pcState.bpc () != 0) {
         pcState.set (pcState.bpc ());
+        pcState.bpc (0);
         thread->pcState (pcState);
     }
 }
@@ -992,10 +994,12 @@ HybridCPU::rPostExecute (void)
             // Branch prediction is right.
             if (bPredictor.predict (pcState.pc ()) == pcState.bpc ()) {
                 // Nothing to do here.
+                ++numPreded;
             } else {
                 // Sets the bubble cycles.
                 trySetBubble (rBubbles (curStaticInst->opClass ()));
             }
+            ++numPredict;
 
             // Feeds back to the branch predictor.
             bPredictor.feedback (pcState.pc (), pcState.bpc ());
@@ -1114,10 +1118,12 @@ HybridCPU::vPostExecute (void)
             // Branch prediction is right.
             if (bPredictor.predict (pcState.pc ()) == pcState.bpc ()) {
                 // Nothing to do here.
+                ++numPreded;
             } else {
                 // Sets the maximum block cycle.
                 trySetBlock (vBlocks (curStaticInst->opClass ()));
             }
+            ++numPredict;
 
             // Feeds back to the branch predictor.
             bPredictor.feedback (pcState.pc (), pcState.bpc ());
